@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8"/>
+    <title>Avatar - Shinmera's Studio</title>
+    <link rel="stylesheet" href="../static/studio.css" @href="/static/studio/studio.css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+  </head>
+  <body>
+    <article class="studio" id="top">
+      <header>
+        <h1>Studio</h1>
+        <nav>
+          <a href="#"><i class="fas fa-home"></i> Home</a>
+          <a href="#"><i class="fas fa-upload"></i> Upload</a>
+          <a href="#top"><i class="fas fa-arrow-up"></i> Top</a>
+        </nav>
+      </header>
+      <form class="upload" method="post" enctype="multipart/form-data" action="#" @action="/api/studio/upload">
+        <section class="info">
+          <img src="/home/linus/1121.png" class="avatar" />
+          <h2><a href="#">Shinmera</a></h2>
+          <input name="title" placeholder="Title" required autofocus />
+        </section>
+        <section class="images">
+          <div class="new-image">
+            <input type="file" name="file[]" id="new-image" accept=".jpg,.jpeg,.png,.gif,.svg" required />
+            <label for="new-image"><i class="fas fa-file-upload"></i> New Image</label>
+          </div>
+        </section>
+        <section class="description">
+          <input class="tags" name="tags" placeholder="Some, Tags" />
+          <textarea name="description" placeholder="Description"></textarea>
+          <input type="submit" value="Submit" />
+        </section>
+      </form>
+      <footer>
+      </footer>
+    </article>
+    <script type="text/javascript" src="../static/studio.js" @src="/static/studio/studio.js"></script>
+  </body>
+</html>

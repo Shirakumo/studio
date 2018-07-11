@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8"/>
+    <title>Avatar - Shinmera's Studio</title>
+    <link rel="stylesheet" href="../static/studio.css" @href="/static/studio/studio.css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+  </head>
+  <body>
+    <article class="studio" id="top">
+      <header>
+        <h1>Studio</h1>
+        <nav>
+          <a href="#"><i class="fas fa-home"></i> Home</a>
+          <a href="#"><i class="fas fa-upload"></i> Upload</a>
+          <a href="#top"><i class="fas fa-arrow-up"></i> Top</a>
+        </nav>
+      </header>
+      <main class="view">
+        <section class="info">
+          <img src="/home/linus/1121.png" class="avatar" />
+          <h2><a href="#">Shinmera</a></h2>
+          <h3>This is a really long title name just to test this stuff out you know how it is in the hood</h3>
+        </section>
+        <section class="image">
+          <img src="/home/linus/meat.jpg"/>
+        </section>
+        <section class="description">
+          <ul class="tags">
+            <li><a href="#">Fuck</a></li>
+            <li><a href="#">Me</a></li>
+          </ul>
+          <p>This is some stupid ass avatar</p>
+        </section>
+      </main>
+      <footer>
+      </footer>
+    </article>
+  </body>
+</html>
