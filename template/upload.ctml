@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8"/>
-    <title>Avatar - Shinmera's Studio</title>
+    <title>Upload - Shinmera's Studio</title>
     <link rel="stylesheet" href="../static/studio.css" @href="/static/studio/studio.css" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
   </head>
@@ -24,7 +24,7 @@
         </section>
         <section class="images">
           <div class="new-image">
-            <input type="file" name="file[]" id="new-image" accept=".jpg,.jpeg,.png,.gif,.svg" required />
+            <input type="file" name="file[]" id="new-image" accept=".jpg,.jpeg,.png,.gif,.svg" required multiple />
             <label for="new-image"><i class="fas fa-file-upload"></i> New Image</label>
           </div>
         </section>

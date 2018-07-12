@@ -6,8 +6,28 @@ document.addEventListener("DOMContentLoaded", function(){
     var initUpload = function(root){
         log("Init upload", root);
 
-        var counter = 0;
+        var idCounter = 0;
+        var toUpload = {};
+
         var registerNewImage = null;
+        var showFile = function(root, file){
+            var reader = new FileReader();
+            var image = document.createElement("img");
+            var remove = document.createElement("i");
+            var id = idCounter++;
+            toUpload[id] = file;
+            reader.onload = function(){ image.src = reader.result; };
+            reader.readAsDataURL(file);
+            // FIXME: D&D
+            remove.classList.add("remove", "fas", "fa-fw", "fa-trash-alt");
+            remove.addEventListener("click", function(){
+                delete toUpload[id];
+                root.removeChild(image);
+                root.removeChild(remove);
+            });
+            root.appendChild(image);
+            root.appendChild(remove);
+        };
         
         var addNewImage = function(old){
             log("New image", old);
@@ -25,24 +45,25 @@ document.addEventListener("DOMContentLoaded", function(){
             old.classList.add("image");
             var label = old.querySelector("label");
             label.parentNode.removeChild(label);
-            var image = document.createElement("img");
-            old.appendChild(image);
-            image.addEventListener("dblclick", function(){ old.parentNode.removeChild(old); });
-            // Load the image file.
-            var reader = new FileReader();
-            reader.onload = function(){ image.src = this.result; };
-            reader.readAsDataURL(file.files[0]);
+            // Load the image files.
+            for(var i=0; i<file.files.length; i++){
+                showFile(old, file.files[i]);
+            }
         };
         
         registerNewImage = function(old){
-            old.setAttribute("data-counter", counter);
-            counter++;
             old.querySelector("[type=file]").addEventListener("change", function(){
                 addNewImage(old);
             });
         };
         
         registerNewImage(root.querySelector(".new-image"));
+
+        root.querySelector("[type=submit]").addEventListener("click", function(ev){
+            ev.preventDefault();
+            // FIXME: Submit
+            return false;
+        });
     };
 
     var initGallery = function(root){

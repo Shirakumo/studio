@@ -23,35 +23,25 @@
           <h3>Gallery</h3>
         </section>
         <section class="images">
-          <h3>2018.03</h3>
+          <h3>2018.07</h3>
           <article class="image">
             <a href="#">
-              <img src="/home/linus/meat.jpg"/>
+              <img src="/home/linus/Documents/onesies/1260.png"/>
             </a>
           </article>
           <article class="image">
             <a href="#">
-              <img src="/home/linus/1121.png"/>
+              <img src="/home/linus/Documents/onesies/1261.png"/>
             </a>
           </article>
           <article class="image">
             <a href="#">
-              <img src="/home/linus/meat.jpg"/>
+              <img src="/home/linus/Documents/onesies/1262.png"/>
             </a>
           </article>
           <article class="image">
             <a href="#">
-              <img src="/home/linus/1121.png"/>
-            </a>
-          </article>
-          <article class="image">
-            <a href="#">
-              <img src="/home/linus/meat.jpg"/>
-            </a>
-          </article>
-          <article class="image">
-            <a href="#">
-              <img src="/home/linus/1121.png"/>
+              <img src="/home/linus/Documents/onesies/1263.png"/>
             </a>
           </article>
           <article class="image">
@@ -61,37 +51,42 @@
           </article>
           <article class="image">
             <a href="#">
-              <img src="/home/linus/1121.png"/>
+              <img src="/home/linus/Documents/onesies/1264.png"/>
             </a>
           </article>
           <article class="image">
             <a href="#">
-              <img src="/home/linus/meat.jpg"/>
+              <img src="/home/linus/Documents/onesies/1265.png"/>
             </a>
           </article>
           <article class="image">
             <a href="#">
-              <img src="/home/linus/1121.png"/>
+              <img src="/home/linus/Documents/onesies/1266.png"/>
             </a>
           </article>
           <article class="image">
             <a href="#">
-              <img src="/home/linus/meat.jpg"/>
+              <img src="/home/linus/Documents/onesies/1267.png"/>
             </a>
           </article>
           <article class="image">
             <a href="#">
-              <img src="/home/linus/1121.png"/>
+              <img src="/home/linus/Documents/onesies/1268.png"/>
             </a>
           </article>
           <article class="image">
             <a href="#">
-              <img src="/home/linus/meat.jpg"/>
+              <img src="/home/linus/Documents/onesies/1269.png"/>
             </a>
           </article>
           <article class="image">
             <a href="#">
-              <img src="/home/linus/1121.png"/>
+              <img src="/home/linus/Documents/onesies/1270.png"/>
+            </a>
+          </article>
+          <article class="image">
+            <a href="#">
+              <img src="/home/linus/Documents/onesies/1271.png"/>
             </a>
           </article>
         </section>

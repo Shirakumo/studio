@@ -59,13 +59,27 @@
    :font-size 1.8em)))
  ((:or .view .upload)
   (.image
-   :padding 2em 0
-   :text-align center
    (img
-    :display inline-block
-    :margin 1em 0 0 0
+    :padding 2em 0 0 0
+    :display block
+    :margin 1em auto 0 auto
     :max-width (calc (- 100vw 2em))
-    :max-height (calc (- 100vh 4em))))
+    :max-height (calc (- 100vh 4em)))
+   (i.remove
+    :z-index 10
+    :position relative
+    :display block
+    :left (calc (- 50% 0.5em)) :top -1.4em
+    :background (hex 333333)
+    :color (hex FFFFFF)
+    :font-size 1.5em
+    :width 1.0em
+    :padding 0.3em 0.2em 0.1em 0.2em
+    :border-radius 1em 1em 0 0
+    :opacity 0.5
+    :cursor pointer)
+   ((:and i.remove :hover)
+    :opacity 1.0))
   (.description
    :background (hex 333333)
    :color (hex FFFFFF)
