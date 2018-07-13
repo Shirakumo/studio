@@ -43,6 +43,7 @@
   :color (hex FFFFFF)
   :padding 0 5em 0 5em
   (.avatar
+   :background (hex 555555)
    :margin 10px
    :width 128px
    :height 128px
@@ -128,7 +129,12 @@
    ((:and input[type=submit] :hover)
     :background (hex 151515))))
  (.view
+  (.image
+   (img :padding 2em 0))
   (.description
+   :display flex
+   :flex-wrap wrap
+   :justify-content space-between
    (ul.tags
     :list-style none
     :padding 0 :margin 0
@@ -140,7 +146,9 @@
         :color (hex FFFFFF))
      ((:and a :hover)
       :background (hex 151515))))
+   (time)
    (p
+    :width 100%
     :margin 1em)))
  (.gallery
   :margin 0 0 250px 0

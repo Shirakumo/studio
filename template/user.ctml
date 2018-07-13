@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8"/>
-    <title><c:splice lquery="(text title)"/> - <c:splice lquery="(text author)"/>'s Studio</title>
+    <title><c:splice lquery='(text (format NIL "~@[~a | ~]~@[~as ~]" tag user))'/>Studio</title>
     <link rel="stylesheet" href="../static/studio.css" @href="/static/studio/studio.css" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
   </head>
@@ -16,21 +16,24 @@
           <a href="#top"><i class="fas fa-arrow-up"></i> Top</a>
         </nav>
       </header>
-      <main class="view">
+      <main class="gallery">
         <section class="info">
           <img src="#" class="avatar" lquery="(attr :src (profile:avatar author 128))" />
           <h2><a href="#" @href="studio/user/{0} author" lquery="(text author)">AUTHOR</a></h2>
-          <h3 lquery="(text title)">TITLE</h3>
+          <c:if test="tag">
+            <c:then><h3 lquery="(text tag)">Tag</h3></c:then>
+            <c:else><h3>Gallery</h3></c:else>
+          </c:if>
         </section>
-        <section class="image" iterate="files">
-          <img src="#" lquery="(attr :src (studio::file-link *))" />
-        </section>
-        <section class="description">
-          <ul class="tags" iterate="tags">
-            <li><a href="#" @href="studio/user/{0}/tag/{1} (** author) *">TAG</a></li>
-          </ul>
-          <time lquery="(text (format-time time)) (attr :title (format-fancy-date time))">2018.02.02</time>
-          <p lquery="(text description)">This is some stupid ass avatar</p>
+        <section class="images">
+          <h3>2018.07</h3>
+          <div iterate="uploads">
+            <article class="image">
+              <a href="#" @href="studio/view/{0} file">
+                <img src="#" lquery="(attr :src (studio::file-link file))" />
+              </a>
+            </article>
+          </div>
         </section>
       </main>
       <footer>

@@ -8,20 +8,27 @@ document.addEventListener("DOMContentLoaded", function(){
 
         var idCounter = 0;
         var toUpload = {};
+        var toDelete = [];
 
         var registerNewImage = null;
         var showFile = function(root, file){
-            var reader = new FileReader();
             var image = document.createElement("img");
             var remove = document.createElement("i");
-            var id = idCounter++;
-            toUpload[id] = file;
-            reader.onload = function(){ image.src = reader.result; };
-            reader.readAsDataURL(file);
+            if(file){
+                var reader = new FileReader();
+                root.dataset.tid = idCounter++;
+                toUpload[root.dataset.tid] = file;
+                reader.onload = function(){ image.src = reader.result; };
+                reader.readAsDataURL(file);
+            }
             // FIXME: D&D
             remove.classList.add("remove", "fas", "fa-fw", "fa-trash-alt");
             remove.addEventListener("click", function(){
-                delete toUpload[id];
+                if(root.dataset.tid){
+                    delete toUpload[root.dataset.tid];
+                } else {
+                    toDelete.push(root.dataset.id);
+                }
                 root.removeChild(image);
                 root.removeChild(remove);
             });
@@ -60,8 +67,31 @@ document.addEventListener("DOMContentLoaded", function(){
         registerNewImage(root.querySelector(".new-image"));
 
         root.querySelector("[type=submit]").addEventListener("click", function(ev){
+            var form = new FormData();
+            form.append("title", root.querySelector("[name=title]").value);
+            form.append("description", root.querySelector("[name=description]").value);
+            form.append("tags", root.querySelector("[name=tags]").value);
+            form.append("data-format", "json");
+            for(var i in toUpload){
+                form.append("file[]", toUpload[i]);
+            }
+            for(var i in toDelete){
+                form.append("delete[]", toDelete[i]);
+            }
+            var request = new XMLHttpRequest();
+            request.responseType = 'json';
+            request.onload = function(ev){
+                log("Submission complete", request);
+                if(request.status == 200){
+                    window.location = request.response["data"]["url"];
+                }else{
+                    document.querySelector("#error").innerHTML = request.response["message"];
+                }
+            };
+            request.open("POST", root.getAttribute("action"));
+            log("Submitting", form);
+            request.send(form);
             ev.preventDefault();
-            // FIXME: Submit
             return false;
         });
     };

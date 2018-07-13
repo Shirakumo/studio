@@ -14,5 +14,8 @@
   :depends-on ((:interface :database)
                (:interface :user)
                (:interface :auth)
+               (:interface :profile)
                :r-data-model
-               :r-clip))
+               :r-clip
+               :i-json
+               :cl-ppcre))

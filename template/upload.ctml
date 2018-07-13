@@ -11,16 +11,16 @@
       <header>
         <h1>Studio</h1>
         <nav>
-          <a href="#"><i class="fas fa-home"></i> Home</a>
-          <a href="#"><i class="fas fa-upload"></i> Upload</a>
+          <a href="#" @href="studio/"><i class="fas fa-home"></i> Home</a>
+          <a href="#" @href="studio/upload"><i class="fas fa-upload"></i> Upload</a>
           <a href="#top"><i class="fas fa-arrow-up"></i> Top</a>
         </nav>
       </header>
-      <form class="upload" method="post" enctype="multipart/form-data" action="#" @action="/api/studio/upload">
+      <form class="upload" method="post" enctype="multipart/form-data" action="#" @action="/api/studio/upload/create">
         <section class="info">
-          <img src="/home/linus/1121.png" class="avatar" />
-          <h2><a href="#">Shinmera</a></h2>
-          <input name="title" placeholder="Title" required autofocus />
+          <img src="#" class="avatar" lquery="(attr :src (profile:avatar author 128))" />
+          <h2><a href="#" @href="studio/user/{0} author" lquery="(text author)">AUTHOR</a></h2>
+          <input name="title" placeholder="Title" minlength="1" maxlength="64" required autofocus />
         </section>
         <section class="images">
           <div class="new-image">
