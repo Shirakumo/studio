@@ -233,13 +233,11 @@
       (img :width 100%
            :height 100%
            :object-fit cover)
-      (a :transition "0.3s width, 0.3s height, 0.3s margin")
-      ((:and a :hover)
-       :width (calc (+ 100% 4em))
-       :height (calc (+ 100% 4em))
-       :margin -2em
-       :z-index 20
-       (img :object-fit contain)))))))
+      ((:and img :hover)
+       :animation-duration 5s
+       :animation-name slide-object
+       :animation-timing-function ease-in-out
+       :animation-iteration-count infinite))))))
  
  (footer
   :text-align center
@@ -247,3 +245,9 @@
   :color (hex AAAAAA)
   (a :color (hex 888888))
   ((:and a :hover) :color (hex EE8800))))
+
+(:keyframes slide-object
+            (0% :object-position 50% 50%)
+            (25% :object-position 0% 0%)
+            (75% :object-position 100% 100%)
+            (100% :object-position 50% 50%))
