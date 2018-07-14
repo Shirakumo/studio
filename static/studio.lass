@@ -4,13 +4,14 @@
  :background (hex EEEEEE)
  (body
   :margin 0
-  :padding 0))
+  :padding 0
+  :overflow-x hidden))
 
 (a :text-decoration none)
 
 (article.studio
  :padding 32px 0 0 0
- (header
+ (>header
   :position fixed
   :top 0 :left 0 :right 0
   :z-index 100
@@ -32,7 +33,8 @@
       :padding 0 0.5em)
    ((:and a :hover)
     :color (hex FFFFFF))))
- ((:or .gallery .view .upload)
+ 
+ ((:or .front .gallery .view .upload)
   (.info
   :display flex
   :align-items center
@@ -43,6 +45,7 @@
   :color (hex FFFFFF)
   :padding 0 5em 0 5em
   (.avatar
+   :z-index 10
    :background (hex 555555)
    :margin 10px
    :width 128px
@@ -51,13 +54,14 @@
    :border-radius 64px)
   (h2
    (a :color (hex EEEEEE))
-   ((:and a :hover) :color (hex FFFFFF)))
+   ((:and a :hover) :color (hex EE8800)))
   (h3
    :overflow hidden
    :text-overflow ellipsis
    :white-space nowrap
    :margin 0 0 0 0.5em
    :font-size 1.8em)))
+ 
  ((:or .view .upload)
   (.image
    (img
@@ -85,6 +89,7 @@
    :background (hex 333333)
    :color (hex FFFFFF)
    :padding 1em 5em 5em 5em))
+ 
  (.upload
   ((:or input textarea)
    :display block
@@ -128,6 +133,7 @@
     :font-size 1.5em)
    ((:and input[type=submit] :hover)
     :background (hex 151515))))
+ 
  (.view
   (.image
    (img :padding 2em 0))
@@ -150,18 +156,41 @@
    (p
     :width 100%
     :margin 1em)))
+
+ ((:or .gallery .front)
+  (.navlink
+   :display block
+   :width 100%
+   :background (hex DDDDDD)
+   :color (hex 333333)
+   :text-align center
+   :font-size 1.2em
+   :padding 0.1em 0
+   :margin 0.2em 0)
+  ((:and .navlink :hover)
+   :background (hex CCCCCC))
+  (.alert
+   :font-size 2em
+   :padding 1em
+   :text-align center))
+ 
  (.gallery
   :margin 0 0 250px 0
+  (.navlink.prev
+   :max-width 1100px
+   :margin 0.2em auto 0.2em auto)
   (.images
    :margin 0 auto 0 auto
    :max-width 1100px
    :display flex
    :flex-wrap wrap
    :justify-content center
-   (h3
+   (time
     :flex-basis 100%
     :text-align right
     :padding 0 0.5em 0 0
+    :margin 0.5em
+    :font-size 1.3em
     :border-bottom 2px solid (hex 333333))
    (.image
     :position relative
@@ -178,4 +207,43 @@
        :align-items center
        :justify-content center
        (img :max-width 100%
-            :max-height 100%))))))
+            :max-height 100%)))))
+ (.front
+  :margin 2em 0 2em 0
+  (.galleries
+  :min-height 50vh
+   (.gallery
+    :margin 1em 0
+    (header
+     (.info
+      :height 32px
+      (.avatar
+       :width 64px
+       :height 64px)))
+    (.images
+     :background (hex CCCCCC)
+     :max-width none
+     :min-height 128px
+     :flex-wrap nowrap
+     (.image
+      :margin 0
+      :width 25%
+      :max-width 400px
+      :max-height 250px
+      (img :width 100%
+           :height 100%
+           :object-fit cover)
+      (a :transition "0.3s width, 0.3s height, 0.3s margin")
+      ((:and a :hover)
+       :width (calc (+ 100% 4em))
+       :height (calc (+ 100% 4em))
+       :margin -2em
+       :z-index 20
+       (img :object-fit contain)))))))
+ 
+ (footer
+  :text-align center
+  :font-size 0.8em
+  :color (hex AAAAAA)
+  (a :color (hex 888888))
+  ((:and a :hover) :color (hex EE8800))))

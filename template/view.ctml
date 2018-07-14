@@ -19,7 +19,7 @@
       <main class="view">
         <section class="info">
           <img src="#" class="avatar" lquery="(attr :src (profile:avatar author 128))" />
-          <h2><a href="#" @href="studio/user/{0} author" lquery="(text author)">AUTHOR</a></h2>
+          <h2><a href="#" @href="studio/gallery/{0} author" lquery="(text author)">AUTHOR</a></h2>
           <h3 lquery="(text title)">TITLE</h3>
         </section>
         <section class="image" iterate="files">
@@ -27,13 +27,14 @@
         </section>
         <section class="description">
           <ul class="tags" iterate="tags">
-            <li><a href="#" @href="studio/user/{0}/tag/{1} (** author) *">TAG</a></li>
+            <li><a href="#" @href="studio/gallery/{0}/tag/{1} (** :author) *" lquery="(text *)">TAG</a></li>
           </ul>
-          <time lquery="(text (format-time time)) (attr :title (format-fancy-date time))">2018.02.02</time>
+          <time lquery="(text (format-human-date time)) (attr :title (format-fancy-date time))">2018.02.02</time>
           <p lquery="(text description)">This is some stupid ass avatar</p>
         </section>
       </main>
       <footer>
+        Running on <a href="https://github.com/Shirakumo/studio">Studio</a>
       </footer>
     </article>
   </body>

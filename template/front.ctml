@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8"/>
-    <title><c:splice lquery='(text (format NIL "~@[~a | ~]" tag))'/>Studio</title>
+    <title>Studio</title>
     <link rel="stylesheet" href="../static/studio.css" @href="/static/studio/studio.css" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
   </head>
@@ -16,26 +16,42 @@
           <a href="#top"><i class="fas fa-arrow-up"></i> Top</a>
         </nav>
       </header>
-      <main class="gallery">
-        <section class="info">
-          <h2><a href="#">Studio</a></h2>
-          <c:if test="tag">
-            <c:then><h3 lquery="(text tag)">Tag</h3></c:then>
-            <c:else><h3>Gallery</h3></c:else>
-          </c:if>
-        </section>
-        <section class="images">
-          <h3>2018.07</h3>
-          <div iterate="uploads">
-            <article class="image">
-              <a href="#" @href="studio/view/{0} file">
-                <img src="#" lquery="(attr :src (studio::file-link file))" />
-              </a>
-            </article>
-          </div>
-        </section>
+      <main class="front">
+        <c:when test="prev">
+          <a class="navlink prev" href="#" lquery="(attr :href prev)">Previous Page</a>
+        </c:when>
+        <c:if test="galleries">
+          <c:then>
+            <section class="galleries" iterate="galleries">
+              <article class="gallery">
+                <header>
+                  <section class="info">
+                    <img src="#" class="avatar" lquery="(attr :src (profile:avatar author 128))" />
+                    <h2><a href="#" @href="studio/gallery/{0} (user:username author)" lquery="(text (user:username author))">AUTHOR</a></h2>
+                  </section>
+                  <section class="images" iterate="(studio::gallery-uploads *)">
+                    <article class="image">
+                      <c:using value="(studio::upload-files *)">
+                        <a href="#" @href="studio/view/{0} (dm:id **)">
+                          <img src="#" lquery="(attr :src (studio::file-link (first *)))" />
+                        </a>
+                      </c:using>
+                    </article>
+                  </section>
+                </header>
+              </article>
+            </section>
+            <c:when test="next">
+              <a class="navlink next" href="#" lquery="(attr :href next)">Next Page</a>
+            </c:when>
+          </c:then>
+          <c:else>
+            <div class="alert">No further galleries.</div>
+          </c:else>
+        </c:if>
       </main>
       <footer>
+        Running on <a href="https://github.com/Shirakumo/studio">Studio</a>
       </footer>
     </article>
   </body>

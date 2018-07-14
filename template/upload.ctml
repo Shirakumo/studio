@@ -19,7 +19,7 @@
       <form class="upload" method="post" enctype="multipart/form-data" action="#" @action="/api/studio/upload/create">
         <section class="info">
           <img src="#" class="avatar" lquery="(attr :src (profile:avatar author 128))" />
-          <h2><a href="#" @href="studio/user/{0} author" lquery="(text author)">AUTHOR</a></h2>
+          <h2><a href="#" @href="studio/gallery/{0} author" lquery="(text author)">AUTHOR</a></h2>
           <input name="title" placeholder="Title" minlength="1" maxlength="64" required autofocus />
         </section>
         <section class="images">
@@ -35,6 +35,7 @@
         </section>
       </form>
       <footer>
+        Running on <a href="https://github.com/Shirakumo/studio">Studio</a>
       </footer>
     </article>
     <script type="text/javascript" src="../static/studio.js" @src="/static/studio/studio.js"></script>

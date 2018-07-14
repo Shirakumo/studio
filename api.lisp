@@ -24,13 +24,18 @@
          :time (dm:field upload "time")
          :files (mapcar #'dm:id (upload-files upload)))))
 
-(define-api studio/uploads (&optional user tag date skip amount) ()
+(define-api studio/gallery/list (&optional skip amount) ()
   (let ((skip (if skip (parse-integer skip) 0))
         (amount (if amount (parse-integer amount))))
     (api-output (mapcar #'api-upload (uploads :user user :tag tag :date date :skip skip :amount amount)))))
 
 (define-api studio/upload (id) ()
   (api-output (api-upload (ensure-upload id))))
+
+(define-api studio/upload/list (user &optional tag date skip amount) ()
+  (let ((skip (if skip (parse-integer skip) 0))
+        (amount (if amount (parse-integer amount))))
+    (api-output (mapcar #'api-upload (uploads user :tag tag :date date :skip skip :amount amount)))))
 
 (define-api studio/upload/create (title file[] &optional description tags) ()
   ;; FIXME: Check permissions

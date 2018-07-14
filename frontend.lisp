@@ -11,50 +11,51 @@
       (parse-integer thing)
       default))
 
-(defun next-link (uploads page offset &key tag user)
+(defun prev-link (user page offset &optional tag)
+  (when (or (< 1 page) (< 0 offset))
+    (gallery-link user :tag tag
+                       :page (if (< 0 offset) page (1- page))
+                       :offset (max 0 (- offset (config :max-per-page))))))
+
+(defun next-link (user uploads page offset &optional tag)
   (if (< (length uploads) (config :max-per-page))
-      (gallery-link :tag tag :user user :page (1+ page))
-      (gallery-link :tag tag :user user :page page :offset (+ offset (config :max-per-page)))))
+      (gallery-link user :tag tag :page (1+ page))
+      (gallery-link user :tag tag :page page :offset (+ offset (config :max-per-page)))))
 
-(define-page gallery "studio/^([0-9]+)?(?:\\+([0-9]+))?$" (:uri-groups (page offset) :clip "front.ctml")
+(define-page front "studio/^([0-9]+)?$" (:uri-groups (page) :clip "front.ctml")
   (let* ((page (maybe-parse-integer page 1))
-         (offset (maybe-parse-integer offset 0))
-         (uploads (uploads :date (list (get-universal-time) page))))
+         (galleries (galleries :skip (* (config :max-per-page) (1- page))
+                               :amount (config :max-per-page))))
     (r-clip:process T
-                    :uploads uploads
-                    :next (next-link uploads page offset))))
+                    :galleries galleries
+                    :prev (when (< 1 page)
+                            (uri-to-url (radiance:make-uri :domains '("studio")
+                                                           :path (princ-to-string (1- page)))
+                                        :representation :external))
+                    :next (uri-to-url (radiance:make-uri :domains '("studio")
+                                                         :path (princ-to-string (1+ page)))
+                                      :representation :external))))
 
-(define-page tag-gallery "studio/^tag/(.+)(?:/([0-9+]+))?(?:\\+([0-9]+))?" (:uri-groups (tag page offset) :clip "front.ctml")
+(define-page gallery "studio/^gallery/([^/]+)(?:/([0-9+]+))?(?:\\+([0-9]+))?" (:uri-groups (user page offset) :clip "gallery.ctml")
   (let* ((page (maybe-parse-integer page 1))
          (offset (maybe-parse-integer offset 0))
-         (uploads (uploads :tag tag :date (list (get-universal-time) page))))
-    (r-clip:process T
-                    :tag tag
-                    :uploads uploads
-                    :next (next-link uploads page offset :tag tag))))
-
-(define-page user-gallery "studio/^user/(.+)(?:/([0-9+]+))?(?:\\+([0-9]+))?" (:uri-groups (user page offset) :clip "user.ctml")
-  (let* ((page (maybe-parse-integer page 1))
-         (offset (maybe-parse-integer offset 0))
-         (uploads (uploads :user user :date (list (get-universal-time) page))))
-    (dolist (upload uploads)
-      (setf (dm:field upload "file") (gethash "id"
-                                              (first (db:select 'files (db:query (:= 'upload (dm:id upload)))
-                                                                :amount 1 :fields '("_id"))))))
+         (uploads (uploads user :date (list (get-universal-time) page))))
     (r-clip:process T
                     :author user
                     :uploads uploads
-                    :next (next-link uploads page offset :user user))))
+                    :prev (prev-link user page offset)
+                    :next (next-link user uploads page offset))))
 
-(define-page user-tag-gallery "studio/^user/(.+)/tag/(.+)(?:/([0-9+]+))?(?:\\+([0-9]+))?" (:uri-groups (user tag page offset) :clip "user.ctml")
+(define-page tag-gallery "studio/^gallery/([^/]+)/tag/(.+?)(?:/([0-9+]+))?(?:\\+([0-9]+))?$" (:uri-groups (user tag page offset) :clip "gallery.ctml")
   (let* ((page (maybe-parse-integer page 1))
          (offset (maybe-parse-integer offset 0))
-         (uploads (uploads :user user :tag tag :date (list (get-universal-time) page))))
+         (uploads (uploads user :tag tag :date (list (get-universal-time) page))))
     (r-clip:process T
                     :author user
                     :tag tag
                     :uploads uploads
-                    :next (next-link uploads page offset :user user :tag tag))))
+                    :prev (prev-link user page offset tag)
+                    :next (next-link user uploads page offset tag))))
 
 (define-page view-image "studio/^view/(.+)" (:uri-groups (id) :clip "view.ctml")
   (let ((upload (ensure-upload (db:ensure-id id))))
@@ -71,6 +72,6 @@
   (r-clip:process T
                   :upload (ensure-upload (db:ensure-id id))))
 
-(define-page upload "studio/upload" (:clip "upload.ctml")
+(define-page upload "studio/^upload" (:clip "upload.ctml")
   ;; FIXME: Check permissions
   (r-clip:process T))

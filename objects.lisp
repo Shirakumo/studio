@@ -8,9 +8,15 @@
 
 (define-trigger radiance:startup ()
   (defaulted-config '("image/png" "image/jpeg" "image/gif" "image/svg+xml") :allowed-content-types)
-  (defaulted-config (* 4 10) :max-per-page))
+  (defaulted-config (* 4 10) :max-per-page)
+  (defaulted-config 4 :frontpage-uploads))
 
 (define-trigger db:connected ()
+  (db:create 'galleries '((author :integer)
+                          (last-update (:integer 5))
+                          (cover :id)
+                          (description :text))
+             :indices '(author))
   (db:create 'uploads '((time (:integer 5))
                         (author :integer)
                         (title (:varchar 64))
@@ -23,17 +29,36 @@
                      (tag (:varchar 32)))
              :indices '(upload tag)))
 
+(defun ensure-gallery (gallery-ish)
+  (etypecase gallery-ish
+    (dm:data-model gallery-ish)
+    (string (or (dm:get-one 'galleries (db:query (:= 'author (user:id gallery-ish))))
+                (error "No gallery with Author ~s" gallery-ish)))
+    (db:id (or (dm:get-one 'galleries (db:query (:= '_id gallery-ish)))
+               (error "No gallery with ID ~s" gallery-ish)))))
+
 (defun ensure-upload (upload-ish)
   (etypecase upload-ish
     (dm:data-model upload-ish)
     (db:id (or (dm:get-one 'uploads (db:query (:= '_id upload-ish)))
-               (error "No upload with ID ~s" upload-ish)))))
+               (error "No upload with ID ~s" upload-ish)))
+    (string (ensure-upload (db:ensure-id upload-ish)))))
 
 (defun ensure-file (file-ish)
   (etypecase file-ish
     (dm:data-model file-ish)
     (db:id (or (dm:get-one 'files (db:query (:= '_id file-ish)))
-               (error "No file with ID ~s" file-ish)))))
+               (error "No file with ID ~s" file-ish)))
+    (string (ensure-file (db:ensure-id file-ish)))))
+
+(defun gallery-uploads (gallery-ish)
+  (let* ((gallery (ensure-gallery gallery-ish))
+         (cover (dm:get-one 'uploads (db:query (:= '_id (dm:field gallery "cover")))))
+         (query (db:query (:= 'author (dm:field gallery "author"))))
+         (count (config :frontpage-uploads)))
+    (if cover
+        (list* cover (dm:get 'uploads query :amount (1- count) :sort '((time :desc))))
+        (dm:get 'uploads query :amount count :sort '((time :desc))))))
 
 (defun upload-tags (upload-ish)
   (let ((id (dm:id (ensure-upload upload-ish)))
@@ -60,11 +85,13 @@
                                    :path (format NIL "view/~a" (dm:id upload)))
                 :representation :external)))
 
-(defun gallery-link (&key user tag page offset)
-  (uri-to-url (radiance:make-uri :domains '("studio")
-                                 :path (format NIL "~@[user/~a~]~@[tag/~a~]~@[/~d~@[+~d~]~]"
-                                               (when user (user:username user)) tag page offset))
-              :representation :external))
+(defun gallery-link (user &key tag page offset)
+  (let ((page (when (and page (< 1 page)) page))
+        (offset (when (and offset (< 0 offset) offset))))
+    (uri-to-url (radiance:make-uri :domains '("studio")
+                                   :path (format NIL "gallery/~a~@[tag/~a~]~@[/~d~@[+~d~]~]"
+                                                 (user:username user) tag page offset))
+                :representation :external)))
 
 (defun date-range (date &optional (page 1))
   (multiple-value-bind (ss mm hh d m y day dl-p tz) (decode-universal-time date 0)
@@ -74,45 +101,44 @@
             (multiple-value-bind (y+ m) (floor (- (1+ m) page) 12)
               (encode-universal-time 0 0 0 1 (1+ m) (+ y y+) tz)))))
 
-(defun uploads (&key tag user date (skip 0) (amount (config :max-per-page)))
+(defun galleries (&key (skip 0) (amount (config :max-per-page)))
+  (dm:get 'galleries (db:query :all) :skip skip :amount amount :sort '((last-update :desc))))
+
+(defun uploads (user &key tag date (skip 0) (amount (config :max-per-page)))
   (multiple-value-bind (min-date max-date) (when date (apply #'date-range date))
     (cond (tag
-           (let ((uploads ()) (count 0))
+           (let ((uploads ()) (count 0) (uid (user:id user)))
              ;; KLUDGE: THIS IS SLOW AND STUPID
-             (db:iterate 'tags (cond (user
-                                      (db:query (:and (:= 'tag tag)
-                                                      (:= 'author user))))
-                                     (T
-                                      (db:query :all)))
-                         (lambda (data)
-                           (let* ((id (gethash "upload" data))
-                                  (upload (dm:get-one 'uploads (if date
-                                                                   (db:query (:and (:= '_id id)
-                                                                                   (:<= min-date 'time)
-                                                                                   (:<  'time max-date)))
-                                                                   (db:query (:= '_id id)))
-                                                      :sort '((time :asc)))))
-                             (when upload
-                               (cond ((< count skip))
-                                     ((< count (+ amount skip))
-                                      (push upload uploads))
-                                     (T
-                                      (return-from uploads (nreverse uploads))))
-                               (incf count))))
-                         :fields '(upload) :skip skip :amount amount)))
+             (loop for i from 0 by amount
+                   for found = NIL
+                   do (db:iterate 'tags (db:query (:and (:= 'tag tag)))
+                                  (lambda (data)
+                                    (setf found T)
+                                    (let* ((id (gethash "upload" data))
+                                           (upload (dm:get-one 'uploads (if date
+                                                                            (db:query (:and (:= '_id id)
+                                                                                            (:= 'author uid)
+                                                                                            (:<= min-date 'time)
+                                                                                            (:<  'time max-date)))
+                                                                            (db:query (:and (:= '_id id)
+                                                                                            (:= 'author uid)))))))
+                                      (when upload
+                                        (cond ((< count skip))
+                                              ((< count (+ amount skip))
+                                               (push upload uploads)))
+                                        (incf count))))
+                                  :fields '(upload) :skip i :amount amount)
+                      (unless found
+                        (return-from uploads
+                          (sort uploads #'> :key (lambda (a) (dm:field a "time"))))))))
           (T
-           (dm:get 'uploads (cond ((and user date)
+           (dm:get 'uploads (cond (date
                                    (db:query (:and (:= 'author (user:id user))
                                                    (:<= min-date 'time)
                                                    (:<  'time max-date))))
-                                  (user
-                                   (db:query (:= 'author (user:id user))))
-                                  (date
-                                   (db:query (:and (:<= min-date 'time)
-                                                   (:<  'time max-date))))
                                   (T
-                                   (db:query :all)))
-                   :skip skip :amount amount :sort '((time :asc)))))))
+                                   (db:query (:= 'author (user:id user)))))
+                   :skip skip :amount amount :sort '((time :desc)))))))
 
 (defun file-pathname (file)
   (merge-pathnames
@@ -125,6 +151,12 @@
   (merge-pathnames
    (make-pathname :directory `(:relative "uploads" ,(princ-to-string (dm:id upload))))
    (mconfig-pathname #.*package*)))
+
+(defun format-month (upload)
+  (multiple-value-bind (ss mm hh d m y)
+      (decode-universal-time (dm:field (ensure-upload upload) "time"))
+    (declare (ignore ss mm hh d))
+    (format NIL "~2d.~4d" m y)))
 
 (defun %handle-new-files (upload files)
   (let ((id (dm:id upload)))
@@ -142,12 +174,42 @@
         (v:debug :radiance.studio e)
         (v:warn :radiance.studio "Failed to delete file ~a." file)))))
 
+(defun make-gallery (author &key description cover)
+  (db:with-transaction ()
+    (let ((gallery (dm:hull 'galleries)))
+      (setf (dm:field gallery "author") (user:id author))
+      (setf (dm:field gallery "description") (or description ""))
+      (setf (dm:field gallery "last-update") 0)
+      (setf (dm:field gallery "cover") cover)
+      (dm:insert gallery))))
+
+(defun update-gallery (gallery &key author description (cover NIL cover-p) last-update)
+  (db:with-transaction ()
+    (let ((gallery (ensure-gallery gallery)))
+      (when author
+        (setf (dm:field gallery "author") (user:id author)))
+      (when description
+        (setf (dm:field gallery "description") description))
+      (when cover-p
+        (setf (dm:field gallery "cover") cover))
+      (when last-update
+        (setf (dm:field gallery "last-update") (user:id last-update)))
+      (dm:save gallery))))
+
+(defun delete-gallery (gallery)
+  (db:with-transaction ()
+    (let ((gallery (ensure-gallery gallery)))
+      (db:iterate 'uploads (db:query (:= 'author (dm:field gallery "author")))
+                  (lambda (row)
+                    (delete-upload (make-instance 'dm:data-model :collection 'uploads :field-table row :inserted T))))
+      (dm:delete gallery))))
+
 (defun make-upload (title files &key description (author (auth:current)) (time (get-universal-time)) tags)
   (db:with-transaction ()
     (let ((upload (dm:hull 'uploads)))
       (setf (dm:field upload "title") title)
       (setf (dm:field upload "description") (or description ""))
-      (setf (dm:field upload "author") (user:id (or author "anonymous")))
+      (setf (dm:field upload "author") (user:id author))
       (setf (dm:field upload "time") time)
       (dm:insert upload)
       (let ((id (dm:field upload "_id")))
@@ -156,6 +218,7 @@
         (%handle-new-files upload files)
         (dolist (tag tags)
           (db:insert 'tags `(("upload" . ,id) ("tag" . ,tag)))))
+      (update-gallery (user:id author) :last-update (get-universal-time))
       upload)))
 
 (defun update-upload (upload &key title description author time (keep-files NIL change-files) new-files (tags NIL tags-p))
