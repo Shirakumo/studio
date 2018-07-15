@@ -33,10 +33,10 @@
             <c:then>
               <time lquery="(text (studio::format-month (first uploads)))">MM.YYYY</time>
               <c:splice iterate="uploads">
-                <article class="image">
+                <article class="image" lquery='(add-class (when (rest (studio::upload-files *)) "multiple"))'>
                   <a href="#" lquery="(attr :href (studio::upload-link *))">
                     <c:using value="(studio::upload-files *)">
-                      <img src="#" lquery="(attr :src (studio::file-link (first *)))" />
+                      <img src="#" lquery='(attr :src (studio::file-link (first *)))' />
                     </c:using>
                   </a>
                 </article>

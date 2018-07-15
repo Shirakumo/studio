@@ -31,7 +31,8 @@
             </div>
           </c:splice>
           <div class="new-image">
-            <input type="file" name="file[]" id="new-image" accept=".jpg,.jpeg,.png,.gif,.svg" required multiple />
+            <input type="file" name="file[]" id="new-image" accept=".jpg,.jpeg,.png,.gif,.svg" multiple
+                   lquery="(attr :required (unless id T))" />
             <label for="new-image"><i class="fas fa-file-upload"></i> New Image</label>
           </div>
         </section>

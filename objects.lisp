@@ -148,9 +148,8 @@
    (mconfig-pathname #.*package*)))
 
 (defun upload-pathname (upload)
-  (merge-pathnames
-   (make-pathname :directory `(:relative "uploads" ,(princ-to-string (dm:id upload))))
-   (mconfig-pathname #.*package*)))
+  (make-pathname :directory `(:relative ,@(rest (pathname-directory (mconfig-pathname #.*package*)))
+                                        "uploads" ,(princ-to-string (dm:id upload)))))
 
 (defun format-month (upload)
   (multiple-value-bind (ss mm hh d m y)
@@ -257,8 +256,8 @@
              (id (dm:id upload)))
         (dolist (file (upload-files upload))
           (push (file-pathname file) to-delete))
-        (delete-directory (upload-pathname upload))
-        (db:remove 'files (db:query (:= 'upload files)))
+        (push (upload-pathname upload) to-delete)
+        (db:remove 'files (db:query (:= 'upload id)))
         (db:remove 'tags (db:query (:= 'upload id)))
         (dm:delete upload)))
     ;; Do this late so we only delete files on successful TX commit.

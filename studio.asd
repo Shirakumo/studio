@@ -18,4 +18,5 @@
                :r-data-model
                :r-clip
                :i-json
-               :cl-ppcre))
+               :cl-ppcre
+               :uiop))
