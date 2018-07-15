@@ -221,8 +221,8 @@
       (update-gallery (user:id author) :last-update (get-universal-time))
       upload)))
 
-(defun update-upload (upload &key title description author time (keep-files NIL change-files) new-files (tags NIL tags-p))
-  (let ((to-delete ()) upload)
+(defun update-upload (upload &key title description author time delete-files new-files (tags NIL tags-p))
+  (let ((to-delete ()))
     (db:with-transaction ()
       (setf upload (ensure-upload upload))
       (let ((id (dm:id upload)))
@@ -235,11 +235,10 @@
         (when time
           (setf (dm:field upload "time") time))
         (dm:save upload)
-        (when change-files
-          (loop for file in (upload-files upload)
-                unless (find (dm:id file) keep-files :test 'equal :key #'db:ensure-id)
-                do (push (file-pathname file) to-delete)
-                   (dm:delete file)))
+        (loop for id in delete-files
+              for file = (ensure-file id)
+              do (push (file-pathname file) to-delete)
+                 (dm:delete file))
         ;; FIXME: Clean up files in case of erroneous unwind.
         (when new-files
           (%handle-new-files upload new-files))

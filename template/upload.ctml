@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8"/>
-    <title>Upload - Shinmera's Studio</title>
+    <title>Upload <c:splice lquery="(text id)" /> - Shinmera's Studio</title>
     <link rel="stylesheet" href="../static/studio.css" @href="/static/studio/studio.css" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
   </head>
@@ -16,22 +16,41 @@
           <a href="#top"><i class="fas fa-arrow-up"></i> Top</a>
         </nav>
       </header>
-      <form class="upload" method="post" enctype="multipart/form-data" action="#" @action="/api/studio/upload/create">
+      <form class="upload" method="post" enctype="multipart/form-data">
         <section class="info">
           <img src="#" class="avatar" lquery="(attr :src (profile:avatar author 128))" />
           <h2><a href="#" @href="studio/gallery/{0} author" lquery="(text author)">AUTHOR</a></h2>
-          <input name="title" placeholder="Title" minlength="1" maxlength="64" required autofocus />
+          <input name="title" placeholder="Title" minlength="1" maxlength="64" required autofocus lquery="(val title)" />
         </section>
         <section class="images">
+          <c:splice iterate="files">
+            <div class="image" lquery="(data :id _id)">
+              <img src="#" lquery="(attr :src (studio::file-link *))" />
+              <input type="checkbox" name="delete[]" lquery="(val _id) (attr :id _id)" />
+              <label class="remove" lquery="(attr :for _id)"><i class="fas fa-fw fa-trash-alt" /></label>
+            </div>
+          </c:splice>
           <div class="new-image">
             <input type="file" name="file[]" id="new-image" accept=".jpg,.jpeg,.png,.gif,.svg" required multiple />
             <label for="new-image"><i class="fas fa-file-upload"></i> New Image</label>
           </div>
         </section>
         <section class="description">
-          <input class="tags" name="tags" placeholder="Some, Tags" />
-          <textarea name="description" placeholder="Description"></textarea>
-          <input type="submit" value="Submit" />
+          <input class="tags" name="tags" placeholder="Some, Tags" lquery='(val (format NIL "~{~a~^, ~}" tags))' />
+          <textarea name="description" placeholder="Description" lquery="(text description)"></textarea>
+          <input type="hidden" name="browser" value="true" />
+          <nav>
+            <c:if test="id">
+              <c:then>
+                <input type="hidden" name="upload" lquery="(val id)" />
+                <input type="submit" @formaction="/api/studio/upload/edit" value="Save" />
+                <input type="submit" @formaction="/api/studio/upload/delete" value="Delete" />
+              </c:then>
+              <c:else>
+                <input type="submit" @formaction="/api/studio/upload/create" value="Submit" />
+              </c:else>
+            </c:if>
+          </nav>
         </section>
       </form>
       <footer>

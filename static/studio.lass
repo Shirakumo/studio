@@ -69,22 +69,7 @@
     :display block
     :margin 1em auto 0 auto
     :max-width (calc (- 100vw 2em))
-    :max-height (calc (- 100vh 4em)))
-   (i.remove
-    :z-index 10
-    :position relative
-    :display block
-    :left (calc (- 50% 0.5em)) :top -1.4em
-    :background (hex 333333)
-    :color (hex FFFFFF)
-    :font-size 1.5em
-    :width 1.0em
-    :padding 0.3em 0.2em 0.1em 0.2em
-    :border-radius 1em 1em 0 0
-    :opacity 0.5
-    :cursor pointer)
-   ((:and i.remove :hover)
-    :opacity 1.0))
+    :max-height (calc (- 100vh 4em))))
   (.description
    :background (hex 333333)
    :color (hex FFFFFF)
@@ -106,6 +91,23 @@
     :width 100%))
   (.images
    (input[type=file] :display none)
+   (input[type=checkbox] :display none)
+   (.remove
+    :z-index 10
+    :position relative
+    :display block
+    :left (calc (- 50% 1.5em)) :top -1.6em
+    :background (hex 333333)
+    :color (hex FFFFFF)
+    :font-size 1.5em
+    :width 1.5em
+    :text-align center
+    :padding 0.3em 0.2em 0.1em 0.2em
+    :border-radius 1em 1em 0 0
+    :opacity 0.5
+    :cursor pointer)
+   ((:and .remove :hover)
+    :opacity 1.0)
    (.new-image
     :text-align center
     (label
@@ -132,7 +134,12 @@
     :cursor pointer
     :font-size 1.5em)
    ((:and input[type=submit] :hover)
-    :background (hex 151515))))
+    :background (hex 151515))
+   (nav
+    :display flex
+    ("input[value=Delete]"
+     :background (hex 880000)
+     :width 5em))))
  
  (.view
   (.image
@@ -142,6 +149,7 @@
    :flex-wrap wrap
    :justify-content space-between
    (ul.tags
+    :flex-grow 1
     :list-style none
     :padding 0 :margin 0
     (li
@@ -152,6 +160,12 @@
         :color (hex FFFFFF))
      ((:and a :hover)
       :background (hex 151515))))
+   (nav
+    :margin 0 0.4em
+    (a :color (hex FFFFFF)
+       :display inline-block
+       :padding 0 0.4em)
+    ((:and a :hover) :color (hex EE8800)))
    (time)
    (p
     :width 100%
