@@ -33,7 +33,7 @@
                     <article class="image">
                       <c:using value="(studio::upload-files *)">
                         <a href="#" @href="studio/view/{0} (dm:id **)">
-                          <img src="#" lquery="(attr :src (studio::file-link (first *)))" />
+                          <img src="#" lquery="(attr :src (studio::file-link (first *) :thumb T))" />
                         </a>
                       </c:using>
                     </article>

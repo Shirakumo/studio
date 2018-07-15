@@ -6,11 +6,11 @@
 
 (in-package #:org.shirakumo.radiance.studio)
 
-(define-api studio/file (id) ()
+(define-api studio/file (id &optional thumb) ()
   (handler-case
       (let ((file (ensure-file (db:ensure-id id))))
         (setf (header "Cache-Control") "public, max-age=31536000")
-        (serve-file (file-pathname file) (dm:field file "type")))
+        (serve-file (file-pathname file :thumb (or* thumb)) (dm:field file "type")))
     (error (e)
       (error 'request-not-found :message (princ-to-string e)))))
 

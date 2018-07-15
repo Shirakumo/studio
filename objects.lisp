@@ -9,7 +9,8 @@
 (define-trigger radiance:startup ()
   (defaulted-config '("image/png" "image/jpeg" "image/gif" "image/svg+xml") :allowed-content-types)
   (defaulted-config (* 4 10) :max-per-page)
-  (defaulted-config 4 :frontpage-uploads))
+  (defaulted-config 4 :frontpage-uploads)
+  (defaulted-config 400 :thumbnail-size))
 
 (define-trigger db:connected ()
   (db:create 'galleries '((author :integer)
@@ -72,12 +73,13 @@
   (let ((id (dm:id (ensure-upload upload-ish))))
     (dm:get 'files (db:query (:= 'upload id)))))
 
-(defun file-link (file)
+(defun file-link (file &key thumb)
   (let ((file (ensure-file file)))
     (uri-to-url (radiance:make-uri :domains '("studio")
                                    :path (format NIL "api/studio/file"))
                 :representation :external
-                :query `(("id" . ,(princ-to-string (dm:id file)))))))
+                :query `(("id" . ,(princ-to-string (dm:id file)))
+                         ("thumb" . ,(if thumb "true" ""))))))
 
 (defun upload-link (upload)
   (let ((upload (ensure-upload upload)))
@@ -140,15 +142,15 @@
                                    (db:query (:= 'author (user:id user)))))
                    :skip skip :amount amount :sort '((time :desc)))))))
 
-(defun file-pathname (file)
+(defun file-pathname (file &key thumb)
   (merge-pathnames
-   (make-pathname :name (princ-to-string (dm:id file))
+   (make-pathname :name (format NIL "~a~:[~;-thumb~]" (dm:id file) thumb)
                   :type (mimes:mime-file-type (dm:field file "type"))
                   :directory `(:relative "uploads" ,(princ-to-string (dm:field file "upload"))))
    (mconfig-pathname #.*package*)))
 
 (defun upload-pathname (upload)
-  (make-pathname :directory `(:relative ,@(rest (pathname-directory (mconfig-pathname #.*package*)))
+  (make-pathname :directory `(:absolute ,@(rest (pathname-directory (mconfig-pathname #.*package*)))
                                         "uploads" ,(princ-to-string (dm:id upload)))))
 
 (defun format-month (upload)
@@ -164,7 +166,11 @@
           do (setf (dm:field hull "upload") id)
              (setf (dm:field hull "type") mime)
              (dm:insert hull)
-             (uiop:copy-file path (file-pathname hull)))))
+             (let ((file (file-pathname hull)))
+               (uiop:copy-file path file)
+               (trivial-thumbnail:create file (file-pathname hull :thumb T)
+                                         :width (config :thumbnail-size)
+                                         :height (config :thumbnail-size))))))
 
 (defun %dispose-files (pathnames)
   (dolist (file pathnames)
@@ -213,6 +219,8 @@
       (dm:insert upload)
       (let ((id (dm:field upload "_id")))
         ;; FIXME: Clean up files in case of erroneous unwind.
+        (v:info :test "WHAT THE FUFCK ~s ~s" (upload-pathname upload)
+                (ensure-directories-exist (upload-pathname upload)))
         (ensure-directories-exist (upload-pathname upload))
         (%handle-new-files upload files)
         (dolist (tag tags)
@@ -237,6 +245,7 @@
         (loop for id in delete-files
               for file = (ensure-file id)
               do (push (file-pathname file) to-delete)
+                 (push (file-pathname file :thumb T) to-delete)
                  (dm:delete file))
         ;; FIXME: Clean up files in case of erroneous unwind.
         (when new-files
@@ -255,7 +264,8 @@
       (let* ((upload (ensure-upload upload))
              (id (dm:id upload)))
         (dolist (file (upload-files upload))
-          (push (file-pathname file) to-delete))
+          (push (file-pathname file) to-delete)
+          (push (file-pathname file :thumb T) to-delete))
         (push (upload-pathname upload) to-delete)
         (db:remove 'files (db:query (:= 'upload id)))
         (db:remove 'tags (db:query (:= 'upload id)))

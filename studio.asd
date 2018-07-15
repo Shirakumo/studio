@@ -15,6 +15,7 @@
                (:interface :user)
                (:interface :auth)
                (:interface :profile)
+               :trivial-thumbnail
                :r-data-model
                :r-clip
                :i-json
