@@ -24,6 +24,7 @@
                         (description :text))
              :indices '(author))
   (db:create 'files '((upload :id)
+                      (order (:integer 1))
                       (type (:varchar 32)))
              :indices '(upload))
   (db:create 'tags '((upload :id)
@@ -71,7 +72,8 @@
 
 (defun upload-files (upload-ish)
   (let ((id (dm:id (ensure-upload upload-ish))))
-    (dm:get 'files (db:query (:= 'upload id)))))
+    (dm:get 'files (db:query (:= 'upload id))
+            :sort '(("order" :asc)))))
 
 (defun file-link (file &key thumb)
   (let ((file (ensure-file file)))
@@ -161,9 +163,11 @@
 
 (defun %handle-new-files (upload files)
   (let ((id (dm:id upload)))
-    (loop for (path file mime) in files
+    (loop for i from 0
+          for (path file mime order) in files
           for hull = (dm:hull 'files)
           do (setf (dm:field hull "upload") id)
+             (setf (dm:field hull "order") (or order i))
              (setf (dm:field hull "type") mime)
              (dm:insert hull)
              (let ((file (file-pathname hull)))
@@ -228,7 +232,7 @@
       (update-gallery (user:id author) :last-update (get-universal-time))
       upload)))
 
-(defun update-upload (upload &key title description author time delete-files new-files (tags NIL tags-p))
+(defun update-upload (upload &key title description author time (files NIL files-p) (tags NIL tags-p))
   (let ((to-delete ()))
     (db:with-transaction ()
       (setf upload (ensure-upload upload))
@@ -242,18 +246,32 @@
         (when time
           (setf (dm:field upload "time") time))
         (dm:save upload)
-        (loop for id in delete-files
-              for file = (ensure-file id)
-              do (push (file-pathname file) to-delete)
-                 (push (file-pathname file :thumb T) to-delete)
-                 (dm:delete file))
-        ;; FIXME: Clean up files in case of erroneous unwind.
-        (when new-files
-          (%handle-new-files upload new-files))
         (when tags-p
           (db:remove 'tags (db:query (:= 'upload id)))
           (dolist (tag tags)
-            (db:insert 'tags `(("upload" . ,id) ("tag" . ,tag)))))))
+            (db:insert 'tags `(("upload" . ,id) ("tag" . ,tag)))))
+        (when files-p
+          (let ((to-upload ()) (to-keep ()))
+            ;; Determine order numbers and update existing files.
+            (loop for i from 0
+                  for file in files
+                  do (typecase file
+                       (list
+                        (push (append file (list i)) to-upload))
+                       (T
+                        (let ((file (ensure-file file)))
+                          (push (dm:id file) to-keep)
+                          (when (/= i (dm:field file "order"))
+                            (setf (dm:field file "order") i)
+                            (dm:save file))))))
+            ;; Delete missing files from DB and FS.
+            (loop for file in (upload-files upload)
+                  do (unless (find (dm:id file) to-keep)
+                       (push (file-pathname file) to-delete)
+                       (push (file-pathname file :thumb T) to-delete)
+                       (dm:delete file)))
+            ;; FIXME: Clean up files in case of failed commit.
+            (%handle-new-files upload to-upload)))))
     ;; Do this late so we only delete files on successful TX commit.
     (%dispose-files to-delete)
     upload))
@@ -272,3 +290,10 @@
         (dm:delete upload)))
     ;; Do this late so we only delete files on successful TX commit.
     (%dispose-files to-delete)))
+
+(defun permitted-p (perm)
+  (etypecase perm
+    ((or string symbol)
+     (user:check (auth:current "anonymous") (format NIL "studio.~a" perm)))
+    (dm:data-model
+     )))

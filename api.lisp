@@ -47,13 +47,12 @@
         (redirect (upload-link upload))
         (api-output (api-upload upload)))))
 
-(define-api studio/upload/edit (upload &optional title description delete[] file[] tags) ()
+(define-api studio/upload/edit (upload &optional title description file[] tags) ()
   ;; FIXME: Check permissions
   (let ((upload (update-upload upload
                                :title title
                                :description description
-                               :delete-files (mapcar #'db:ensure-id delete[])
-                               :new-files file[]
+                               :files file[]
                                :tags (cl-ppcre:split "(\\s*,\\s*)+" tags))))
     (if (string= (post/get "browser") "true")
         (redirect (upload-link upload))

@@ -5,89 +5,134 @@ var Studio = function(){
         if(console) console.log.apply(null, arguments);
     }
 
-    self.idCounter = 0;
-    self.toUpload = {};
-    self.toDelete = [];
+    self.find = function(thing, array){
+        return 0 <= array.indexOf(thing);
+    };
+
+    self.remove = function(thing, array){
+        var result = [];
+        for(var el of array){
+            if(el != thing) result.push(el);
+        }
+        return result;
+    };
+
+    var fileObjects = [];
+    self.filePayload = function(root){
+        root = root || document;
+        var result = [];
+        [].forEach.call(root.querySelectorAll(".image"), function(image){
+            if(!image.classList.contains("removed")){
+                if(image.dataset.file){
+                    result.push(fileObjects[parseInt(image.dataset.file)]);
+                }else if(image.dataset.id){
+                    result.push(image.dataset.id);
+                }else{
+                    log("Warning: image without id or file", image);
+                }
+            }
+        });
+        return result;
+    };
     
     var initUpload = function(root){
         self.log("Init upload", root);
+        
+        var fileSelect = root.querySelector(".new-image [type=file]");
+        var images = root.querySelector(".images");
+        
         // FIXME: Implement logic to undo a removal
-        var registerRemove = function(remove){
-            remove.addEventListener("click", function(){
-                var root = remove.parentNode;
-                if(root.dataset.tid){
-                    delete self.toUpload[root.dataset.tid];
-                } else {
-                    self.toDelete.push(root.dataset.id);
+        var registerImage = function(image){
+            image.querySelector(".remove").addEventListener("click", function(){
+                if(image.classList.contains("removed")){
+                    image.classList.remove("removed");
+                    image.querySelector(".remove i").classList.remove("fa-undo");
+                    image.querySelector(".remove i").classList.add("fa-trash-alt");
+                }else{
+                    image.classList.add("removed");
+                    image.querySelector(".remove i").classList.add("fa-undo");
+                    image.querySelector(".remove i").classList.remove("fa-trash-alt");
                 }
-                root.parentNode.removeChild(root);
+                if(images.querySelectorAll(".image:not(.removed)").length == 0){
+                    fileSelect.setAttribute("required", "required");
+                }else{
+                    fileSelect.removeAttribute("required");
+                }
+            });
+
+            image.addEventListener("dragstart", function(ev){
+                ev.dataTransfer.effectAllowed = "move";
+                image.classList.add("move");
+            });
+
+            image.addEventListener("dragover", function(ev){
+                ev.preventDefault();
+                ev.dataTransfer.dropEffect = "move";
+                var source = images.querySelector(".image.move");
+                var target = ev.target;
+                while(target && !target.classList.contains("image")) target = target.parentNode;
+                if(source && target && target != source){
+                    var g = target.getBoundingClientRect();
+                    if(ev.clientY < g.top+(g.bottom-g.top)/2){
+                        images.insertBefore(source, target);
+                    }else{
+                        images.insertBefore(source, target.nextSibling);
+                    }
+                }
+            });
+
+            image.addEventListener("dragend", function(ev){
+                ev.preventDefault();
+                image.classList.remove("move");
             });
         };
         
-        var registerNewImage = null;
-        var showFile = function(root, file){
-            var image = document.createElement("img");
+        var showFile = function(file){
+            var image = document.createElement("div");
+            var img = document.createElement("img");
             var remove = document.createElement("label");
-            if(file){
-                var reader = new FileReader();
-                root.dataset.tid = self.idCounter++;
-                self.toUpload[root.dataset.tid] = file;
-                reader.onload = function(){ image.src = reader.result; };
-                reader.readAsDataURL(file);
-            }
-            // FIXME: D&D
+
+            // Start loading image as soon as possible
+            var reader = new FileReader();
+            reader.onload = function(){ img.src = reader.result; };
+            reader.readAsDataURL(file);
+
+            // Prepare the rest.
+            image.dataset.file = fileObjects.length;
+            fileObjects.push(file);
+            image.classList.add("image");
             remove.classList.add("remove");
             remove.innerHTML = '<i class="fas fa-fw fa-trash-alt"></i>';
-            registerRemove(remove);
-            root.appendChild(image);
-            root.appendChild(remove);
+            image.appendChild(img);
+            image.appendChild(remove);
+            registerImage(image);
+            images.insertBefore(image, images.querySelector(".new-image"));
         };
-        
-        var addNewImage = function(old){
-            self.log("New image", old);
-            // Do this first so subsequent files are not required.
-            var file = old.querySelector("[type=file]");
-            file.removeAttribute("required");
-            // Clone and register a copy of the selector.
-            var newImage = old.cloneNode(true);
-            newImage.querySelector("[type=file]").value = "";
-            root.querySelector(".images").appendChild(newImage);
-            registerNewImage(newImage);
-            // Turn the old selector into an image preview.
-            file.removeAttribute("id");
-            old.classList.remove("new-image");
-            old.classList.add("image");
-            var label = old.querySelector("label");
-            label.parentNode.removeChild(label);
-            // Load the image files.
-            for(var i=0; i<file.files.length; i++){
-                showFile(old, file.files[i]);
-            }
-        };
-        
-        registerNewImage = function(old){
-            old.querySelector("[type=file]").addEventListener("change", function(){
-                addNewImage(old);
-            });
-        };
-        
-        registerNewImage(root.querySelector(".new-image"));
 
-        [].forEach.call(root.querySelectorAll(".image .remove"), registerRemove);
+        fileSelect.addEventListener("change", function(){
+            fileSelect.removeAttribute("required");
+            for(var i=0; i<fileSelect.files.length; i++){
+                showFile(fileSelect.files[i]);
+            }
+            fileSelect.value = '';
+        });
+
+        [].forEach.call(images.querySelectorAll(".image"), registerImage);
 
         root.querySelector("[type=submit]").addEventListener("click", function(ev){
+            // Gather form data
             var form = new FormData();
-            form.append("upload", root.querySelector("[name=upload]").value);
+            form.append("data-format", "json");
             form.append("title", root.querySelector("[name=title]").value);
             form.append("description", root.querySelector("[name=description]").value);
             form.append("tags", root.querySelector("[name=tags]").value);
-            form.append("data-format", "json");
-            for(var i in self.toUpload){
-                form.append("file[]", self.toUpload[i]);
+            if(root.querySelector("[name=upload]")){
+                form.append("upload", root.querySelector("[name=upload]").value);
             }
-            for(var i in self.toDelete){
-                form.append("delete[]", self.toDelete[i]);
-            }
+            self.filePayload(images).forEach(function(file){
+                form.append("file[]", file);
+            });
+            // Submit form via AJAX
             var request = new XMLHttpRequest();
             request.responseType = 'json';
             request.onload = function(ev){

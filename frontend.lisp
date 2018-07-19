@@ -83,4 +83,4 @@
 (define-page upload "studio/^upload" (:clip "upload.ctml")
   ;; FIXME: Check permissions
   (r-clip:process T
-                  :author (user:username (auth:current))))
+                  :author (user:username (auth:current "anonymous"))))

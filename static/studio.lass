@@ -70,6 +70,11 @@
     :margin 1em auto 0 auto
     :max-width (calc (- 100vw 2em))
     :max-height (calc (- 100vh 4em))))
+  (.image.removed
+   (img :opacity 0.25))
+  (.image.move
+   :opacity 0.5
+   :transform rotate -1deg)
   (.description
    :background (hex 333333)
    :color (hex FFFFFF)
@@ -96,7 +101,7 @@
     :z-index 10
     :position relative
     :display block
-    :left (calc (- 50% 1.5em)) :top -1.6em
+    :left (calc (- 50% 0.75em)) :top -1.6em
     :background (hex 333333)
     :color (hex FFFFFF)
     :font-size 1.5em
