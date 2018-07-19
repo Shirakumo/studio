@@ -8,17 +8,7 @@
   </head>
   <body>
     <article class="studio" id="top">
-      <header>
-        <h1>Studio</h1>
-        <nav>
-          <a href="#" @href="studio/"><i class="fas fa-home"></i> Home</a>
-          <c:if test="(auth:current)">
-            <c:then><a href="#" @href="studio/upload"><i class="fas fa-upload"></i> Upload</a></c:then>
-            <c:else><a href="#" @href="<auth page login #>"><i class="fas fa-sign-in-alt"></i> Login</a></c:else>
-          </c:if>
-          <a href="#top"><i class="fas fa-arrow-up"></i> Top</a>
-        </nav>
-      </header>
+      <c:splice lquery='(html (template-file "header.ctml" :studio))'/>
       <main class="front">
         <c:when test="prev">
           <a class="navlink prev" href="#" lquery="(attr :href prev)">Previous Page</a>
@@ -57,5 +47,6 @@
         Running on <a href="https://github.com/Shirakumo/studio">Studio</a>
       </footer>
     </article>
+    <script type="text/javascript" src="../static/studio.js" @src="/static/studio/studio.js"></script>
   </body>
 </html>

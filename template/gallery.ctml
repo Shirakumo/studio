@@ -8,14 +8,7 @@
   </head>
   <body>
     <article class="studio" id="top">
-      <header>
-        <h1>Studio</h1>
-        <nav>
-          <a href="#" @href="studio/"><i class="fas fa-home"></i> Home</a>
-          <a href="#" @href="studio/upload"><i class="fas fa-upload"></i> Upload</a>
-          <a href="#top"><i class="fas fa-arrow-up"></i> Top</a>
-        </nav>
-      </header>
+      <c:splice lquery='(html (template-file "header.ctml" :studio))'/>
       <main class="gallery">
         <section class="info">
           <img src="#" class="avatar" lquery="(attr :src (profile:avatar author 128))" />
@@ -55,5 +48,6 @@
         Running on <a href="https://github.com/Shirakumo/studio">Studio</a>
       </footer>
     </article>
+    <script type="text/javascript" src="../static/studio.js" @src="/static/studio/studio.js"></script>
   </body>
 </html>

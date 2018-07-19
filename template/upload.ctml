@@ -8,14 +8,7 @@
   </head>
   <body>
     <article class="studio" id="top">
-      <header>
-        <h1>Studio</h1>
-        <nav>
-          <a href="#" @href="studio/"><i class="fas fa-home"></i> Home</a>
-          <a href="#" @href="studio/upload"><i class="fas fa-upload"></i> Upload</a>
-          <a href="#top"><i class="fas fa-arrow-up"></i> Top</a>
-        </nav>
-      </header>
+      <c:splice lquery='(html (template-file "header.ctml" :studio))'/>
       <form class="upload" method="post" enctype="multipart/form-data">
         <section class="info">
           <img src="#" class="avatar" lquery="(attr :src (profile:avatar author 128))" />
@@ -38,6 +31,11 @@
         </section>
         <section class="description">
           <input class="tags" name="tags" placeholder="Some, Tags" lquery='(val (format NIL "~{~a~^, ~}" tags))' />
+          <select class="visibility" name="visibility">
+            <option value="public">Public</option>
+            <option value="hidden">Hidden</option>
+            <option value="private">Private</option>
+          </select>
           <textarea name="description" placeholder="Description" lquery="(text description)"></textarea>
           <input type="hidden" name="browser" value="true" />
           <nav>

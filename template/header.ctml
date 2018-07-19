@@ -1,0 +1,13 @@
+<header>
+  <h1>Studio</h1>
+  <nav>
+    <a href="#" @href="studio/"><i class="fas fa-home"></i> Home</a>
+    <c:unless test="(auth:current)">
+      <a href="#" @href="<auth page login #>"><i class="fas fa-sign-in-alt"></i> Login</a>
+    </c:unless>
+    <c:when test="(studio::permitted-p :create)">
+      <a href="#" @href="studio/upload"><i class="fas fa-upload"></i> Upload</a>
+    </c:when>
+    <a href="#top"><i class="fas fa-arrow-up"></i> Top</a>
+  </nav>
+</header>

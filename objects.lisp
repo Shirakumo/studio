@@ -10,7 +10,12 @@
   (defaulted-config '("image/png" "image/jpeg" "image/gif" "image/svg+xml") :allowed-content-types)
   (defaulted-config (* 4 10) :max-per-page)
   (defaulted-config 4 :frontpage-uploads)
-  (defaulted-config 400 :thumbnail-size))
+  (defaulted-config 400 :thumbnail-size)
+  (defaulted-config (list (perm studio upload create)
+                          (perm studio upload edit own)
+                          (perm studio upload delete own))
+                    :permissions :default)
+  (apply #'user:add-default-permissions (config :permissions :default)))
 
 (define-trigger db:connected ()
   (db:create 'galleries '((author :integer)
@@ -21,6 +26,7 @@
   (db:create 'uploads '((time (:integer 5))
                         (author :integer)
                         (title (:varchar 64))
+                        (visibility (:integer 1))
                         (description :text))
              :indices '(author))
   (db:create 'files '((upload :id)
@@ -80,8 +86,8 @@
     (uri-to-url (radiance:make-uri :domains '("studio")
                                    :path (format NIL "api/studio/file"))
                 :representation :external
-                :query `(("id" . ,(princ-to-string (dm:id file)))
-                         ("thumb" . ,(if thumb "true" ""))))))
+                :query (list* (cons "id" (princ-to-string (dm:id file)))
+                              (when thumb '(("thumb" . "true")))))))
 
 (defun upload-link (upload)
   (let ((upload (ensure-upload upload)))
@@ -152,7 +158,8 @@
    (mconfig-pathname #.*package*)))
 
 (defun upload-pathname (upload)
-  (make-pathname :directory `(:absolute ,@(rest (pathname-directory (mconfig-pathname #.*package*)))
+  (make-pathname :name NIL :type NIL
+                 :directory `(:absolute ,@(rest (pathname-directory (mconfig-pathname #.*package*)))
                                         "uploads" ,(princ-to-string (dm:id upload)))))
 
 (defun format-month (upload)
@@ -213,13 +220,14 @@
                     (delete-upload (make-instance 'dm:data-model :collection 'uploads :field-table row :inserted T))))
       (dm:delete gallery))))
 
-(defun make-upload (title files &key description (author (auth:current)) (time (get-universal-time)) tags)
+(defun make-upload (title files &key description (author (auth:current)) (time (get-universal-time)) tags (visibility :public))
   (db:with-transaction ()
     (let ((upload (dm:hull 'uploads)))
       (setf (dm:field upload "title") title)
       (setf (dm:field upload "description") (or description ""))
       (setf (dm:field upload "author") (user:id author))
       (setf (dm:field upload "time") time)
+      (setf (dm:field upload "visibility") (visibility->int visibility))
       (dm:insert upload)
       (let ((id (dm:field upload "_id")))
         ;; FIXME: Clean up files in case of erroneous unwind.
@@ -232,7 +240,7 @@
       (update-gallery (user:id author) :last-update (get-universal-time))
       upload)))
 
-(defun update-upload (upload &key title description author time (files NIL files-p) (tags NIL tags-p))
+(defun update-upload (upload &key title description author time (files NIL files-p) (tags NIL tags-p) visibility)
   (let ((to-delete ()))
     (db:with-transaction ()
       (setf upload (ensure-upload upload))
@@ -245,6 +253,8 @@
           (setf (dm:field upload "author") (user:id author)))
         (when time
           (setf (dm:field upload "time") time))
+        (when visibility
+          (setf (dm:field upload "visibility") (visibility->int visibility)))
         (dm:save upload)
         (when tags-p
           (db:remove 'tags (db:query (:= 'upload id)))
@@ -291,9 +301,34 @@
     ;; Do this late so we only delete files on successful TX commit.
     (%dispose-files to-delete)))
 
-(defun permitted-p (perm)
-  (etypecase perm
-    ((or string symbol)
-     (user:check (auth:current "anonymous") (format NIL "studio.~a" perm)))
-    (dm:data-model
-     )))
+(defun permitted-p (perm &optional object (user (auth:current)))
+  (ecase perm
+    (:create (user:check user (perm studio upload create)))
+    (:edit   (or (and (= (user:id user) (dm:field object "author"))
+                      (user:check user (perm studio upload edit own)))
+                 (user:check user (perm studio upload edit))))
+    (:delete (or (and (= (user:id user) (dm:field object "author"))
+                      (user:check user (perm studio upload delete own)))
+                 (user:check user (perm studio upload delete))))))
+
+(defun visibility->int (visibility)
+  (ecase visibility
+    (:public 0)
+    (:hidden 1)
+    (:private 2)))
+
+(defun ->visibility (visibility)
+  (case visibility
+    ((0 :public) :public)
+    ((1 :hidden) :hidden)
+    ((2 :private) :private)
+    (T (cond ((string= visibility "public") :public)
+             ((string= visibility "hidden") :hidden)
+             ((string= visibility "private") :private)
+             (T (error "Invalid visibility: ~s" visibility))))))
+
+(defun visibility->icon (visibility)
+  (ecase visibility
+    (:public "fa-globe")
+    (:hidden "fa-eye-slash")
+    (:private "fa-lock")))

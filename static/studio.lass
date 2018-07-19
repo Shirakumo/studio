@@ -4,8 +4,7 @@
  :background (hex EEEEEE)
  (body
   :margin 0
-  :padding 0
-  :overflow-x hidden))
+  :padding 0))
 
 (a :text-decoration none)
 
@@ -81,7 +80,7 @@
    :padding 1em 5em 5em 5em))
  
  (.upload
-  ((:or input textarea)
+  ((:or input textarea select)
    :display block
    :box-sizing border-box
    :background (hex 222222)
@@ -127,8 +126,13 @@
     ((:and label :hover)
      :background (hex 151515))))
   (.description
+   :display flex
+   :flex-wrap wrap
    (.tags
-    :width 100%)
+    :flex-grow 1)
+   (.visibility
+    :border-left 1px solid (hex 333333)
+    :font-family "\"Font Awesome 5 Free\"" sans-serif)
    (textarea
     :width (calc (- 100% 2em))
     :margin 1em
@@ -141,6 +145,7 @@
    ((:and input[type=submit] :hover)
     :background (hex 151515))
    (nav
+    :flex-grow 1
     :display flex
     ("input[value=Delete]"
      :background (hex 880000)
@@ -148,11 +153,14 @@
  
  (.view
   (.image
-   (img :padding 2em 0))
+   (img :padding 2em 0)
+   (img.full :max-width none
+             :max-height none))
   (.description
    :display flex
    :flex-wrap wrap
    :justify-content space-between
+   :align-items center
    (ul.tags
     :flex-grow 1
     :list-style none
@@ -165,6 +173,7 @@
         :color (hex FFFFFF))
      ((:and a :hover)
       :background (hex 151515))))
+   (.visibility :color (hex AAAAAA))
    (nav
     :margin 0 0.4em
     (a :color (hex FFFFFF)

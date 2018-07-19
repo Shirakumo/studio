@@ -41,7 +41,6 @@ var Studio = function(){
         var fileSelect = root.querySelector(".new-image [type=file]");
         var images = root.querySelector(".images");
         
-        // FIXME: Implement logic to undo a removal
         var registerImage = function(image){
             image.querySelector(".remove").addEventListener("click", function(){
                 if(image.classList.contains("removed")){
@@ -126,6 +125,7 @@ var Studio = function(){
             form.append("title", root.querySelector("[name=title]").value);
             form.append("description", root.querySelector("[name=description]").value);
             form.append("tags", root.querySelector("[name=tags]").value);
+            form.append("visibility", root.querySelector("[name=visibility]").value);
             if(root.querySelector("[name=upload]")){
                 form.append("upload", root.querySelector("[name=upload]").value);
             }
@@ -157,6 +157,16 @@ var Studio = function(){
 
     var initView = function(root){
         self.log("Init view", root);
+
+        [].forEach.call(root.querySelectorAll(".image img"), function(img){
+            img.addEventListener("click", function(){
+                if(img.classList.contains("full")){
+                    img.classList.remove("full");
+                }else{
+                    img.classList.add("full");
+                }
+            });
+        });
     };
 
     self.init = function(root){

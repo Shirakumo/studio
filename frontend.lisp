@@ -60,8 +60,10 @@
 (define-page view-image "studio/^view/(.+)" (:uri-groups (id) :clip "view.ctml")
   (let ((upload (ensure-upload (db:ensure-id id))))
     (r-clip:process T
+                    :upload upload
                     :id (dm:id upload)
                     :title  (dm:field upload "title")
+                    :visibility (->visibility (dm:field upload "visibility"))
                     :author (user:username (dm:field upload "author"))
                     :files (upload-files upload)
                     :tags (upload-tags upload)
@@ -72,8 +74,10 @@
   (let ((upload (ensure-upload (db:ensure-id id))))
     ;; FIXME: Check permissions
     (r-clip:process T
+                    :upload upload
                     :id (dm:id upload)
                     :title (dm:field upload "title")
+                    :visibility (->visibility (dm:field upload "visibility"))
                     :author (user:username (dm:field upload "author"))
                     :files (upload-files upload)
                     :tags (upload-tags upload)

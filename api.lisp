@@ -30,30 +30,34 @@
     (api-output (mapcar #'api-upload (uploads :user user :tag tag :date date :skip skip :amount amount)))))
 
 (define-api studio/upload (id) ()
+  ;; FIXME: Check permissions
   (api-output (api-upload (ensure-upload id))))
 
 (define-api studio/upload/list (user &optional tag date skip amount) ()
+  ;; FIXME: Check permissions
   (let ((skip (if skip (parse-integer skip) 0))
         (amount (if amount (parse-integer amount))))
     (api-output (mapcar #'api-upload (uploads user :tag tag :date date :skip skip :amount amount)))))
 
-(define-api studio/upload/create (title file[] &optional description tags) ()
+(define-api studio/upload/create (title file[] &optional description tags visibility) ()
   ;; FIXME: Check permissions
   (unless (<= 1 (length title) 64)
     (error "Title must be between 1 and 64 characters long."))
   (let ((upload (make-upload title file[] :description description
-                                          :tags (cl-ppcre:split "(\\s*,\\s*)+" tags))))
+                                          :tags (cl-ppcre:split "(\\s*,\\s*)+" tags)
+                                          :visibility (->visibility visibility))))
     (if (string= (post/get "browser") "true")
         (redirect (upload-link upload))
         (api-output (api-upload upload)))))
 
-(define-api studio/upload/edit (upload &optional title description file[] tags) ()
+(define-api studio/upload/edit (upload &optional title description file[] tags visibility) ()
   ;; FIXME: Check permissions
   (let ((upload (update-upload upload
                                :title title
                                :description description
                                :files file[]
-                               :tags (cl-ppcre:split "(\\s*,\\s*)+" tags))))
+                               :tags (cl-ppcre:split "(\\s*,\\s*)+" tags)
+                               :visibility (when visibility (->visibility visibility)))))
     (if (string= (post/get "browser") "true")
         (redirect (upload-link upload))
         (api-output (api-upload upload)))))
