@@ -36,6 +36,13 @@
                                                          :path (princ-to-string (1+ page)))
                                       :representation :external))))
 
+(define-page settings "studio/settings" (:clip "settings.ctml")
+  (let ((gallery (ensure-gallery (auth:current) NIL)))
+    (r-clip:process T
+                    :author (user:username (auth:current))
+                    :description (when gallery (dm:field gallery "description"))
+                    :exists gallery)))
+
 (define-page gallery "studio/^gallery/([^/]+)(?:/([0-9+]+))?(?:\\+([0-9]+))?" (:uri-groups (user page offset) :clip "gallery.ctml")
   (let* ((page (maybe-parse-integer page 1))
          (offset (maybe-parse-integer offset 0))

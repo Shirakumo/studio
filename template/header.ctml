@@ -5,9 +5,21 @@
     <c:unless test="(auth:current)">
       <a href="#" @href="<auth page login #>"><i class="fas fa-sign-in-alt"></i> Login</a>
     </c:unless>
-    <c:when test="(studio::permitted-p :create)">
-      <a href="#" @href="studio/upload"><i class="fas fa-upload"></i> Upload</a>
-    </c:when>
+    <c:if test="(studio::has-gallery-p)">
+      <c:then>
+        <c:when test="(studio::permitted-p :create)">
+          <a href="#" @href="studio/upload"><i class="fas fa-upload"></i> Upload</a>
+        </c:when>
+        <c:when test="(studio::permitted-p :edit-gallery)">
+          <a href="#" @href="studio/settings"><i class="fas fa-cogs"></i> Settings</a>
+        </c:when>
+      </c:then>
+      <c:else>
+        <c:when test="(studio::permitted-p :create-gallery)">
+          <a href="#" @href="studio/settings"><i class="fas fa-user-plus"></i> Register</a>
+        </c:when>
+      </c:else>
+    </c:if>
     <a href="#top"><i class="fas fa-arrow-up"></i> Top</a>
   </nav>
 </header>

@@ -149,10 +149,14 @@ var Studio = function(){
             ev.preventDefault();
             return false;
         });
+
+        // FIXME: implement prompt on delete
     };
 
     var initGallery = function(root){
         self.log("Init gallery", root);
+
+        // FIXME: implement prefetching
     };
 
     var initView = function(root){

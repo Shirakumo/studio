@@ -11,7 +11,10 @@
   (defaulted-config (* 4 10) :max-per-page)
   (defaulted-config 4 :frontpage-uploads)
   (defaulted-config 400 :thumbnail-size)
-  (defaulted-config (list (perm studio upload create)
+  (defaulted-config (list (perm studio gallery create)
+                          (perm studio gallery edit own)
+                          (perm studio gallery delete own)
+                          (perm studio upload create)
                           (perm studio upload edit own)
                           (perm studio upload delete own))
                     :permissions :default)
@@ -37,27 +40,27 @@
                      (tag (:varchar 32)))
              :indices '(upload tag)))
 
-(defun ensure-gallery (gallery-ish)
+(defun ensure-gallery (gallery-ish &optional (errorp T))
   (etypecase gallery-ish
     (dm:data-model gallery-ish)
-    (string (or (dm:get-one 'galleries (db:query (:= 'author (user:id gallery-ish))))
-                (error "No gallery with Author ~s" gallery-ish)))
-    (db:id (or (dm:get-one 'galleries (db:query (:= '_id gallery-ish)))
-               (error "No gallery with ID ~s" gallery-ish)))))
+    (user:user (ensure-gallery (user:id gallery-ish) errorp))
+    (string (ensure-gallery (user:id gallery-ish) errorp))
+    (integer (or (dm:get-one 'galleries (db:query (:= 'author gallery-ish)))
+                 (when errorp (error "No gallery with Author ~s" gallery-ish))))))
 
-(defun ensure-upload (upload-ish)
+(defun ensure-upload (upload-ish &optional (errorp T))
   (etypecase upload-ish
     (dm:data-model upload-ish)
     (db:id (or (dm:get-one 'uploads (db:query (:= '_id upload-ish)))
-               (error "No upload with ID ~s" upload-ish)))
-    (string (ensure-upload (db:ensure-id upload-ish)))))
+               (when errorp (error "No upload with ID ~s" upload-ish))))
+    (string (ensure-upload (db:ensure-id upload-ish) errorp))))
 
-(defun ensure-file (file-ish)
+(defun ensure-file (file-ish &optional (errorp T))
   (etypecase file-ish
     (dm:data-model file-ish)
     (db:id (or (dm:get-one 'files (db:query (:= '_id file-ish)))
-               (error "No file with ID ~s" file-ish)))
-    (string (ensure-file (db:ensure-id file-ish)))))
+               (when errorp (error "No file with ID ~s" file-ish))))
+    (string (ensure-file (db:ensure-id file-ish) errorp))))
 
 (defun gallery-uploads (gallery-ish)
   (let* ((gallery (ensure-gallery gallery-ish))
@@ -301,15 +304,23 @@
     ;; Do this late so we only delete files on successful TX commit.
     (%dispose-files to-delete)))
 
+(defun has-gallery-p (&optional (user (auth:current)))
+  (when user
+    (< 0 (db:count 'galleries (db:query (:= 'author (user:id user)))))))
+
 (defun permitted-p (perm &optional object (user (auth:current)))
-  (ecase perm
-    (:create (user:check user (perm studio upload create)))
-    (:edit   (or (and (= (user:id user) (dm:field object "author"))
-                      (user:check user (perm studio upload edit own)))
-                 (user:check user (perm studio upload edit))))
-    (:delete (or (and (= (user:id user) (dm:field object "author"))
-                      (user:check user (perm studio upload delete own)))
-                 (user:check user (perm studio upload delete))))))
+  (when user
+    (ecase perm
+      (:create (user:check user (perm studio upload create)))
+      (:edit   (or (and (= (user:id user) (dm:field object "author"))
+                        (user:check user (perm studio upload edit own)))
+                   (user:check user (perm studio upload edit))))
+      (:delete (or (and (= (user:id user) (dm:field object "author"))
+                        (user:check user (perm studio upload delete own)))
+                   (user:check user (perm studio upload delete))))
+      (:create-gallery (user:check user (perm studio gallery create)))
+      (:edit-gallery (user:check user (perm studio gallery edit)))
+      (:delete-gallery (user:check user (perm studio gallery delete))))))
 
 (defun visibility->int (visibility)
   (ecase visibility
