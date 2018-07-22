@@ -335,6 +335,39 @@
   (a :color (hex 888888))
   ((:and a :hover) :color (hex EE8800))))
 
+(.prompt
+ :position fixed
+ :top 0 :left 0 :bottom 0 :right 0
+ :background (rgba 120 120 120 0.5)
+ :z-index 100
+ (.container
+  :border-radius 1em
+  :padding 1em
+  :background (hex 333333)
+  :color (hex FFFFFF)
+  :max-width 500px
+  :margin 5em auto
+  :display flex
+  :flex-wrap wrap
+  (i :font-size 3em
+     :margin 0.1em)
+  (p :padding 1em
+     :margin 0
+     :flex-grow 1)
+  (nav
+   :width 100%
+   :padding 0 0 0 4em
+   (button
+    :background (hex 151515)
+    :color inherit
+    :border 0
+    :font-size inherit
+    :min-width 5em
+    :margin 0.1em
+    :cursor pointer)
+   ((:and button :hover)
+    :background (hex 555555)))))
+
 (:keyframes slide-object
             (0% :object-position 50% 50%)
             (25% :object-position 0% 0%)

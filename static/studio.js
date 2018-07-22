@@ -17,6 +17,53 @@ var Studio = function(){
         return result;
     };
 
+    self.constructElement = (tag, options)=>{
+        var el = document.createElement(options.tag || tag);
+        el.setAttribute("class", (options.classes||[]).join(" "));
+        if(options.text) el.innerText = options.text;
+        if(options.html) el.innerHTML = options.html;
+        for(var attr in (options.attributes||{})){
+            el.setAttribute(attr, options.attributes[attr]);
+        }
+        for(var tag in (options.elements||{})){
+            var sub = self.constructElement(tag, options.elements[tag]);
+            el.appendChild(sub);
+        }
+        return el;
+    };
+
+    self.prompt = function(message, options){
+        options = options || {};
+        var prompt = self.constructElement("div", {
+            classes: ["prompt", options.classes],
+            elements: {
+                "div": {
+                    classes: ["container"],
+                    elements: {
+                        "i": {classes: ["far", "fa-question-circle"]},
+                        "p": {text: options.message || "Are you sure?"},
+                        "nav": {
+                            elements: {
+                                "a": {tag: "button", classes: ["yes"], text: options.yes || "Yes"},
+                                "b": {tag: "button", classes: ["no"], text: options.no || "No"},
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        prompt.querySelector(".no").addEventListener("click", function(){
+            if(options.onNo) options.onNo();
+            prompt.parentElement.removeChild(prompt);
+        });
+        prompt.querySelector(".yes").addEventListener("click", function(){
+            if(options.onYes) options.onYes();
+            prompt.parentElement.removeChild(prompt);
+        });
+        (options.container || document.querySelector("body")).appendChild(prompt);
+        return prompt;
+    };
+
     var fileObjects = [];
     self.filePayload = function(root){
         root = root || document;
@@ -118,41 +165,53 @@ var Studio = function(){
 
         [].forEach.call(images.querySelectorAll(".image"), registerImage);
 
-        root.querySelector("[type=submit]").addEventListener("click", function(ev){
-            var title = root.querySelector("[name=title]");
-            var files = self.filePayload(images);
-            // Check validity
-            if(!title.checkValidity()) return;
-            if(files.length == 0) return;
-            // Gather form data
-            var form = new FormData();
-            form.append("data-format", "json");
-            form.append("title", title.value);
-            form.append("description", root.querySelector("[name=description]").value);
-            form.append("tags", root.querySelector("[name=tags]").value);
-            form.append("visibility", root.querySelector("[name=visibility]").value);
-            if(root.querySelector("[name=upload]")){
-                form.append("upload", root.querySelector("[name=upload]").value);
-            }
-            files.forEach(function(file){
-                form.append("file[]", file);
-            });
-            // Submit form via AJAX
-            var request = new XMLHttpRequest();
-            request.responseType = 'json';
-            request.onload = function(ev){
-                self.log("Submission complete", request);
-                if(request.status == 200){
-                    window.location = request.response["data"]["url"];
-                }else{
-                    document.querySelector("#error").innerHTML = request.response["message"];
+        [].forEach.call(root.querySelectorAll("[type=submit]"), function(element){
+            element.addEventListener("click", function(ev){
+                ev.preventDefault();
+                var action = ev.target.value;
+                var title = root.querySelector("[name=title]");
+                var files = self.filePayload(images);
+                // Check validity
+                if(!title.checkValidity()) return;
+                if(files.length == 0) return;
+                // Gather form data
+                var form = new FormData();
+                form.append("data-format", "json");
+                form.append("title", title.value);
+                form.append("description", root.querySelector("[name=description]").value);
+                form.append("tags", root.querySelector("[name=tags]").value);
+                form.append("visibility", root.querySelector("[name=visibility]").value);
+                if(root.querySelector("[name=upload]")){
+                    form.append("upload", root.querySelector("[name=upload]").value);
                 }
-            };
-            request.open("POST", ev.target.getAttribute("formaction"));
-            self.log("Submitting", form);
-            request.send(form);
-            ev.preventDefault();
-            return false;
+                files.forEach(function(file){
+                    form.append("file[]", file);
+                });
+                // Submit form via AJAX
+                var request = new XMLHttpRequest();
+                request.responseType = 'json';
+                request.onload = function(ev){
+                    self.log("Submission complete", request);
+                    if(request.status == 200){
+                        window.location = request.response["data"]["url"];
+                    }else{
+                        document.querySelector("#error").innerHTML = request.response["message"];
+                    }
+                };
+
+                var submit = function(){
+                    self.log("Submitting", action, form);
+                    request.open("POST", ev.target.getAttribute("formaction"));
+                    request.send(form);
+                };
+                
+                if(action == "Delete") {
+                    self.prompt("Are you sure you want to delete this?", {onYes: submit});
+                } else {
+                    submit();
+                }
+                return false;
+            });
         });
 
         // FIXME: implement prompt on delete
