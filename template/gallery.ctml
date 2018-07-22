@@ -10,6 +10,16 @@
     <article class="studio" id="top">
       <c:splice lquery='(html (template-file "header.ctml" :studio))'/>
       <main class="gallery">
+        <c:when test="cover">
+          <section class="cover image">
+            <a href="#" lquery="(attr :href (studio::upload-link cover))">
+              <c:using value="(studio::upload-files cover)">
+                <img src="#" lquery='(attr :src (studio::file-link (first *)))' />
+              </c:using>
+              <div class="title" lquery="(text (clip cover :title))">Title</div>
+            </a>
+          </section>
+        </c:when>
         <section class="info">
           <img src="#" class="avatar" lquery="(attr :src (profile:avatar author 128))" />
           <h2><a href="#" @href="studio/gallery/{0} author" lquery="(text author)">AUTHOR</a></h2>

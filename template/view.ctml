@@ -19,17 +19,30 @@
           <img src="#" lquery="(attr :src (studio::file-link *))" />
         </section>
         <section class="description">
-          <ul class="tags" iterate="tags">
-            <li><a href="#" @href="studio/gallery/{0}/tag/{1} (** :author) *" lquery="(text *)">TAG</a></li>
-          </ul>
-          <i class="visibility fas" lquery='(add-class (studio::visibility->icon visibility)) (attr :title visibility)'></i>
-          <nav>
-            <a href="#" @href="studio/view/{0} id"><i class="fas fa-link"></i> Link</a>
-            <c:when test="(studio::permitted-p :edit upload)">
-              <a href="#" @href="studio/edit/{0} id"><i class="fas fa-edit"></i> Edit</a>
-            </c:when>
-          </nav>
-          <time lquery="(text (format-human-date time)) (attr :title (format-fancy-date time))">2018.02.02</time>
+          <div class="meta">
+            <ul class="tags" iterate="tags">
+              <li><a href="#" @href="studio/gallery/{0}/tag/{1} (** :author) *" lquery="(text *)">TAG</a></li>
+            </ul>
+            <div class="visibility">
+              <i class="fas" lquery='(add-class (studio::visibility->icon visibility))'></i>
+              <c:splice lquery="(text (string-capitalize visibility))" />
+            </div>
+            <nav>
+              <a href="#" @href="studio/view/{0} id"><i class="fas fa-link"></i> Link</a>
+              <c:when test="(studio::permitted-p :edit upload)">
+                <c:if test="cover-p">
+                  <c:then>
+                    <a href="#" @href="studio/api/studio/gallery/set-cover?upload=_"><i class="far fa-star"></i> Unset Cover</a>
+                  </c:then>
+                  <c:else>
+                    <a href="#" @href="studio/api/studio/gallery/set-cover?upload={0} id"><i class="fas fa-star"></i> Set Cover</a>
+                  </c:else>
+                </c:if>
+                <a href="#" @href="studio/edit/{0} id"><i class="fas fa-edit"></i> Edit</a>
+              </c:when>
+            </nav>
+            <time lquery="(text (format-human-date time)) (attr :title (format-fancy-date time))">2018.02.02</time>
+          </div>
           <p lquery="(text description)">This is some stupid ass avatar</p>
         </section>
       </main>

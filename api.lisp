@@ -62,6 +62,10 @@
         (redirect (gallery-link author))
         (api-output (gallery->table gallery)))))
 
+(define-api studio/gallery/set-cover (upload) ()
+  (update-gallery (auth:current) :cover (when (string/= "_" upload) (db:ensure-id upload)))
+  (redirect (referer)))
+
 (define-api studio/gallery/delete (author) ()
   (delete-gallery author))
 

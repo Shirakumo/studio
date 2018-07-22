@@ -18,15 +18,17 @@
           <textarea class="description" name="description" placeholder="A short description of your gallery" lquery="(text description)"></textarea>
           <input type="hidden" name="author" lquery="(val author)" />
           <input type="hidden" name="browser" value="true" />
-          <c:if test="exists">
-            <c:then>
-              <input type="submit" @formaction="/api/studio/gallery/edit" value="Save" />
-              <input type="submit" @formaction="/api/studio/gallery/delete" value="Delete" />
-            </c:then>
-            <c:else>
-              <input type="submit" @formaction="/api/studio/gallery/create" value="Submit" />
-            </c:else>
-          </c:if>
+          <nav>
+            <c:if test="exists">
+              <c:then>
+                <input type="submit" @formaction="/api/studio/gallery/edit" value="Save" />
+                <input type="submit" @formaction="/api/studio/gallery/delete" value="Delete" />
+              </c:then>
+              <c:else>
+                <input type="submit" @formaction="/api/studio/gallery/create" value="Submit" />
+              </c:else>
+            </c:if>
+          </nav>
         </form>
       </main>
       <footer>

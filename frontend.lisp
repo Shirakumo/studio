@@ -46,8 +46,12 @@
 (define-page gallery "studio/^gallery/([^/]+)(?:/([0-9+]+))?(?:\\+([0-9]+))?" (:uri-groups (user page offset) :clip "gallery.ctml")
   (let* ((page (maybe-parse-integer page 1))
          (offset (maybe-parse-integer offset 0))
+         (gallery (ensure-gallery user))
          (uploads (uploads user :date (list (get-universal-time) page))))
     (r-clip:process T
+                    :description (dm:field gallery "description")
+                    :cover (when (dm:field gallery "cover")
+                             (ensure-upload (dm:field gallery "cover") NIL))
                     :author user
                     :uploads uploads
                     :prev (prev-link user page offset)
@@ -65,7 +69,8 @@
                     :next (next-link user uploads page offset tag))))
 
 (define-page view-image "studio/^view/(.+)" (:uri-groups (id) :clip "view.ctml")
-  (let ((upload (ensure-upload (db:ensure-id id))))
+  (let* ((upload (ensure-upload (db:ensure-id id)))
+         (gallery (ensure-gallery (dm:field upload "author"))))
     (r-clip:process T
                     :upload upload
                     :id (dm:id upload)
@@ -75,7 +80,8 @@
                     :files (upload-files upload)
                     :tags (upload-tags upload)
                     :time (dm:field upload "time")
-                    :description (dm:field upload "description"))))
+                    :description (dm:field upload "description")
+                    :cover-p (equal (dm:id upload) (dm:field gallery "cover")))))
 
 (define-page edit-image "studio/^edit/(.+)" (:uri-groups (id) :clip "upload.ctml")
   (let ((upload (ensure-upload (db:ensure-id id))))

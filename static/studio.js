@@ -119,17 +119,22 @@ var Studio = function(){
         [].forEach.call(images.querySelectorAll(".image"), registerImage);
 
         root.querySelector("[type=submit]").addEventListener("click", function(ev){
+            var title = root.querySelector("[name=title]");
+            var files = self.filePayload(images);
+            // Check validity
+            if(!title.checkValidity()) return;
+            if(files.length == 0) return;
             // Gather form data
             var form = new FormData();
             form.append("data-format", "json");
-            form.append("title", root.querySelector("[name=title]").value);
+            form.append("title", title.value);
             form.append("description", root.querySelector("[name=description]").value);
             form.append("tags", root.querySelector("[name=tags]").value);
             form.append("visibility", root.querySelector("[name=visibility]").value);
             if(root.querySelector("[name=upload]")){
                 form.append("upload", root.querySelector("[name=upload]").value);
             }
-            self.filePayload(images).forEach(function(file){
+            files.forEach(function(file){
                 form.append("file[]", file);
             });
             // Submit form via AJAX

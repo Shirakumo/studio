@@ -64,8 +64,12 @@
 
 (defun gallery-uploads (gallery-ish)
   (let* ((gallery (ensure-gallery gallery-ish))
-         (cover (dm:get-one 'uploads (db:query (:= '_id (dm:field gallery "cover")))))
-         (query (db:query (:= 'author (dm:field gallery "author"))))
+         (cover (when (dm:field gallery "cover")
+                  (dm:get-one 'uploads (db:query (:= '_id (dm:field gallery "cover"))))))
+         (query (if cover
+                    (db:query (:and (:= 'author (dm:field gallery "author"))
+                                    (:!= '_id (dm:field gallery "cover"))))
+                    (db:query (:= 'author (dm:field gallery "author")))))
          (count (config :frontpage-uploads)))
     (if cover
         (list* cover (dm:get 'uploads query :amount (1- count) :sort '((time :desc))))
@@ -319,8 +323,8 @@
                         (user:check user (perm studio upload delete own)))
                    (user:check user (perm studio upload delete))))
       (:create-gallery (user:check user (perm studio gallery create)))
-      (:edit-gallery (user:check user (perm studio gallery edit)))
-      (:delete-gallery (user:check user (perm studio gallery delete))))))
+      (:edit-gallery (user:check user (perm studio gallery edit own)))
+      (:delete-gallery (user:check user (perm studio gallery delete own))))))
 
 (defun visibility->int (visibility)
   (ecase visibility
