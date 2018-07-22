@@ -8,6 +8,7 @@
   :defsystem-depends-on (:radiance)
   :class "radiance:virtual-module"
   :components ((:file "module")
+               (:file "toolkit")
                (:file "objects")
                (:file "frontend")
                (:file "api"))

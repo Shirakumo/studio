@@ -322,7 +322,10 @@
    :background (hex 880000)
    :width 5em)
   (form
+   (.description :min-height 5em)
    (nav
+    :max-width 1100px
+    :margin 0 auto
     :display flex)))
  
  (footer

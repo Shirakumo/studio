@@ -33,8 +33,6 @@
          :time (dm:field upload "time")
          :files (mapcar #'dm:id (upload-files upload)))))
 
-;; FIXME: Check permissions
-
 (define-api studio/gallery (author) ()
   (api-output (gallery->table (ensure-gallery author))))
 
@@ -44,6 +42,7 @@
     (api-output (mapcar #'upload->table (uploads :user user :tag tag :date date :skip skip :amount amount)))))
 
 (define-api studio/gallery/create (author &optional description cover) ()
+  (check-permitted :create-gallery)
   (let ((gallery (make-gallery author
                                :description description
                                :cover (when (and cover (string/= "" cover)) (db:ensure-id cover)))))
@@ -52,25 +51,33 @@
         (api-output (gallery->table gallery)))))
 
 (define-api studio/gallery/edit (author &optional description cover) ()
-  (let ((gallery (if cover
-                     (update-gallery author
-                                     :description description
-                                     :cover (when (string/= "" cover) (db:ensure-id cover)))
-                     (update-gallery author
-                                     :description description))))
+  (let ((gallery (ensure-gallery author)))
+    (check-permitted :edit-gallery gallery)
+    (setf gallery (if cover
+                      (update-gallery author
+                                      :description description
+                                      :cover (when (string/= "" cover) (db:ensure-id cover)))
+                      (update-gallery author
+                                      :description description)))
     (if (string= (post/get "browser") "true")
         (redirect (gallery-link author))
         (api-output (gallery->table gallery)))))
 
-(define-api studio/gallery/set-cover (upload) ()
-  (update-gallery (auth:current) :cover (when (string/= "_" upload) (db:ensure-id upload)))
-  (redirect (referer)))
+(define-api studio/gallery/set-cover (upload &optional author) ()
+  (let ((gallery (ensure-gallery (or author (auth:current)))))
+    (check-permitted :edit-gallery gallery)
+    (update-gallery gallery :cover (when (string/= "_" upload) (db:ensure-id upload)))
+    (redirect (referer))))
 
 (define-api studio/gallery/delete (author) ()
-  (delete-gallery author))
+  (let ((gallery (ensure-gallery author)))
+    (check-permitted :delete-gallery gallery)
+    (delete-gallery author)))
 
 (define-api studio/upload (id) ()
-  (api-output (upload->table (ensure-upload id))))
+  (let ((upload (ensure-upload id)))
+    (check-permitted :view upload)
+    (api-output (upload->table upload))))
 
 (define-api studio/upload/list (user &optional tag date skip amount) ()
   (let ((skip (if skip (parse-integer skip) 0))
@@ -78,6 +85,7 @@
     (api-output (mapcar #'upload->table (uploads user :tag tag :date date :skip skip :amount amount)))))
 
 (define-api studio/upload/create (title file[] &optional description tags visibility) ()
+  (check-permitted :create)
   (unless (<= 1 (length title) 64)
     (error "Title must be between 1 and 64 characters long."))
   (let ((upload (make-upload title file[] :description description
@@ -88,24 +96,27 @@
         (api-output (upload->table upload)))))
 
 (define-api studio/upload/edit (upload &optional title description file[] tags visibility) ()
-  (let ((upload (if tags
-                    (update-upload upload
-                                   :title title
-                                   :description description
-                                   :files file[]
-                                   :tags (cl-ppcre:split "(\\s*,\\s*)+" tags)
-                                   :visibility (when visibility (->visibility visibility)))
-                    (update-upload upload
-                                   :title title
-                                   :description description
-                                   :files file[]
-                                   :visibility (when visibility (->visibility visibility))))))
+  (let ((upload (ensure-upload upload)))
+    (check-permitted :edit upload)
+    (setf upload (if tags
+                     (update-upload upload
+                                    :title title
+                                    :description description
+                                    :files file[]
+                                    :tags (cl-ppcre:split "(\\s*,\\s*)+" tags)
+                                    :visibility (when visibility (->visibility visibility)))
+                     (update-upload upload
+                                    :title title
+                                    :description description
+                                    :files file[]
+                                    :visibility (when visibility (->visibility visibility)))))
     (if (string= (post/get "browser") "true")
         (redirect (upload-link upload))
         (api-output (upload->table upload)))))
 
 (define-api studio/upload/delete (upload) ()
   (let ((upload (ensure-upload upload)))
+    (check-permitted :delete upload)
     (delete-upload upload)
     (if (string= (post/get "browser") "true")
         (redirect (gallery-link (dm:field upload "author")))

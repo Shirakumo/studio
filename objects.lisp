@@ -68,8 +68,10 @@
                   (dm:get-one 'uploads (db:query (:= '_id (dm:field gallery "cover"))))))
          (query (if cover
                     (db:query (:and (:= 'author (dm:field gallery "author"))
-                                    (:!= '_id (dm:field gallery "cover"))))
-                    (db:query (:= 'author (dm:field gallery "author")))))
+                                    (:!= '_id (dm:field gallery "cover"))
+                                    (:= 'visibility (visibility->int :public))))
+                    (db:query (:and (:= 'author (dm:field gallery "author"))
+                                    (:= 'visibility (visibility->int :public))))))
          (count (config :frontpage-uploads)))
     (if cover
         (list* cover (dm:get 'uploads query :amount (1- count) :sort '((time :desc))))
@@ -110,18 +112,10 @@
                                                  (user:username user) tag page offset))
                 :representation :external)))
 
-(defun date-range (date &optional (page 1))
-  (multiple-value-bind (ss mm hh d m y day dl-p tz) (decode-universal-time date 0)
-    (declare (ignore ss mm hh d day dl-p))
-    (values (multiple-value-bind (y+ m) (floor (- m page) 12)
-              (encode-universal-time 0 0 0 1 (1+ m) (+ y y+) tz))
-            (multiple-value-bind (y+ m) (floor (- (1+ m) page) 12)
-              (encode-universal-time 0 0 0 1 (1+ m) (+ y y+) tz)))))
-
 (defun galleries (&key (skip 0) (amount (config :max-per-page)))
   (dm:get 'galleries (db:query :all) :skip skip :amount amount :sort '((last-update :desc))))
 
-(defun uploads (user &key tag date (skip 0) (amount (config :max-per-page)))
+(defun uploads (user &key tag date (skip 0) (amount (config :max-per-page)) (author-p (user:= user (auth:current "anonymous"))))
   (multiple-value-bind (min-date max-date) (when date (apply #'date-range date))
     (cond (tag
            (let ((uploads ()) (count 0) (uid (user:id user)))
@@ -149,12 +143,20 @@
                         (return-from uploads
                           (sort uploads #'> :key (lambda (a) (dm:field a "time"))))))))
           (T
-           (dm:get 'uploads (cond (date
+           (dm:get 'uploads (cond ((and date author-p)
                                    (db:query (:and (:= 'author (user:id user))
                                                    (:<= min-date 'time)
                                                    (:<  'time max-date))))
+                                  (date
+                                   (db:query (:and (:= 'author (user:id user))
+                                                   (:= 'visibility (visibility->int :public))
+                                                   (:<= min-date 'time)
+                                                   (:<  'time max-date))))
+                                  (author-p
+                                   (db:query (:= 'author (user:id user))))
                                   (T
-                                   (db:query (:= 'author (user:id user)))))
+                                   (db:query (:and (:= 'author (user:id user))
+                                                   (:= 'visibility (visibility->int :public))))))
                    :skip skip :amount amount :sort '((time :desc)))))))
 
 (defun file-pathname (file &key thumb)
@@ -168,12 +170,6 @@
   (make-pathname :name NIL :type NIL
                  :directory `(:absolute ,@(rest (pathname-directory (mconfig-pathname #.*package*)))
                                         "uploads" ,(princ-to-string (dm:id upload)))))
-
-(defun format-month (upload)
-  (multiple-value-bind (ss mm hh d m y)
-      (decode-universal-time (dm:field (ensure-upload upload) "time"))
-    (declare (ignore ss mm hh d))
-    (format NIL "~2d.~4d" m y)))
 
 (defun %handle-new-files (upload files)
   (let ((id (dm:id upload)))
@@ -316,6 +312,8 @@
   (when user
     (ecase perm
       (:create (user:check user (perm studio upload create)))
+      (:view (or (= (user:id user) (dm:field object "author"))
+                 (/= (dm:field object "visibility") (visibility->int :private))))
       (:edit   (or (and (= (user:id user) (dm:field object "author"))
                         (user:check user (perm studio upload edit own)))
                    (user:check user (perm studio upload edit))))
@@ -323,27 +321,14 @@
                         (user:check user (perm studio upload delete own)))
                    (user:check user (perm studio upload delete))))
       (:create-gallery (user:check user (perm studio gallery create)))
-      (:edit-gallery (user:check user (perm studio gallery edit own)))
-      (:delete-gallery (user:check user (perm studio gallery delete own))))))
+      (:edit-gallery (or (and (if object (= (user:id user) (dm:field object "author")) T)
+                              (user:check user (perm studio gallery edit own)))
+                         (user:check user (perm studio gallery edit))))
+      (:delete-gallery (or (and (if object (= (user:id user) (dm:field object "author")) T)
+                                (user:check user (perm studio gallery delete own)))
+                           (user:check user (perm studio gallery delete)))))))
 
-(defun visibility->int (visibility)
-  (ecase visibility
-    (:public 0)
-    (:hidden 1)
-    (:private 2)))
-
-(defun ->visibility (visibility)
-  (case visibility
-    ((0 :public) :public)
-    ((1 :hidden) :hidden)
-    ((2 :private) :private)
-    (T (cond ((string= visibility "public") :public)
-             ((string= visibility "hidden") :hidden)
-             ((string= visibility "private") :private)
-             (T (error "Invalid visibility: ~s" visibility))))))
-
-(defun visibility->icon (visibility)
-  (ecase visibility
-    (:public "fa-globe")
-    (:hidden "fa-eye-slash")
-    (:private "fa-lock")))
+(defun check-permitted (perm &optional object (user (auth:current)))
+  (unless (permitted-p perm object user)
+    (error 'request-denied :message (format NIL "You are not allowed to ~(~a~)~@[ this ~a~]"
+                                            perm (when object (collection->name (dm:collection object)))))))

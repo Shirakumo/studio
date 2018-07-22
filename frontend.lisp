@@ -38,6 +38,7 @@
 
 (define-page settings "studio/settings" (:clip "settings.ctml")
   (let ((gallery (ensure-gallery (auth:current) NIL)))
+    (check-permitted :edit-gallery gallery)
     (r-clip:process T
                     :author (user:username (auth:current))
                     :description (when gallery (dm:field gallery "description"))
@@ -71,6 +72,7 @@
 (define-page view-image "studio/^view/(.+)" (:uri-groups (id) :clip "view.ctml")
   (let* ((upload (ensure-upload (db:ensure-id id)))
          (gallery (ensure-gallery (dm:field upload "author"))))
+    (check-permitted :view upload)
     (r-clip:process T
                     :upload upload
                     :id (dm:id upload)
@@ -85,7 +87,7 @@
 
 (define-page edit-image "studio/^edit/(.+)" (:uri-groups (id) :clip "upload.ctml")
   (let ((upload (ensure-upload (db:ensure-id id))))
-    ;; FIXME: Check permissions
+    (check-permitted :edit upload)
     (r-clip:process T
                     :upload upload
                     :id (dm:id upload)
@@ -98,6 +100,6 @@
                     :description (dm:field upload "description"))))
 
 (define-page upload "studio/^upload" (:clip "upload.ctml")
-  ;; FIXME: Check permissions
+  (check-permitted :create)
   (r-clip:process T
                   :author (user:username (auth:current "anonymous"))))
