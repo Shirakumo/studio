@@ -106,6 +106,15 @@ var Studio = function(){
                 }
             });
 
+            image.addEventListener("drag", function(ev){
+                var b = window.innerHeight / 20;
+                if(ev.clientY < b){
+                    window.scrollBy({top: -20, behaviour: "smooth"});
+                }else if(window.innerHeight < ev.clientY + 2*b){
+                    window.scrollBy({top: +20, behaviour: "smooth"});
+                }
+            });
+
             image.addEventListener("dragstart", function(ev){
                 ev.dataTransfer.effectAllowed = "move";
                 image.classList.add("move");

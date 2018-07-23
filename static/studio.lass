@@ -65,7 +65,6 @@
  ((:or .view .upload)
   (.image
    (img
-    :padding 2em 0 0 0
     :display block
     :margin 1em auto 0 auto
     :max-width (calc (- 100vw 2em))
@@ -113,6 +112,9 @@
     :cursor pointer)
    ((:and .remove :hover)
     :opacity 1.0)
+   (.image (img :max-width (calc (- 50vw 2em))
+                :max-height (calc (- 50vh 4em))
+                :margin 1em auto 0 auto))
    (.new-image
     :text-align center
     (label
