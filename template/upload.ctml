@@ -12,7 +12,7 @@
       <form class="upload" method="post" enctype="multipart/form-data">
         <section class="info">
           <img src="#" class="avatar" lquery="(attr :src (profile:avatar author 128))" />
-          <h2><a href="#" @href="studio/gallery/{0} author" lquery="(text author)">AUTHOR</a></h2>
+          <h2><a href="#" rel="author" @href="studio/gallery/{0} author" lquery="(text author)">AUTHOR</a></h2>
           <input name="title" placeholder="Title" minlength="1" maxlength="64" required autofocus lquery="(val title)" />
         </section>
         <section class="images">
