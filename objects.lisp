@@ -191,7 +191,7 @@
                (uiop:copy-file path file)
                (trivial-thumbnail:create file (file-pathname hull :thumb T)
                                          :width (config :thumbnail-size)
-                                         :height (config :thumbnail-size))))))
+                                         :crop :cover)))))
 
 (defun %dispose-files (pathnames)
   (dolist (file pathnames)
