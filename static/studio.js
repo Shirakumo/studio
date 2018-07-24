@@ -214,7 +214,8 @@ var Studio = function(){
                 request.onload = function(ev){
                     self.log("Submission complete", request);
                     if(request.status == 200){
-                        window.location = request.response["data"]["url"];
+                        var url = request.response["data"]["url"];
+                        window.location = url || document.querySelector("[rel=author]").getAttribute("href");
                     }else{
                         document.querySelector("#error").innerHTML = request.response["message"];
                     }
