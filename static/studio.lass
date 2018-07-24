@@ -63,12 +63,58 @@
    :font-size 1.8em)))
  
  ((:or .view .upload)
+  :position relative
+  (input.reading-option :display none)
+  (label[for=top-to-bottom] :right 9em)
+  (label[for=left-to-right] :right 7em)
+  (label[for=right-to-left] :right 5em)
+  (label[for=contiguous] :right 3em)
+  (label[for=dark] :right 1em)
+  (label.reading-option
+   :position absolute
+   :font-size 1.2em
+   :cursor pointer
+   :padding 0.1em
+   :background (hex 333333)
+   :color (hex FFFFFF))
+  ((:and input.reading-option :checked + label)
+   :color (hex EE8800))
   (.image
+   :clear both
+   :display flex
+   :align-items center
+   :overflow auto
+   :padding 2em
    (img
     :display block
-    :margin 1em auto 0 auto
-    :max-width (calc (- 100vw 2em))
-    :max-height (calc (- 100vh 4em))))
+    :padding 1em
+    :max-width (calc (- 90vw 2em))
+    :max-height (calc (- 90vh 4em)))
+   (img.full :max-width none
+             :max-height none))
+  ((:or .image.top-to-bottom
+        "#top-to-bottom:checked~.image")
+   :flex-direction column
+   ((:and img :first-child) :padding-top 0)
+   ((:and img :last-child) :padding-top 0))
+  ((:or .image.left-to-right
+        "#left-to-right:checked~.image")
+   :flex-direction row
+   (img :padding 0 1em)
+   ((:and img :first-child) :padding-left 25vw)
+   ((:and img :last-child) :padding-right 25vw))
+  ((:or .image.right-to-left
+        "#right-to-left:checked~.image")
+   :flex-direction row-reverse
+   (img :padding 0 1em)
+   ((:and img :first-child) :padding-right 25vw)
+   ((:and img :last-child) :padding-left 25vw))
+  ((:or .image.contiguous
+        "#contiguous:checked~.image")
+   (img :padding 0))
+  ((:or .image.dark
+        "#dark:checked~.image")
+   :background (hex 151515))
   (.image.removed
    (img :opacity 0.25))
   (.image.move
@@ -155,10 +201,6 @@
      :width 5em))))
  
  (.view
-  (.image
-   (img :padding 2em 0)
-   (img.full :max-width none
-             :max-height none))
   (.description
    (.meta
     :display flex

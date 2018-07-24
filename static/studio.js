@@ -1,6 +1,8 @@
 var Studio = function(){
     var self = this;
     
+    self.options = (new URL(window.location)).searchParams;
+    
     self.log = function(){
         if(console) console.log.apply(null, arguments);
     };
@@ -172,7 +174,7 @@ var Studio = function(){
 
         fileSelect.addEventListener("change", function(){
             fileSelect.removeAttribute("required");
-            for(var i=0; i<fileSelect.files.length; i++){
+            for(var i=fileSelect.files.length-1; i>=0; i--){
                 showFile(fileSelect.files[i]);
             }
             fileSelect.value = '';
@@ -258,6 +260,13 @@ var Studio = function(){
                     img.classList.add("full");
                 }
             });
+        });
+
+        var readingOptions = self.options.get("reading-options").split(",");
+        [].forEach.call(root.querySelectorAll("input.reading-option"), function(input){
+            if(self.find(input.getAttribute("id"), readingOptions)){
+                input.checked = true;
+            }
         });
     };
 
