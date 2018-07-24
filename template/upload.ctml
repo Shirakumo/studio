@@ -15,6 +15,18 @@
           <h2><a href="#" rel="author" @href="studio/gallery/{0} author" lquery="(text author)">AUTHOR</a></h2>
           <input name="title" placeholder="Title" minlength="1" maxlength="64" required autofocus lquery="(val title)" />
         </section>
+        <input class="reading-option" type="radio" name="direction" id="top-to-bottom"/>
+        <label class="reading-option" for="top-to-bottom" title="Read top to bottom"><i class="fas fa-fw fa-arrow-down"/></label>
+        <input class="reading-option" type="radio" name="direction" id="left-to-right"/>
+        <label class="reading-option" for="left-to-right" title="Read left to right"><i class="fas fa-fw fa-arrow-right"/></label>
+        <input class="reading-option" type="radio" name="direction" id="right-to-left"/>
+        <label class="reading-option" for="right-to-left" title="Read right to left"><i class="fas fa-fw fa-arrow-left"/></label>
+        <input class="reading-option" type="radio" name="direction" id="tiled" checked/>
+        <label class="reading-option" for="tiled" title="Tile images"><i class="fas fa-fw fa-th"/></label>
+        <input class="reading-option" type="checkbox" name="contiguous" id="contiguous"/>
+        <label class="reading-option" for="contiguous" title="No gaps between images"><i class="fas fa-fw fa-compress"/></label>
+        <input class="reading-option" type="checkbox" name="dark" id="dark"/>
+        <label class="reading-option" for="dark" title="Dark background"><i class="fas fa-fw fa-moon"/></label>
         <section class="images">
           <c:splice iterate="files">
             <div class="image" lquery="(data :id _id)">

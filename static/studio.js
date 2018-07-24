@@ -262,7 +262,7 @@ var Studio = function(){
             });
         });
 
-        var readingOptions = self.options.get("reading-options").split(",");
+        var readingOptions = (self.options.get("reading-options") || "").split(",");
         [].forEach.call(root.querySelectorAll("input.reading-option"), function(input){
             if(self.find(input.getAttribute("id"), readingOptions)){
                 input.checked = true;
