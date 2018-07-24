@@ -106,7 +106,7 @@
                 :representation :external)))
 
 (defun gallery-link (user &key tag date offset)
-  (let ((offset (when (and offset (< 0 offset) offset))))
+  (let ((offset (when (and offset (< 0 offset)) offset)))
     (uri-to-url (radiance:make-uri :domains '("studio")
                                    :path (format NIL "gallery/~a~@[tag/~a~]~@[/~d~@[+~d~]~]"
                                                  (user:username user)

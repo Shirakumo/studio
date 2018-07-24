@@ -17,6 +17,12 @@ var Studio = function(){
         return result;
     };
 
+    self.show = function(element){
+        var header = document.querySelector("#top>header").clientHeight;
+        element.scrollIntoView({behaviour: "smooth"});
+        element.focus();
+    };
+
     self.constructElement = (tag, options)=>{
         var el = document.createElement(options.tag || tag);
         el.setAttribute("class", (options.classes||[]).join(" "));
@@ -181,8 +187,14 @@ var Studio = function(){
                 var title = root.querySelector("[name=title]");
                 var files = self.filePayload(images);
                 // Check validity
-                if(!title.checkValidity()) return false;
-                if(files.length == 0) return false;
+                if(!title.checkValidity()){
+                    self.show(title);
+                    return false;
+                }
+                if(files.length == 0){
+                    self.show(fileSelect);
+                    return false;
+                }
                 // Gather form data
                 var form = new FormData();
                 form.append("data-format", "json");

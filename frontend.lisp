@@ -11,11 +11,16 @@
       (parse-integer thing)
       default))
 
+;; FIXME: What about empty months?
+
 (defun prev-link (user date offset &optional tag)
-  (when (or (< 0 offset) (< (second date) (get-universal-time)))
-    (gallery-link user :tag tag
-                       :date (second date)
-                       :offset (max 0 (- offset (config :per-page :uploads))))))
+  (cond ((< 0 offset)
+         (gallery-link user :tag tag
+                            :date (first date)
+                            :offset (max 0 (- offset (config :per-page :uploads)))))
+        ((< (second date) (get-universal-time))
+         (gallery-link user :tag tag
+                            :date (second date)))))
 
 (defun next-link (user uploads date offset &optional tag)
   (if (< (length uploads) (config :per-page :uploads))
@@ -43,7 +48,7 @@
                     :description (when gallery (dm:field gallery "description"))
                     :exists gallery)))
 
-(define-page gallery "studio/^gallery/([^/]+)(?:/([0-9+.]+))?(?:\\+([0-9]+))?" (:uri-groups (user date offset) :clip "gallery.ctml")
+(define-page gallery "studio/^gallery/([^/]+)(?:/([0-9.]+)(?:[+ ]([0-9]+))?)?" (:uri-groups (user date offset) :clip "gallery.ctml")
   (let* ((date (parse-date date))
          (offset (maybe-parse-integer offset 0))
          (gallery (ensure-gallery user))
@@ -57,7 +62,7 @@
                     :prev (prev-link user date offset)
                     :next (next-link user uploads date offset))))
 
-(define-page tag-gallery "studio/^gallery/([^/]+)/tag/(.+?)(?:/([0-9+]+))?(?:\\+([0-9]+))?$" (:uri-groups (user tag date offset) :clip "gallery.ctml")
+(define-page tag-gallery "studio/^gallery/([^/]+)/tag/(.+?)(?:/([0-9.]+)(?:[ +]([0-9]+))?)?$" (:uri-groups (user tag date offset) :clip "gallery.ctml")
   (let* ((date (parse-date date))
          (offset (maybe-parse-integer offset 0))
          (uploads (uploads user :tag tag :date date :skip offset)))
