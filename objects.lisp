@@ -8,7 +8,8 @@
 
 (define-trigger radiance:startup ()
   (defaulted-config '("image/png" "image/jpeg" "image/gif" "image/svg+xml") :allowed-content-types)
-  (defaulted-config (* 4 10) :max-per-page)
+  (defaulted-config (* 4 10) :per-page :uploads)
+  (defaulted-config 10 :per-page :galleries)
   (defaulted-config 4 :frontpage-uploads)
   (defaulted-config 400 :thumbnail-size)
   (defaulted-config (list (perm studio gallery create)
@@ -104,19 +105,25 @@
                                    :path (format NIL "view/~a" (dm:id upload)))
                 :representation :external)))
 
-(defun gallery-link (user &key tag page offset)
-  (let ((page (when (and page (< 1 page)) page))
-        (offset (when (and offset (< 0 offset) offset))))
+(defun gallery-link (user &key tag date offset)
+  (let ((offset (when (and offset (< 0 offset) offset))))
     (uri-to-url (radiance:make-uri :domains '("studio")
                                    :path (format NIL "gallery/~a~@[tag/~a~]~@[/~d~@[+~d~]~]"
-                                                 (user:username user) tag page offset))
+                                                 (user:username user)
+                                                 tag
+                                                 (typecase date
+                                                   (null NIL)
+                                                   (integer (format-date date))
+                                                   (string date))
+                                                 offset))
                 :representation :external)))
 
-(defun galleries (&key (skip 0) (amount (config :max-per-page)))
+(defun galleries (&key (skip 0) (amount (config :per-page :galleries)))
   (dm:get 'galleries (db:query :all) :skip skip :amount amount :sort '((last-update :desc))))
 
-(defun uploads (user &key tag date (skip 0) (amount (config :max-per-page)) (author-p (user:= user (auth:current "anonymous"))))
-  (multiple-value-bind (min-date max-date) (when date (apply #'date-range date))
+(defun uploads (user &key tag date (skip 0) (amount (config :per-page :uploads)) (author-p (user:= user (auth:current "anonymous"))))
+  (let ((min-date (first date))
+        (max-date (second date)))
     (cond (tag
            (let ((uploads ()) (count 0) (uid (user:id user)))
              ;; KLUDGE: THIS IS SLOW AND STUPID

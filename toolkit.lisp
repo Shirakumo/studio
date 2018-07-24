@@ -6,20 +6,32 @@
 
 (in-package #:org.shirakumo.radiance.studio)
 
+(defun parse-date (date)
+  (let (y m)
+    (handler-case
+        (let ((dot (position #\. date)))
+          (setf m (parse-integer date :start 0 :end dot)
+                y (parse-integer date :start (1+ dot))))
+      (error (e)
+        (declare (ignore e))
+        (multiple-value-bind (ss mm hh d cm cy)
+            (decode-universal-time (get-universal-time) 0)
+          (declare (ignore ss mm hh d))
+          (setf y cy m cm))))
+    (list (encode-universal-time 0 0 0 1 m y 0)
+          (multiple-value-bind (y+ m) (floor (1+ m) 12)
+            (encode-universal-time 0 0 0 1 m (+ y y+) 0)))))
 
-(defun date-range (date &optional (page 1))
-  (multiple-value-bind (ss mm hh d m y day dl-p tz) (decode-universal-time date 0)
-    (declare (ignore ss mm hh d day dl-p))
-    (values (multiple-value-bind (y+ m) (floor (- m page) 12)
-              (encode-universal-time 0 0 0 1 (1+ m) (+ y y+) tz))
-            (multiple-value-bind (y+ m) (floor (- (1+ m) page) 12)
-              (encode-universal-time 0 0 0 1 (1+ m) (+ y y+) tz)))))
-
-(defun format-month (upload)
-  (multiple-value-bind (ss mm hh d m y)
-      (decode-universal-time (dm:field (ensure-upload upload) "time"))
+(defun format-date (time)
+  (multiple-value-bind (ss mm hh d m y) (decode-universal-time time 0)
     (declare (ignore ss mm hh d))
-    (format NIL "~2d.~4d" m y)))
+    (format NIL "~d.~d" m y)))
+
+(defun adjust-date (time months)
+  (multiple-value-bind (ss mm hh d m y) (decode-universal-time time 0)
+    (declare (ignore ss mm hh d))
+    (multiple-value-bind (y+ m) (floor (+ m -1 months) 12)
+      (encode-universal-time 0 0 0 1 (1+ m) (+ y y+) 0))))
 
 (defun visibility->int (visibility)
   (ecase visibility

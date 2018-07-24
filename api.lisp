@@ -79,10 +79,12 @@
     (check-permitted :view upload)
     (api-output (upload->table upload))))
 
-(define-api studio/upload/list (user &optional tag date skip amount) ()
+(define-api studio/upload/list (user &optional tag min-date max-date skip amount) ()
   (let ((skip (if skip (parse-integer skip) 0))
-        (amount (if amount (parse-integer amount))))
-    (api-output (mapcar #'upload->table (uploads user :tag tag :date date :skip skip :amount amount)))))
+        (amount (if amount (parse-integer amount)))
+        (min-date (if min-date (parse-integer min-date)))
+        (max-date (if max-date (parse-integer max-date))))
+    (api-output (mapcar #'upload->table (uploads user :tag tag :date (when (and min-date max-date) (list min-date max-date)) :skip skip :amount amount)))))
 
 (define-api studio/upload/create (title file[] &optional description tags visibility) ()
   (check-permitted :create)

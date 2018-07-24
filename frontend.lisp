@@ -11,21 +11,20 @@
       (parse-integer thing)
       default))
 
-(defun prev-link (user page offset &optional tag)
-  (when (or (< 1 page) (< 0 offset))
+(defun prev-link (user date offset &optional tag)
+  (when (or (< 0 offset) (< (second date) (get-universal-time)))
     (gallery-link user :tag tag
-                       :page (if (< 0 offset) page (1- page))
-                       :offset (max 0 (- offset (config :max-per-page))))))
+                       :date (second date)
+                       :offset (max 0 (- offset (config :per-page :uploads))))))
 
-(defun next-link (user uploads page offset &optional tag)
-  (if (< (length uploads) (config :max-per-page))
-      (gallery-link user :tag tag :page (1+ page))
-      (gallery-link user :tag tag :page page :offset (+ offset (config :max-per-page)))))
+(defun next-link (user uploads date offset &optional tag)
+  (if (< (length uploads) (config :per-page :uploads))
+      (gallery-link user :tag tag :date (adjust-date (first date) -1))
+      (gallery-link user :tag tag :date (first date) :offset (+ offset (config :per-page :uploads)))))
 
 (define-page front "studio/^([0-9]+)?$" (:uri-groups (page) :clip "front.ctml")
   (let* ((page (maybe-parse-integer page 1))
-         (galleries (galleries :skip (* (config :max-per-page) (1- page))
-                               :amount (config :max-per-page))))
+         (galleries (galleries :skip (* (config :per-page :galleries) (1- page)))))
     (r-clip:process T
                     :galleries galleries
                     :prev (when (< 1 page)
@@ -44,30 +43,30 @@
                     :description (when gallery (dm:field gallery "description"))
                     :exists gallery)))
 
-(define-page gallery "studio/^gallery/([^/]+)(?:/([0-9+]+))?(?:\\+([0-9]+))?" (:uri-groups (user page offset) :clip "gallery.ctml")
-  (let* ((page (maybe-parse-integer page 1))
+(define-page gallery "studio/^gallery/([^/]+)(?:/([0-9+.]+))?(?:\\+([0-9]+))?" (:uri-groups (user date offset) :clip "gallery.ctml")
+  (let* ((date (parse-date date))
          (offset (maybe-parse-integer offset 0))
          (gallery (ensure-gallery user))
-         (uploads (uploads user :date (list (get-universal-time) page))))
+         (uploads (uploads user :date date :skip offset)))
     (r-clip:process T
                     :description (dm:field gallery "description")
                     :cover (when (dm:field gallery "cover")
                              (ensure-upload (dm:field gallery "cover") NIL))
                     :author user
                     :uploads uploads
-                    :prev (prev-link user page offset)
-                    :next (next-link user uploads page offset))))
+                    :prev (prev-link user date offset)
+                    :next (next-link user uploads date offset))))
 
-(define-page tag-gallery "studio/^gallery/([^/]+)/tag/(.+?)(?:/([0-9+]+))?(?:\\+([0-9]+))?$" (:uri-groups (user tag page offset) :clip "gallery.ctml")
-  (let* ((page (maybe-parse-integer page 1))
+(define-page tag-gallery "studio/^gallery/([^/]+)/tag/(.+?)(?:/([0-9+]+))?(?:\\+([0-9]+))?$" (:uri-groups (user tag date offset) :clip "gallery.ctml")
+  (let* ((date (parse-date date))
          (offset (maybe-parse-integer offset 0))
-         (uploads (uploads user :tag tag :date (list (get-universal-time) page))))
+         (uploads (uploads user :tag tag :date date :skip offset)))
     (r-clip:process T
                     :author user
                     :tag tag
                     :uploads uploads
-                    :prev (prev-link user page offset tag)
-                    :next (next-link user uploads page offset tag))))
+                    :prev (prev-link user date offset tag)
+                    :next (next-link user uploads date offset tag))))
 
 (define-page view-image "studio/^view/(.+)" (:uri-groups (id) :clip "view.ctml")
   (let* ((upload (ensure-upload (db:ensure-id id)))

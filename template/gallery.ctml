@@ -34,7 +34,7 @@
         <section class="images">
           <c:if test="uploads">
             <c:then>
-              <time lquery="(text (studio::format-month (first uploads)))">MM.YYYY</time>
+              <time lquery="(text (studio::format-date (clip (first uploads) :time)))">MM.YYYY</time>
               <c:splice iterate="uploads">
                 <article class="image" lquery='(add-class (when (rest (studio::upload-files *)) "multiple"))'>
                   <a href="#" lquery="(attr :href (studio::upload-link *))">

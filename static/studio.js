@@ -3,7 +3,7 @@ var Studio = function(){
     
     self.log = function(){
         if(console) console.log.apply(null, arguments);
-    }
+    };
 
     self.find = function(thing, array){
         return 0 <= array.indexOf(thing);
@@ -68,15 +68,13 @@ var Studio = function(){
     self.filePayload = function(root){
         root = root || document;
         var result = [];
-        [].forEach.call(root.querySelectorAll(".image"), function(image){
-            if(!image.classList.contains("removed")){
-                if(image.dataset.file){
-                    result.push(fileObjects[parseInt(image.dataset.file)]);
-                }else if(image.dataset.id){
-                    result.push(image.dataset.id);
-                }else{
-                    log("Warning: image without id or file", image);
-                }
+        [].forEach.call(root.querySelectorAll(".image:not(.removed)"), function(image){
+            if(image.dataset.file){
+                result.push(fileObjects[parseInt(image.dataset.file)]);
+            }else if(image.dataset.id){
+                result.push(image.dataset.id);
+            }else{
+                log("Warning: image without id or file", image);
             }
         });
         return result;
@@ -143,23 +141,25 @@ var Studio = function(){
         };
         
         var showFile = function(file){
-            var image = document.createElement("div");
-            var img = document.createElement("img");
-            var remove = document.createElement("label");
+            var image = self.constructElement("div", {
+                classes: ["image"],
+                elements: {
+                    "img": {},
+                    "label": {
+                        classes: ["remove"],
+                        elements: { "i": {classes: ["fas", "fa-fw", "fa-trash-alt"]}}
+                    }
+                }
+            });
 
             // Start loading image as soon as possible
             var reader = new FileReader();
-            reader.onload = function(){ img.src = reader.result; };
+            reader.onload = function(){ image.querySelector("img").src = reader.result; };
             reader.readAsDataURL(file);
 
             // Prepare the rest.
             image.dataset.file = fileObjects.length;
             fileObjects.push(file);
-            image.classList.add("image");
-            remove.classList.add("remove");
-            remove.innerHTML = '<i class="fas fa-fw fa-trash-alt"></i>';
-            image.appendChild(img);
-            image.appendChild(remove);
             registerImage(image);
             images.insertBefore(image, images.querySelector(".new-image"));
         };
@@ -181,8 +181,8 @@ var Studio = function(){
                 var title = root.querySelector("[name=title]");
                 var files = self.filePayload(images);
                 // Check validity
-                if(!title.checkValidity()) return;
-                if(files.length == 0) return;
+                if(!title.checkValidity()) return false;
+                if(files.length == 0) return false;
                 // Gather form data
                 var form = new FormData();
                 form.append("data-format", "json");
@@ -222,8 +222,10 @@ var Studio = function(){
                 return false;
             });
         });
+    };
 
-        // FIXME: implement prompt on delete
+    var initSettings = function(root){
+        self.log("Init settings", root);
     };
 
     var initGallery = function(root){
@@ -250,10 +252,12 @@ var Studio = function(){
         var upload = root.querySelector(".upload");
         var gallery = root.querySelector(".gallery");
         var view = root.querySelector(".view");
+        var settings = root.querySelector(".settings");
         
         if(upload) initUpload(upload);
         if(gallery) initGallery(gallery);
         if(view) initView(view);
+        if(settings) initView(settings);
     };
 };
 
