@@ -32,7 +32,7 @@
                         (title (:varchar 64))
                         (visibility (:integer 1))
                         (description :text))
-             :indices '(author))
+             :indices '(author time))
   (db:create 'files '((upload :id)
                       (order (:integer 1))
                       (type (:varchar 32)))
@@ -120,6 +120,25 @@
 
 (defun galleries (&key (skip 0) (amount (config :per-page :galleries)))
   (dm:get 'galleries (db:query :all) :skip skip :amount amount :sort '((last-update :desc))))
+
+(defun page-marks (uploads date offset)
+  (when uploads
+    (let* ((oldest (car (last uploads)))
+           (latest (first uploads))
+           (older (dm:get-one 'uploads (db:query (:and (:< 'time (dm:field oldest "time"))
+                                                       (:= 'author (dm:field oldest "author"))))
+                              :sort '((time :desc))))
+           (newer (dm:get-one 'uploads (db:query (:and (:< (dm:field latest "time") 'time)
+                                                       (:= 'author (dm:field latest "author"))))
+                              :sort '((time :desc)))))
+      (values (when older
+                (list (format-date (dm:field older "time"))
+                      (if (< (first date) (dm:field older "time"))
+                          (+ offset (config :per-page :uploads)) 0)))
+              (when newer
+                (list (format-date (dm:field newer "time"))
+                      (if (< (second date) (dm:field newer "time"))
+                          0 (- offset (config :per-page :uploads)))))))))
 
 (defun uploads (user &key tag date (skip 0) (amount (config :per-page :uploads)) (author-p (user:= user (auth:current "anonymous"))))
   (let ((min-date (first date))

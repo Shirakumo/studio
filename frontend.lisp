@@ -53,25 +53,27 @@
          (offset (maybe-parse-integer offset 0))
          (gallery (ensure-gallery user))
          (uploads (uploads user :date date :skip offset)))
-    (r-clip:process T
-                    :description (dm:field gallery "description")
-                    :cover (when (dm:field gallery "cover")
-                             (ensure-upload (dm:field gallery "cover") NIL))
-                    :author user
-                    :uploads uploads
-                    :prev (prev-link user date offset)
-                    :next (next-link user uploads date offset))))
+    (multiple-value-bind (older newer) (page-marks uploads date offset)
+      (r-clip:process T
+                      :description (dm:field gallery "description")
+                      :cover (when (dm:field gallery "cover")
+                               (ensure-upload (dm:field gallery "cover") NIL))
+                      :author user
+                      :uploads uploads
+                      :next (when older (gallery-link user :date (first older) :offset (second older)))
+                      :prev (when newer (gallery-link user :date (first newer) :offset (second newer)))))))
 
 (define-page tag-gallery "studio/^gallery/([^/]+)/tag/(.+?)(?:/([0-9.]+)(?:[ +]([0-9]+))?)?$" (:uri-groups (user tag date offset) :clip "gallery.ctml")
   (let* ((date (parse-date date))
          (offset (maybe-parse-integer offset 0))
          (uploads (uploads user :tag tag :date date :skip offset)))
-    (r-clip:process T
-                    :author user
-                    :tag tag
-                    :uploads uploads
-                    :prev (prev-link user date offset tag)
-                    :next (next-link user uploads date offset tag))))
+    (multiple-value-bind (older newer) (page-marks uploads date offset)
+      (r-clip:process T
+                      :author user
+                      :tag tag
+                      :uploads uploads
+                      :next (when older (gallery-link user :date (first older) :offset (second older)))
+                      :prev (when newer (gallery-link user :date (first newer) :offset (second newer)))))))
 
 (define-page view-image "studio/^view/(.+)" (:uri-groups (id) :clip "view.ctml")
   (let* ((upload (ensure-upload (db:ensure-id id)))
