@@ -290,7 +290,7 @@
      :white-space nowrap
      :text-align right))
    ((:and a :hover)
-    :max-height 90vh))
+    :max-height 200vh))
   (.cover+.info
    :margin-top 0)
   (.navlink.prev
