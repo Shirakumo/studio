@@ -69,3 +69,10 @@
     (galleries "gallery")
     (tags "tag")
     (files "file")))
+
+(defmacro mktable (&rest entries)
+  (let ((table (gensym "TABLE")))
+    `(let ((,table (make-hash-table :test 'eql)))
+       ,@(loop for (key val) on entries by #'cddr
+               collect `(setf (gethash ',key ,table) ,val))
+       ,table)))

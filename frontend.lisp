@@ -53,7 +53,7 @@
          (offset (maybe-parse-integer offset 0))
          (gallery (ensure-gallery user))
          (uploads (uploads user :date date :skip offset)))
-    (multiple-value-bind (older newer) (page-marks uploads date offset)
+    (multiple-value-bind (older newer) (page-marks uploads date offset (dm:field gallery "author"))
       (r-clip:process T
                       :description (dm:field gallery "description")
                       :cover (when (dm:field gallery "cover")
@@ -67,7 +67,7 @@
   (let* ((date (parse-date date))
          (offset (maybe-parse-integer offset 0))
          (uploads (uploads user :tag tag :date date :skip offset)))
-    (multiple-value-bind (older newer) (page-marks uploads date offset)
+    (multiple-value-bind (older newer) (page-marks uploads date offset (user:id user))
       (r-clip:process T
                       :author user
                       :tag tag

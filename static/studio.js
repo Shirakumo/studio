@@ -2,6 +2,8 @@ var Studio = function(){
     var self = this;
     
     self.options = (new URL(window.location)).searchParams;
+    self.apiBase = document.querySelector("link[rel=api-base]");
+    if(self.apiBase) self.apiBase = self.apiBase.getAttribute("href");
     
     self.log = function(){
         if(console) console.log.apply(null, arguments);
@@ -19,13 +21,40 @@ var Studio = function(){
         return result;
     };
 
+    self.equalp = function(a, b){
+        if(a === null || b === null){
+            return a === b;
+        }
+        
+        var aF = Object.getOwnPropertyNames(a);
+        var bF = Object.getOwnPropertyNames(b);
+        if (aF.length != bF.length) {
+            return false;
+        }
+
+        for (var i = 0; i < aF.length; i++) {
+            var field = aF[i];
+            if (a[field] !== b[field]) {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    self.mergeInto = function(target, object){
+        for(var key in object){
+            target[key] = object[key];
+        }
+        return target;
+    };
+
     self.show = function(element){
         var header = document.querySelector("#top>header").clientHeight;
         element.scrollIntoView({behaviour: "smooth"});
         element.focus();
     };
 
-    self.constructElement = (tag, options)=>{
+    self.constructElement = function(tag, options){
         var el = document.createElement(options.tag || tag);
         el.setAttribute("class", (options.classes||[]).join(" "));
         if(options.text) el.innerText = options.text;
@@ -38,6 +67,120 @@ var Studio = function(){
             el.appendChild(sub);
         }
         return el;
+    };
+
+    self.extractPage = function(url){
+        var path = (new URL(url)).pathname;
+        var matches = path.match("gallery/([^/]+)(?:/tag/(.+?))?/([0-9]{1,2}\\.[0-9]{1,4})(?:\\+([0-9]+))?");
+        if(matches){
+            return {
+                user: matches[1],
+                tag: matches[2],
+                date: matches[3],
+                offset: (matches[4])? parseInt(matches[4]) : 0
+            };
+        }else{
+            var now = new Date();
+            return {
+                user: document.querySelector("a[rel=author]").innerText,
+                tag: null,
+                date: (now.getMonth()+1)+"."+now.getFullYear(),
+                offset: 0
+            };
+        }
+    };
+
+    self.pageUrl = function(page){
+        var base = document.querySelector("a[rel=author]").getAttribute("href");
+        base = base.substr(0, base.lastIndexOf("/"));
+        return base+"/"+page.user
+            +(page.tag?"/tag/"+page.tag:"")
+            +"/"+page.date
+            +(0<page.offset?"+"+page.offset:"");
+    };
+
+    self.currentPage = null;
+    self.changeToPage = function(page){
+        if(!self.equalp(page,self.currentPage)){
+            self.log("Changing to page", page);
+            if(!self.currentPage){
+                window.history.pushState("prefetch", page.date+"+"+page.offset, self.pageUrl(page));
+            }else{
+                window.history.replaceState("prefetch", page.date+"+"+page.offset, self.pageUrl(page));
+            }
+            self.currentPage = page;
+        }
+        return self.currentPage;
+    };
+
+    self.imagesSectionPage = function(images){
+        var date = images.querySelector("time").textContent;
+        var page = self.extractPage(window.location.href);
+        return self.mergeInto(page, {date: date, offset: 0});
+    };
+
+    var uploadRequest = null;
+    self.fetchUploads = function(page, onComplete){
+        if(uploadRequest) return uploadRequest;
+        self.log("Fetching uploads", page);
+        var form = new FormData();
+        form.append("data-format", "json");
+        form.append("user", page.user);
+        form.append("date", page.date);
+        form.append("skip", page.offset);
+        if(page.tag) form.append("tag", page.tag);
+        uploadRequest = new XMLHttpRequest();
+        uploadRequest.responseType = 'json';
+        uploadRequest.onload = function(ev){
+            if(uploadRequest.status == 200){
+                onComplete(uploadRequest.response["data"]);
+            }else{
+                self.log("Failed to fetch uploads", ev);
+            }
+            uploadRequest = null;
+        };
+        uploadRequest.open("POST", self.apiBase+"upload/list");
+        uploadRequest.send(form);
+        return uploadRequest;
+    };
+
+    self.unixEpochDifference = 2208988800;
+    self.uploadDate = function(upload){
+        var date = new Date((upload.time-self.unixEpochDifference)*1000);
+        return (date.getMonth()+1)+"."+date.getFullYear();
+    };
+
+    self.showUpload = function(upload){
+        var element = self.constructElement("article", {
+            classes: ["image", (1 < upload.files.length)? "multiple" : "NIL"],
+            elements: { "a": {
+                attributes: {"href": upload.url},
+                elements: {"img": {
+                    attributes: {"src": self.apiBase+"file?thumb=true&id="+upload.files[0]}
+                }}
+            }}
+        });
+        var date = self.uploadDate(upload);
+        [].forEach.call(document.querySelectorAll(".images"), function(images){
+            if(images.querySelector("time").innerText == date){
+                images.appendChild(element);
+                date = null;
+            }
+        });
+        if(date){
+            var images = self.constructElement("section", {
+                classes: ["images"],
+                elements: { "time": {text: date}}
+            });
+            images.appendChild(element);
+            var last = document.querySelector(".images:last-child");
+            last.parentElement.insertBefore(images, last.nextSibling);
+        }
+        return element;
+    };
+
+    self.isScrolledToBottom = function(){
+        return (window.innerHeight + window.pageYOffset) >= document.body.offsetHeight - 2;
     };
 
     self.prompt = function(message, options){
@@ -246,7 +389,39 @@ var Studio = function(){
     var initGallery = function(root){
         self.log("Init gallery", root);
 
-        // FIXME: implement prefetching
+        var next = document.querySelector(".navlink.next");
+
+        var fetchNext;fetchNext = function(){
+            if(next){
+                self.fetchUploads(next, function(data){
+                    self.log("Fetch complete", data);
+                    data.uploads.forEach(self.showUpload);
+                    if(data.older){
+                        self.mergeInto(next, data.older);
+                        // Try again in case we didn't fetch enough to advance the bottom
+                        if(self.isScrolledToBottom()) fetchNext();
+                    }else next = null;
+                });
+            }
+        };
+        
+        if(next){
+            next.parentElement.removeChild(next);
+            next = self.extractPage(next.getAttribute("href"));
+            window.addEventListener("scroll", function(ev){
+                if(self.isScrolledToBottom()){ fetchNext(); }
+                var largest = null;
+                [].forEach.call(root.querySelectorAll(".images"), function(images){
+                    var offset = images.getBoundingClientRect().top;
+                    if(!largest
+                       || (offset < 200 && largest.getBoundingClientRect().top < offset)
+                       || self.isScrolledToBottom()){
+                        largest = images;
+                    }
+                });
+                self.changeToPage(self.imagesSectionPage(largest));
+            });
+        }
     };
 
     var initView = function(root){
