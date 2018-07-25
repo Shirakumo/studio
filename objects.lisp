@@ -262,8 +262,6 @@
       (dm:insert upload)
       (let ((id (dm:field upload "_id")))
         ;; FIXME: Clean up files in case of erroneous unwind.
-        (v:info :test "WHAT THE FUFCK ~s ~s" (upload-pathname upload)
-                (ensure-directories-exist (upload-pathname upload)))
         (ensure-directories-exist (upload-pathname upload))
         (%handle-new-files upload files)
         (dolist (tag tags)
