@@ -6,27 +6,6 @@
 
 (in-package #:org.shirakumo.radiance.studio)
 
-(defun maybe-parse-integer (thing &optional default)
-  (if (and thing (string/= thing ""))
-      (parse-integer thing)
-      default))
-
-;; FIXME: What about empty months?
-
-(defun prev-link (user date offset &optional tag)
-  (cond ((< 0 offset)
-         (gallery-link user :tag tag
-                            :date (first date)
-                            :offset (max 0 (- offset (config :per-page :uploads)))))
-        ((< (second date) (get-universal-time))
-         (gallery-link user :tag tag
-                            :date (second date)))))
-
-(defun next-link (user uploads date offset &optional tag)
-  (if (< (length uploads) (config :per-page :uploads))
-      (gallery-link user :tag tag :date (adjust-date (first date) -1))
-      (gallery-link user :tag tag :date (first date) :offset (+ offset (config :per-page :uploads)))))
-
 (define-page front "studio/^([0-9]+)?$" (:uri-groups (page) :clip "front.ctml")
   (let* ((page (maybe-parse-integer page 1))
          (galleries (galleries :skip (* (config :per-page :galleries) (1- page)))))

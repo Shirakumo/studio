@@ -6,6 +6,11 @@
 
 (in-package #:org.shirakumo.radiance.studio)
 
+(defun maybe-parse-integer (thing &optional default)
+  (if (and thing (string/= thing ""))
+      (parse-integer thing)
+      default))
+
 (defun parse-date (date)
   (let (y m)
     (handler-case
