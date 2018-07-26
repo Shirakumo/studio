@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8"/>
+    <title>Import - Studio</title>
+    <link rel="stylesheet" href="../static/studio.css" @href="/static/studio/studio.css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+  </head>
+  <body>
+    <article class="studio" id="top">
+      <c:splice lquery='(html (template-file "header.ctml" :studio))'/>
+      <main class="import">
+        <section class="info">
+          <img src="#" class="avatar" lquery="(attr :src (profile:avatar author 128))" />
+          <h2><a href="#" rel="author" @href="studio/gallery/{0} author" lquery="(text author)">AUTHOR</a></h2>
+          <h3>Import from another platform</h3>
+        </section>
+        <section class="services">
+          <a class="service" @href="studio/api/studio/import/tumblr/authorize">
+            <i class="fab fa-tumblr-square" />
+            Tumblr
+          </a>
+        </section>
+      </main>
+      <footer>
+        Running on <a href="https://github.com/Shirakumo/studio">Studio</a>
+      </footer>
+    </article>
+    <script type="text/javascript" src="../static/studio.js" @src="/static/studio/studio.js"></script>
+  </body>
+</html>

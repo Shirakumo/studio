@@ -34,7 +34,7 @@
    ((:and a :hover)
     :color (hex FFFFFF))))
  
- ((:or .front .gallery .view .upload .settings)
+ ((:or .front .gallery .view .upload .settings .import)
   (.info
   :display flex
   :align-items center
@@ -133,16 +133,32 @@
    :background (hex 333333)
    :color (hex FFFFFF)
    :padding 1em 5em 5em 5em))
- 
- (.upload
+
+ ((:or .upload .settings .import)
   ((:or input textarea select)
    :display block
    :box-sizing border-box
-   :background (hex 222222)
    :border none
    :color inherit
    :font-size inherit
    :font-family inherit)
+  (input[type=radio]
+   :display inline-block)
+  (input[type=submit]
+   :width 100%
+   :color (hex FFFFFF)
+   :background (hex 555555)
+   :cursor pointer
+   :font-size 1.5em)
+  ((:and input[type=submit] :hover)
+   :background (hex 151515))
+  ("input[value=Delete]"
+   :background (hex 880000)
+   :width 5em))
+ 
+ (.upload
+  ((:or input textarea select)
+   :background (hex 222222))
   (.info
    (input
     :font-size 1.8em
@@ -197,19 +213,9 @@
     :width (calc (- 100% 2em))
     :margin 1em
     :min-height 10em)
-   (input[type=submit]
-    :background (hex 555555)
-    :width 100%
-    :cursor pointer
-    :font-size 1.5em)
-   ((:and input[type=submit] :hover)
-    :background (hex 151515))
    (nav
     :flex-grow 1
-    :display flex
-    ("input[value=Delete]"
-     :background (hex 880000)
-     :width 5em))))
+    :display flex)))
  
  (.view
   (.description
@@ -365,23 +371,58 @@
    :color inherit
    :font-size inherit
    :font-family inherit)
-  (input[type=submit]
-   :width 100%
-   :color (hex FFFFFF)
-   :background (hex 555555)
-   :cursor pointer
-   :font-size 1.5em)
-  ((:and input[type=submit] :hover)
-   :background (hex 151515))
-  ("input[value=Delete]"
-   :background (hex 880000)
-   :width 5em)
   (form
    (.description :min-height 5em)
    (nav
     :max-width 1100px
     :margin 0 auto
     :display flex)))
+
+ (.import
+  (.services
+   :display flex
+   :justify-content center
+   :max-width 1100px
+   :margin 2em auto
+   (.service
+    :color (hex 151515)
+    :text-align center
+    (i :font-size 3em
+       :display block))
+   ((:and .service :hover)
+    :color (hex ee8800))))
+ (.import.tumblr
+  (form
+   :max-width 1100px
+   :margin 2em auto
+   (ul
+    :list-style none
+    :padding 0)
+   (input[type=radio] :display none)
+   (input[type=checkbox] :display none)
+   ((:or .blog .post)
+    (label
+     :cursor pointer
+     :display flex
+     :align-items center
+     :padding 0.2em
+     :border-left 0.2em solid transparent
+     :overflow hidden)
+    ((:and input :checked ~ label)
+     :border-color (hex EE8800))
+    ((:and label :hover)
+     :border-color (hex FFDD88)))
+   (.blog
+    (.avatar
+     :border-radius 32px
+     :margin-right 1em))
+   (.post
+    (.images :flex-grow 1)
+    (time :padding 0 1em))
+   (nav
+    :display flex
+    (.everything
+     :width 9em))))
  
  (footer
   :text-align center

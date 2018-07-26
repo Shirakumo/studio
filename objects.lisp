@@ -15,6 +15,7 @@
   (defaulted-config (list (perm studio gallery create)
                           (perm studio gallery edit own)
                           (perm studio gallery delete own)
+                          (perm studio upload import)
                           (perm studio upload create)
                           (perm studio upload edit own)
                           (perm studio upload delete own))
@@ -337,6 +338,7 @@
 (defun permitted-p (perm &optional object (user (auth:current)))
   (when user
     (ecase perm
+      (:import (user:check user (perm studio upload import)))
       (:create (user:check user (perm studio upload create)))
       (:view (or (= (user:id user) (dm:field object "author"))
                  (/= (dm:field object "visibility") (visibility->int :private))))

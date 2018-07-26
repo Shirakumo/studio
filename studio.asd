@@ -11,11 +11,14 @@
                (:file "toolkit")
                (:file "objects")
                (:file "frontend")
-               (:file "api"))
+               (:file "api")
+               (:file "import"))
   :depends-on ((:interface :database)
                (:interface :user)
                (:interface :auth)
                (:interface :profile)
+               :humbler
+               :drakma
                :trivial-thumbnail
                :r-data-model
                :r-clip

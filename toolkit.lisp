@@ -6,6 +6,11 @@
 
 (in-package #:org.shirakumo.radiance.studio)
 
+(defun png->src (data)
+  (with-output-to-string (out)
+    (write-string "data:image/png;base64," out)
+    (base64:usb8-array-to-base64-stream data out)))
+
 (defun maybe-parse-integer (thing &optional default)
   (if (and thing (string/= thing ""))
       (parse-integer thing)
