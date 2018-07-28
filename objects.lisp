@@ -109,7 +109,7 @@
 (defun gallery-link (user &key tag date offset)
   (let ((offset (when (and offset (< 0 offset)) offset)))
     (uri-to-url (radiance:make-uri :domains '("studio")
-                                   :path (format NIL "gallery/~a~@[tag/~a~]~@[/~d~@[+~d~]~]"
+                                   :path (format NIL "gallery/~a~@[/tag/~a~]~@[/~d~@[+~d~]~]"
                                                  (user:username user)
                                                  tag
                                                  (typecase date
@@ -122,7 +122,8 @@
 (defun galleries (&key (skip 0) (amount (config :per-page :galleries)))
   (dm:get 'galleries (db:query :all) :skip skip :amount amount :sort '((last-update :desc))))
 
-(defun page-marks (uploads date offset author)
+(defun page-marks (uploads date offset author &optional tag)
+  ;; FIXME: TAG
   (let* ((oldest (if uploads (dm:field (car (last uploads)) "time") (first date)))
          (latest (if uploads (dm:field (first uploads) "time") (second date)))
          (older (first (db:select 'uploads (db:query (:and (:< 'time oldest)
@@ -143,9 +144,11 @@
                    (list (format-date (first date))
                          0))))))
 
-(defun uploads (user &key tag date (skip 0) (amount (config :per-page :uploads)) (author-p (user:= user (auth:current "anonymous"))))
+(defun uploads (user &key tag date skip amount (author-p (user:= user (auth:current "anonymous"))))
   (let ((min-date (first date))
-        (max-date (second date)))
+        (max-date (second date))
+        (skip (or skip 0))
+        (amount (or amount (config :per-page :uploads))))
     (cond (tag
            (let ((uploads ()) (count 0) (uid (user:id user)))
              ;; KLUDGE: THIS IS SLOW AND STUPID

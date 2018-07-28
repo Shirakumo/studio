@@ -46,13 +46,13 @@
   (let* ((date (parse-date date))
          (offset (maybe-parse-integer offset 0))
          (uploads (uploads user :tag tag :date date :skip offset)))
-    (multiple-value-bind (older newer) (page-marks uploads date offset (user:id user))
+    (multiple-value-bind (older newer) (page-marks uploads date offset (user:id user) tag)
       (r-clip:process T
                       :author user
                       :tag tag
                       :uploads uploads
-                      :next (when older (gallery-link user :date (first older) :offset (second older)))
-                      :prev (when newer (gallery-link user :date (first newer) :offset (second newer)))))))
+                      :next (when older (gallery-link user :tag tag :date (first older) :offset (second older)))
+                      :prev (when newer (gallery-link user :tag tag :date (first newer) :offset (second newer)))))))
 
 (define-page view-image "studio/^view/(.+)" (:uri-groups (id) :clip "view.ctml")
   (let* ((upload (ensure-upload (db:ensure-id id)))

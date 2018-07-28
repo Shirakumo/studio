@@ -70,8 +70,8 @@ var Studio = function(){
     };
 
     self.extractPage = function(url){
-        var path = (new URL(url)).pathname;
-        var matches = path.match("gallery/([^/]+)(?:/tag/(.+?))?/([0-9]{1,2}\\.[0-9]{1,4})(?:\\+([0-9]+))?");
+        var path = decodeURI((new URL(url)).pathname);
+        var matches = path.match("gallery/([^/]+)(?:/tag/(.+?))?(?:/([0-9]{1,2}\\.[0-9]{1,4})(?:\\+([0-9]+))?)?$");
         if(matches){
             return {
                 user: matches[1],
@@ -397,6 +397,7 @@ var Studio = function(){
                     self.log("Fetch complete", data);
                     data.uploads.forEach(self.showUpload);
                     if(data.older){
+                        self.log(data.older);
                         self.mergeInto(next, data.older);
                         // Try again in case we didn't fetch enough to advance the bottom
                         if(self.isScrolledToBottom()) fetchNext();

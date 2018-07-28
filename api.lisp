@@ -88,7 +88,7 @@
                       (list (parse-integer min-date) (parse-integer max-date)))))
          (uploads (uploads user :tag tag :date date :skip skip :amount amount)))
     (multiple-value-bind (older newer) (page-marks uploads date skip (user:id user))
-      (api-output (mktable :uploads (mapcar #'upload->table uploads)
+      (api-output (mktable :uploads (map 'vector #'upload->table uploads)
                            :older (when older (mktable :date (first older) :offset (second older)))
                            :newer (when newer (mktable :date (first newer) :offset (second newer))))))))
 
