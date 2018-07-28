@@ -15,6 +15,17 @@
           <h2><a href="#" rel="author" @href="studio/gallery/{0} author" lquery="(text author)">AUTHOR</a></h2>
           <h3>Import from another platform</h3>
         </section>
+        <c:when test="job">
+          <section class="job">
+            <i class="fas" lquery="(add-class (studio::status->icon (studio::status job)))"></i>
+            <time lquery="(time (studio::start-time job))">XXXX.XX</time>
+            <span class="count" lquery="(text (length (studio::results job)))">X</span>
+            <span class="status" lquery="(text (studio::status job))">CREATED</span>
+            <c:when test="(eql :running (studio::status job))">
+              <a class="button" @href="studio/api/studio/import/stop?browser=true">Stop</a>
+            </c:when>
+          </section>
+        </c:when>
         <section class="services">
           <a class="service" @href="studio/api/studio/import/tumblr/authorize">
             <i class="fab fa-tumblr-square" />

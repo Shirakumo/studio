@@ -69,7 +69,10 @@
 (define-api studio/gallery/delete (author) ()
   (let ((gallery (ensure-gallery author)))
     (check-permitted :delete-gallery gallery)
-    (delete-gallery author)))
+    (delete-gallery author)
+    (if (string= (post/get "browser") "true")
+        (redirect #@"studio/")
+        (api-output T :message "Gallery deleted."))))
 
 (define-api studio/upload (id) ()
   (let ((upload (ensure-upload id)))

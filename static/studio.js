@@ -408,6 +408,7 @@ var Studio = function(){
         if(next){
             next.parentElement.removeChild(next);
             next = self.extractPage(next.getAttribute("href"));
+            if(self.isScrolledToBottom()){ fetchNext(); }
             window.addEventListener("scroll", function(ev){
                 if(self.isScrolledToBottom()){ fetchNext(); }
                 var largest = null;

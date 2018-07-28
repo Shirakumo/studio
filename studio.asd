@@ -12,13 +12,15 @@
                (:file "objects")
                (:file "frontend")
                (:file "api")
-               (:file "import"))
+               (:file "import")
+               (:file "import-tumblr"))
   :depends-on ((:interface :database)
                (:interface :user)
                (:interface :auth)
                (:interface :profile)
+               :north-drakma
+               :dexador
                :humbler
-               :drakma
                :trivial-thumbnail
                :r-data-model
                :r-clip

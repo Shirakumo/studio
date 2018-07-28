@@ -29,8 +29,8 @@
           (declare (ignore ss mm hh d))
           (setf y cy m cm))))
     (list (encode-universal-time 0 0 0 1 m y 0)
-          (multiple-value-bind (y+ m) (floor (1+ m) 12)
-            (encode-universal-time 0 0 0 1 m (+ y y+) 0)))))
+          (multiple-value-bind (y+ m) (floor m 12)
+            (encode-universal-time 0 0 0 1 (1+ m) (+ y y+) 0)))))
 
 (defun format-date (time)
   (multiple-value-bind (ss mm hh d m y) (decode-universal-time time 0)
@@ -86,3 +86,10 @@
        ,@(loop for (key val) on entries by #'cddr
                collect `(setf (gethash ',key ,table) ,val))
        ,table)))
+
+(defun status->icon (status)
+  (ecase status
+    (:created "fa-asterisk")
+    (:running "fa-spin fa-hourglass-half")
+    (:completed "fa-check")
+    (:aborted "fa-ban")))

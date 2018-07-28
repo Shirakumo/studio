@@ -130,7 +130,7 @@
                                   :amount 1 :fields '("time") :sort '((time :desc)))))
          (newer (first (db:select 'uploads (db:query (:and (:< latest 'time)
                                                            (:= 'author author)))
-                                  :amount 1 :fields '("time") :sort '((time :desc))))))
+                                  :amount 1 :fields '("time") :sort '((time :asc))))))
     (values (when older
               (list (format-date (gethash "time" older))
                     (if (< (first date) (gethash "time" older))
@@ -196,9 +196,11 @@
    (mconfig-pathname #.*package*)))
 
 (defun upload-pathname (upload)
-  (make-pathname :name NIL :type NIL
-                 :directory `(:absolute ,@(rest (pathname-directory (mconfig-pathname #.*package*)))
-                                        "uploads" ,(princ-to-string (dm:id upload)))))
+  (let ((config (mconfig-pathname #.*package*)))
+    (make-pathname :name NIL :type NIL
+                   :directory `(:absolute ,@(rest (pathname-directory config))
+                                          "uploads" ,(princ-to-string (dm:id upload)))
+                   :defaults config)))
 
 (defun %handle-new-files (upload files)
   (let ((id (dm:id upload)))
@@ -217,10 +219,12 @@
 
 (defun %dispose-files (pathnames)
   (dolist (file pathnames)
-    (handler-case (delete-file file)
+    (handler-case (if (uiop:directory-pathname-p file)
+                      (uiop:delete-empty-directory file)
+                      (delete-file file))
       (error (e)
-        (v:debug :radiance.studio e)
-        (v:warn :radiance.studio "Failed to delete file ~a." file)))))
+        (l:debug :radiance.studio e)
+        (l:warn :radiance.studio "Failed to delete file ~a" file)))))
 
 (defun make-gallery (author &key description cover)
   (db:with-transaction ()
@@ -246,7 +250,9 @@
 
 (defun delete-gallery (gallery)
   (db:with-transaction ()
-    (let ((gallery (ensure-gallery gallery)))
+    (let* ((gallery (ensure-gallery gallery))
+           (job (import-job (dm:field gallery "author"))))
+      (when job (stop-import job))
       (db:iterate 'uploads (db:query (:= 'author (dm:field gallery "author")))
                   (lambda (row)
                     (delete-upload (make-instance 'dm:data-model :collection 'uploads :field-table row :inserted T))))

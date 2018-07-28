@@ -379,6 +379,26 @@
     :display flex)))
 
  (.import
+  (.job
+   :max-width 1100px
+   :margin 2em auto
+   :background (hex 333333)
+   :color (hex FFFFFF)
+   :display flex
+   :padding 1em
+   :align-items center
+   (i :margin-right 1em)
+   (time :margin-right 1em)
+   (.button
+    :color (hex FFFFFF)
+    :text-decoration none
+    :display inline-block
+    :padding 0.1em 0.5em
+    :background (hex 555555))
+   ((:and .button :hover) :background (hex 888888))
+   (.status :flex-grow 1 :text-align center)
+   ((:and .status :before) :content "Status: ")
+   ((:and .count :before) :content "Imported: "))
   (.services
    :display flex
    :justify-content center
