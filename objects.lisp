@@ -344,7 +344,7 @@
   (when user
     (< 0 (db:count 'galleries (db:query (:= 'author (user:id user)))))))
 
-(defun permitted-p (perm &optional object (user (auth:current)))
+(defun permitted-p (perm &optional object (user (auth:current "anonymous")))
   (when user
     (ecase perm
       (:import (user:check user (perm studio upload import)))
@@ -365,7 +365,7 @@
                                 (user:check user (perm studio gallery delete own)))
                            (user:check user (perm studio gallery delete)))))))
 
-(defun check-permitted (perm &optional object (user (auth:current)))
+(defun check-permitted (perm &optional object (user (auth:current "anonymous")))
   (unless (permitted-p perm object user)
     (error 'request-denied :message (format NIL "You are not allowed to ~(~a~)~@[ this ~a~]"
                                             perm (when object (collection->name (dm:collection object)))))))

@@ -21,6 +21,13 @@ var Studio = function(){
         return result;
     };
 
+    self.addEventListeners = function(target, events, func){
+        events.forEach(function(event){
+            target.addEventListener(event, func);
+        });
+        return target;
+    };
+
     self.equalp = function(a, b){
         if(a === null || b === null){
             return a === b;
@@ -81,8 +88,9 @@ var Studio = function(){
             };
         }else{
             var now = new Date();
+            var author = document.querySelector("a[rel=author]");
             return {
-                user: document.querySelector("a[rel=author]").innerText,
+                user: (author)?author.innerText:null,
                 tag: null,
                 date: (now.getMonth()+1)+"."+now.getFullYear(),
                 offset: 0
@@ -255,37 +263,45 @@ var Studio = function(){
                 }
             });
 
-            image.addEventListener("drag", function(ev){
+            var handleDragOver = function(y, target){
+                var source = images.querySelector(".image.move");
+                while(target && target != document && !target.classList.contains("image"))
+                    target = target.parentNode;
+                if(source && target && target != document && target != source){
+                    var g = target.getBoundingClientRect();
+                    if(y < g.top+(g.bottom-g.top)/2){
+                        images.insertBefore(source, target);
+                    }else{
+                        images.insertBefore(source, target.nextSibling);
+                    }
+                }
+            };
+
+            self.addEventListeners(image, ["drag","touchmove"], function(ev){
                 var b = window.innerHeight / 20;
                 if(ev.clientY < b){
                     window.scrollBy({top: -20, behaviour: "smooth"});
                 }else if(window.innerHeight < ev.clientY + 2*b){
                     window.scrollBy({top: +20, behaviour: "smooth"});
                 }
+                if(ev instanceof TouchEvent){
+                    var target = document.elementFromPoint(ev.touches.item(0).pageX, ev.touches.item(0).pageY);
+                    if(target) handleDragOver(ev.touches.item(0).clientY, target);
+                }
             });
 
-            image.addEventListener("dragstart", function(ev){
-                ev.dataTransfer.effectAllowed = "move";
+            self.addEventListeners(image, ["dragstart","touchstart"], function(ev){
+                if(ev instanceof DragEvent) ev.dataTransfer.effectAllowed = "move";
                 image.classList.add("move");
             });
 
             image.addEventListener("dragover", function(ev){
                 ev.preventDefault();
                 ev.dataTransfer.dropEffect = "move";
-                var source = images.querySelector(".image.move");
-                var target = ev.target;
-                while(target && !target.classList.contains("image")) target = target.parentNode;
-                if(source && target && target != source){
-                    var g = target.getBoundingClientRect();
-                    if(ev.clientY < g.top+(g.bottom-g.top)/2){
-                        images.insertBefore(source, target);
-                    }else{
-                        images.insertBefore(source, target.nextSibling);
-                    }
-                }
+                handleDragOver(ev.clientY, ev.target);
             });
 
-            image.addEventListener("dragend", function(ev){
+            self.addEventListeners(image, ["dragend","touchend","touchcancel"], function(ev){
                 ev.preventDefault();
                 image.classList.remove("move");
             });
@@ -382,6 +398,10 @@ var Studio = function(){
         });
     };
 
+    var initFront = function(root){
+        self.log("Init front", root);
+    };
+
     var initSettings = function(root){
         self.log("Init settings", root);
     };
@@ -448,11 +468,13 @@ var Studio = function(){
     };
 
     self.init = function(root){
-        var upload = root.querySelector(".upload");
-        var gallery = root.querySelector(".gallery");
-        var view = root.querySelector(".view");
-        var settings = root.querySelector(".settings");
-        
+        var front = root.querySelector("main.front");
+        var upload = root.querySelector("form.upload");
+        var gallery = root.querySelector("main.gallery");
+        var view = root.querySelector("main.view");
+        var settings = root.querySelector("main.settings");
+
+        if(front) initFront(front);
         if(upload) initUpload(upload);
         if(gallery) initGallery(gallery);
         if(view) initView(view);
