@@ -39,7 +39,9 @@
                       (type (:varchar 32)))
              :indices '(upload))
   (db:create 'tags '((upload :id)
-                     (tag (:varchar 32)))
+                     (tag (:varchar 32))
+                     (author :integer)
+                     (time (:integer 5)))
              :indices '(upload tag)))
 
 (defun ensure-gallery (gallery-ish &optional (errorp T))
@@ -123,15 +125,24 @@
   (dm:get 'galleries (db:query :all) :skip skip :amount amount :sort '((last-update :desc))))
 
 (defun page-marks (uploads date offset author &optional tag)
-  ;; FIXME: TAG
   (let* ((oldest (if uploads (dm:field (car (last uploads)) "time") (first date)))
          (latest (if uploads (dm:field (first uploads) "time") (second date)))
-         (older (first (db:select 'uploads (db:query (:and (:< 'time oldest)
-                                                           (:= 'author author)))
-                                  :amount 1 :fields '("time") :sort '((time :desc)))))
-         (newer (first (db:select 'uploads (db:query (:and (:< latest 'time)
-                                                           (:= 'author author)))
-                                  :amount 1 :fields '("time") :sort '((time :asc))))))
+         (older (first (if tag
+                           (db:select 'tags (db:query (:and (:< 'time oldest)
+                                                            (:= 'tag tag)
+                                                            (:= 'author author)))
+                                      :amount 1 :fields '("time") :sort '((time :desc)))
+                           (db:select 'uploads (db:query (:and (:< 'time oldest)
+                                                               (:= 'author author)))
+                                      :amount 1 :fields '("time") :sort '((time :desc))))))
+         (newer (first (if tag
+                           (db:select 'tags (db:query (:and (:< latest 'time)
+                                                            (:= 'tag tag)
+                                                            (:= 'author author)))
+                                      :amount 1 :fields '("time") :sort '((time :asc)))
+                           (db:select 'uploads (db:query (:and (:< latest 'time)
+                                                               (:= 'author author)))
+                                      :amount 1 :fields '("time") :sort '((time :asc)))))))
     (values (when older
               (list (format-date (gethash "time" older))
                     (if (< (first date) (gethash "time" older))
@@ -150,30 +161,17 @@
         (skip (or skip 0))
         (amount (or amount (config :per-page :uploads))))
     (cond (tag
-           (let ((uploads ()) (count 0) (uid (user:id user)))
-             ;; KLUDGE: THIS IS SLOW AND STUPID
-             (loop for i from 0 by amount
-                   for found = NIL
-                   do (db:iterate 'tags (db:query (:and (:= 'tag tag)))
-                                  (lambda (data)
-                                    (setf found T)
-                                    (let* ((id (gethash "upload" data))
-                                           (upload (dm:get-one 'uploads (if date
-                                                                            (db:query (:and (:= '_id id)
-                                                                                            (:= 'author uid)
-                                                                                            (:<= min-date 'time)
-                                                                                            (:<  'time max-date)))
-                                                                            (db:query (:and (:= '_id id)
-                                                                                            (:= 'author uid)))))))
-                                      (when upload
-                                        (cond ((< count skip))
-                                              ((< count (+ amount skip))
-                                               (push upload uploads)))
-                                        (incf count))))
-                                  :fields '(upload) :skip i :amount amount)
-                      (unless found
-                        (return-from uploads
-                          (sort uploads #'> :key (lambda (a) (dm:field a "time"))))))))
+           (db:iterate 'tags (cond (date
+                                    (db:query (:and (:= 'author (user:id user))
+                                                    (:<= min-date 'time)
+                                                    (:<  'time max-date)
+                                                    (:= 'tag tag))))
+                                   (T
+                                    (db:query (:and (:= 'author (user:id user))
+                                                    (:= 'tag tag)))))
+                       (lambda (data)
+                         (dm:get-one 'uploads (db:query (:= '_id (gethash "upload" data)))))
+                       :fields '(upload) :skip skip :amount amount :accumulate T :sort '((time :desc))))
           (T
            (dm:get 'uploads (cond ((and date author-p)
                                    (db:query (:and (:= 'author (user:id user))
@@ -263,10 +261,11 @@
 
 (defun make-upload (title files &key description (author (auth:current)) (time (get-universal-time)) tags (visibility :public))
   (db:with-transaction ()
-    (let ((upload (dm:hull 'uploads)))
+    (let ((upload (dm:hull 'uploads))
+          (uid (user:id author)))
       (setf (dm:field upload "title") title)
       (setf (dm:field upload "description") (or description ""))
-      (setf (dm:field upload "author") (user:id author))
+      (setf (dm:field upload "author") uid)
       (setf (dm:field upload "time") time)
       (setf (dm:field upload "visibility") (visibility->int visibility))
       (dm:insert upload)
@@ -274,8 +273,11 @@
         ;; FIXME: Clean up files in case of erroneous unwind.
         (ensure-directories-exist (upload-pathname upload))
         (%handle-new-files upload files)
-        (dolist (tag tags)
-          (db:insert 'tags `(("upload" . ,id) ("tag" . ,tag)))))
+        (dolist (tag (remove-duplicates tags :test #'string-equal))
+          (db:insert 'tags `(("upload" . ,id)
+                             ("tag" . ,tag)
+                             ("author" . ,uid)
+                             ("time" . ,time)))))
       (update-gallery (user:id author) :last-update (get-universal-time))
       upload)))
 
@@ -297,8 +299,11 @@
         (dm:save upload)
         (when tags-p
           (db:remove 'tags (db:query (:= 'upload id)))
-          (dolist (tag tags)
-            (db:insert 'tags `(("upload" . ,id) ("tag" . ,tag)))))
+          (dolist (tag (remove-duplicates tags :test #'string-equal))
+            (db:insert 'tags `(("upload" . ,id)
+                               ("tag" . ,tag)
+                               ("author" . ,(dm:field upload "author"))
+                               ("time" . ,(dm:field upload "time"))))))
         (when files-p
           (let ((to-upload ()) (to-keep ()))
             ;; Determine order numbers and update existing files.
