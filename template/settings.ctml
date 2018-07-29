@@ -10,28 +10,27 @@
   <body>
     <article class="studio" id="top">
       <c:splice lquery='(html (template-file "header.ctml" :studio))'/>
-      <main class="settings">
-        <form>
-          <section class="info">
-            <img src="#" class="avatar" lquery="(attr :src (profile:avatar author 128))" />
-            <h2><a href="#" rel="author" @href="studio/gallery/{0} author" lquery="(text author)">AUTHOR</a></h2>
-          </section>
-          <textarea class="description" name="description" placeholder="A short description of your gallery" lquery="(text description)"></textarea>
-          <input type="hidden" name="author" lquery="(val author)" />
-          <input type="hidden" name="browser" value="true" />
-          <nav>
-            <c:if test="exists">
-              <c:then>
-                <input type="submit" @formaction="/api/studio/gallery/edit" value="Save" />
-                <input type="submit" @formaction="/api/studio/gallery/delete" value="Delete" />
-              </c:then>
-              <c:else>
-                <input type="submit" @formaction="/api/studio/gallery/create" value="Submit" />
-              </c:else>
-            </c:if>
-          </nav>
-        </form>
-      </main>
+      <form class="settings">
+        <section class="info">
+          <img src="#" class="avatar" lquery="(attr :src (profile:avatar author 128))" />
+          <h2><a href="#" rel="author" @href="studio/gallery/{0} author" lquery="(text author)">AUTHOR</a></h2>
+          <a class="button" title="Import from another platform." @href="studio/import"><i class="fas fa-file-import"></i> Import</a>
+        </section>
+        <textarea class="description" name="description" placeholder="A short description of your gallery" lquery="(text description)"></textarea>
+        <input type="hidden" name="author" lquery="(val author)" />
+        <input type="hidden" name="browser" value="true" />
+        <nav>
+          <c:if test="exists">
+            <c:then>
+              <input type="submit" @formaction="/api/studio/gallery/edit" value="Save" />
+              <input type="submit" @formaction="/api/studio/gallery/delete" value="Delete" />
+            </c:then>
+            <c:else>
+              <input type="submit" @formaction="/api/studio/gallery/create" value="Register" />
+            </c:else>
+          </c:if>
+        </nav>
+      </form>
       <footer>
         Running on <a href="https://github.com/Shirakumo/studio">Studio</a>
       </footer>

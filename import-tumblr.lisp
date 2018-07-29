@@ -129,14 +129,19 @@
       (setf (session:field 'import/tumblr-secret) (north:token-secret humbler:*client*))
       (redirect url))))
 
-(define-api studio/import/tumblr/authenticate (oauth_verifier oauth_token) ()
+(define-api studio/import/tumblr/authenticate (&optional oauth_verifier oauth_token) ()
   (check-permitted :import)
   (with-tumblr-oauth (:secret (session:field 'import/tumblr-secret))
-    (north:complete-authentication humbler:*client* oauth_verifier oauth_token)
-    (redirect (uri-to-url #@"studio/import/tumblr"
-                          :representation :external
-                          :query `(("token" . ,(north:token humbler:*client*))
-                                   ("secret" . ,(north:token-secret humbler:*client*)))))))
+    (cond ((and oauth_verifier oauth_token)
+           (north:complete-authentication humbler:*client* oauth_verifier oauth_token)
+           (redirect (uri-to-url #@"studio/import/tumblr"
+                                 :representation :external
+                                 :query `(("token" . ,(north:token humbler:*client*))
+                                          ("secret" . ,(north:token-secret humbler:*client*))))))
+          (T
+           (redirect (uri-to-url #@"studio/import"
+                                 :representation :external
+                                 :query `(("message" . "Authentication rejected."))))))))
 
 (defun %tumblr-import-api (ids blog token secret tag)
   (check-permitted :import)
@@ -153,8 +158,7 @@
                             :representation :external
                             :query `(("token" . ,token)
                                      ("secret" . ,secret)
-                                     ("blog" . ,blog)
-                                     ("message" . "Import started."))))
+                                     ("blog" . ,blog))))
       (api-output T :message "Import started.")))
 
 (define-api studio/import/tumblr (id[] blog token secret) ()

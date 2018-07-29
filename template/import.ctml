@@ -29,7 +29,7 @@
         </c:when>
         <section class="services">
           <a class="service" @href="studio/api/studio/import/tumblr/authorize">
-            <i class="fab fa-tumblr-square" />
+            <i class="fab fa-tumblr" />
             Tumblr
           </a>
         </section>

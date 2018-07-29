@@ -367,6 +367,16 @@
        :animation-timing-function ease-in-out
        :animation-iteration-count infinite))))))
 
+ ((:or .settings .import)
+  (.button
+   :color (hex FFFFFF)
+   :text-decoration none
+   :display inline-block
+   :margin 0 0.2em
+   :padding 0.1em 0.5em
+   :background (hex 555555))
+  ((:and .button :hover) :background (hex 888888)))
+
  (.settings
   ((:or input textarea select)
    :display block
@@ -375,12 +385,11 @@
    :color inherit
    :font-size inherit
    :font-family inherit)
-  (form
-   (.description :min-height 5em)
-   (nav
-    :max-width 1100px
-    :margin 0 auto
-    :display flex)))
+  (.description :min-height 5em)
+  (nav
+   :max-width 1100px
+   :margin 0 auto
+   :display flex))
 
  (.import
   (.job
@@ -393,13 +402,6 @@
    :align-items center
    (i :margin-right 1em)
    (time :margin-right 1em)
-   (.button
-    :color (hex FFFFFF)
-    :text-decoration none
-    :display inline-block
-    :padding 0.1em 0.5em
-    :background (hex 555555))
-   ((:and .button :hover) :background (hex 888888))
    (.status :flex-grow 1 :text-align center)
    ((:and .status :before) :content "Status: ")
    ((:and .count :before) :content "Imported: "))
@@ -458,19 +460,17 @@
 (.prompt
  :position fixed
  :top 0 :left 0 :bottom 0 :right 0
- :background (rgba 120 120 120 0.5)
+ :background (rgba 0 0 0 0.5)
  :z-index 100
  (.container
-  :border-radius 1em
   :padding 1em
   :background (hex 333333)
   :color (hex FFFFFF)
   :max-width 500px
   :margin 5em auto
-  :display flex
-  :flex-wrap wrap
   (i :font-size 3em
-     :margin 0.1em)
+     :margin 0.1em 0.3em 0.1em 0.1em
+     :float left)
   (p :padding 1em
      :margin 0
      :flex-grow 1)
@@ -494,7 +494,6 @@
             (75% :object-position 100% 100%)
             (100% :object-position 50% 50%))
 
-;; FIXME: Mobile/Limited Width
 (:media (:max-width 800px)
         (article.studio
          (header

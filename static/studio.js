@@ -191,7 +191,7 @@ var Studio = function(){
         return (window.innerHeight + window.pageYOffset) >= document.body.offsetHeight - 2;
     };
 
-    self.prompt = function(message, options){
+    self.prompt = function(options){
         options = options || {};
         var prompt = self.constructElement("div", {
             classes: ["prompt", options.classes],
@@ -389,7 +389,10 @@ var Studio = function(){
                 };
                 
                 if(action == "Delete") {
-                    self.prompt("Are you sure you want to delete this?", {onYes: submit});
+                    self.prompt({
+                        message: "Are you sure you want to delete this?",
+                        onYes: submit
+                    });
                 } else {
                     submit();
                 }
@@ -404,6 +407,25 @@ var Studio = function(){
 
     var initSettings = function(root){
         self.log("Init settings", root);
+
+        var forceDelete = false;
+        var deleteButton = root.querySelector("input[value=Delete]");
+        if(deleteButton){
+            deleteButton.addEventListener("click", function(ev){
+                if(!forceDelete){
+                    ev.preventDefault();
+                    self.prompt({
+                        message: "Are you sure you want to delete your gallery and all of your uploads?",
+                        onYes: function(){
+                            forceDelete = true;
+                            root.querySelector("input[value=Delete]").click();
+                        }
+                    });
+                    return false;
+                }
+                return true;
+            });
+        }
     };
 
     var initGallery = function(root){
@@ -468,17 +490,17 @@ var Studio = function(){
     };
 
     self.init = function(root){
-        var front = root.querySelector("main.front");
-        var upload = root.querySelector("form.upload");
-        var gallery = root.querySelector("main.gallery");
-        var view = root.querySelector("main.view");
-        var settings = root.querySelector("main.settings");
+        var front = root.querySelector("article.studio>.front");
+        var upload = root.querySelector("article.studio>.upload");
+        var gallery = root.querySelector("article.studio>.gallery");
+        var view = root.querySelector("article.studio>.view");
+        var settings = root.querySelector("article.studio>.settings");
 
         if(front) initFront(front);
         if(upload) initUpload(upload);
         if(gallery) initGallery(gallery);
         if(view) initView(view);
-        if(settings) initView(settings);
+        if(settings) initSettings(settings);
     };
 };
 

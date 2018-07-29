@@ -322,7 +322,7 @@
             ;; FIXME: Clean up files in case of failed commit.
             (%handle-new-files upload to-upload)))))
     ;; Do this late so we only delete files on successful TX commit.
-    (%dispose-files to-delete)
+    (%dispose-files (nreverse to-delete))
     upload))
 
 (defun delete-upload (upload)
@@ -338,7 +338,7 @@
         (db:remove 'tags (db:query (:= 'upload id)))
         (dm:delete upload)))
     ;; Do this late so we only delete files on successful TX commit.
-    (%dispose-files to-delete)))
+    (%dispose-files (nreverse to-delete))))
 
 (defun has-gallery-p (&optional (user (auth:current)))
   (when user
