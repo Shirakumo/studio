@@ -74,6 +74,24 @@
         (redirect #@"studio/")
         (api-output T :message "Gallery deleted."))))
 
+(define-api studio/gallery/atom (user &optional tag) ()
+  (let* ((gallery (ensure-gallery user))
+         (uploads (uploads (dm:field gallery "author") :tag tag :author-p NIL)))
+    (setf (content-type *response*) "application/atom+xml; charset=utf-8")
+    (handler-bind ((plump:invalid-xml-character #'abort)
+                   (plump:discouraged-xml-character #'muffle-warning))
+      (let ((plump:*tag-dispatchers* plump:*xml-tags*))
+        (plump:serialize
+         (r-clip:process
+          (@template "atom.ctml")
+          :author user
+          :title (format NIL "~a's Gallery" user)
+          :description (dm:field gallery "description")
+          :tag tag
+          :updated (if uploads (dm:field (first uploads) "time") 0)
+          :uploads uploads)
+         NIL)))))
+
 (define-api studio/upload (id) ()
   (let ((upload (ensure-upload id)))
     (check-permitted :view upload)

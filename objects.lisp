@@ -95,17 +95,21 @@
             :sort '(("order" :asc)))))
 
 (defun file-link (file &key thumb)
-  (let ((file (ensure-file file)))
+  (let ((id (etypecase file
+              (integer file)
+              (T (dm:id (ensure-file file))))))
     (uri-to-url (radiance:make-uri :domains '("studio")
                                    :path (format NIL "api/studio/file"))
                 :representation :external
-                :query (list* (cons "id" (princ-to-string (dm:id file)))
+                :query (list* (cons "id" (princ-to-string id))
                               (when thumb '(("thumb" . "true")))))))
 
 (defun upload-link (upload)
-  (let ((upload (ensure-upload upload)))
+  (let ((id (etypecase upload
+              (integer upload)
+              (T (dm:id (ensure-upload upload))))))
     (uri-to-url (radiance:make-uri :domains '("studio")
-                                   :path (format NIL "view/~a" (dm:id upload)))
+                                   :path (format NIL "view/~a" id))
                 :representation :external)))
 
 (defun gallery-link (user &key tag date offset)
@@ -202,6 +206,18 @@
                    :directory `(:absolute ,@(rest (pathname-directory config))
                                           "uploads" ,(princ-to-string (dm:id upload)))
                    :defaults config)))
+
+(defun upload-atom-content (upload)
+  (with-output-to-string (out)
+    (format out "<div class=\"upload\">")
+    (format out "~%<div class=\"images\">")
+    (dolist (file (upload-files upload))
+      (format out "~%  <img src=~s>" (file-link file)))
+    (format out "~%</div>")
+    (format out "~%<p class=\"description\">")
+    (plump:encode-entities (dm:field upload "description") out)
+    (format out "</p>")
+    (format out "~%</div>")))
 
 (defvar *volatile-files* ())
 

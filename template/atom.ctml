@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title type="text" lquery="(text title)">TITLE</title>
+  <subtitle type="html" lquery="(text description)">
+    DESCRIPTION
+  </subtitle>
+  <updated lquery="(text (format-machine-date updated))"></updated>
+  <id lquery="(text (studio::gallery-link author))"></id>
+  <link rel="alternate" type="text/html" hreflang="en" @href="reader/" />
+  <link rel="self" type="application/atom+xml" @href='studio/api/studio/gallery/atom?user={0}&tag={1} author (or tag "")'/>
+  <generator uri="http://github.com/Shirakumo/studio/" version="1.0">Studio</generator>
+  <c:splice iterate="uploads">
+    <entry>
+      <title lquery="(text title)">TITLE</title>
+      <link rel="alternate" type="text/html" @href="studio/view/{0} _id"/>
+      <id lquery="(text (studio::upload-link *))">ID</id>
+      <published lquery="(text (format-machine-date time))">TIME</published>
+      <updated lquery="(text (format-machine-date time))">TIME</updated>
+      <author>
+        <name lquery="(text (user:username author))">AUTHOR</name>
+        <c:when test='(user:field "homepage" author)'><uri lquery='(text (user:field "homepage" author))'>http://example.org/</uri></c:when>
+        <c:when test='(user:field "email" author)'><email lquery='(text (user:field "email" author))'>author@example.com</email></c:when>
+      </author>
+      <content type="html" lquery="(text (studio::upload-atom-content *))">
+        EXCERPT
+      </content>
+    </entry>
+  </c:splice>
+</feed>

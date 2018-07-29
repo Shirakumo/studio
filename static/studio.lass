@@ -282,7 +282,7 @@
    :margin 0
    :width 100%
    :max-width none
-   :padding 0.2em
+   :padding 0.2em 0
    :background (hex 555555)
    :color (hex FFFFFF)
    :text-align center))

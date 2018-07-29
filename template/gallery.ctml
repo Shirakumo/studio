@@ -21,6 +21,8 @@
         <meta property="og:image" lquery='(attr :content (studio::file-link (first *)))' />
       </c:using>
     </c:when>
+    <link @href="studio/api/studio/gallery/atom?user={0}&tag={1} author tag" type="application/atom+xml" rel="alternate"
+          lquery='(attr :title (format NIL "~a~@[/~a~] Atom Feed" author tag))'/>
   </head>
   <body>
     <article class="studio" id="top">
