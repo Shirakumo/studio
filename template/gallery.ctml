@@ -44,6 +44,7 @@
             <c:else><h3>Gallery</h3></c:else>
           </c:if>
         </section>
+        <p class="description" lquery="(text description)"></p>
         <c:when test="prev">
           <a class="navlink prev" href="#" lquery="(attr :href prev)">Previous Page</a>
         </c:when>
