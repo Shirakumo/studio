@@ -6,6 +6,16 @@
     <link rel="stylesheet" href="../static/studio.css" @href="/static/studio/studio.css" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" lquery='(attr :content title)' />
+    <meta name="twitter:description" lquery='(attr :content description)' />
+    <meta name="twitter:image:alt" content="Cover" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" lquery='(attr :content title)' />
+    <meta property="og:description" lquery='(attr :content description)' />
+    <meta name="twitter:image" lquery='(attr :content (studio::file-link (first files)))' />
+    <meta property="og:image" lquery='(attr :content (studio::file-link (first files)))' />
   </head>
   <body>
     <article class="studio" id="top">

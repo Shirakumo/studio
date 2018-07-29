@@ -7,6 +7,20 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
     <link rel="api-base" @href="/api/studio/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" lquery='(attr :content (format NIL "~a&apos;s studio" author))' />
+    <meta name="twitter:description" lquery='(attr :content description)' />
+    <meta name="twitter:image:alt" content="Cover" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" lquery='(attr :content (format NIL "~a&apos;s studio" author))' />
+    <meta property="og:description" lquery='(attr :content description)' />
+    <c:when test="cover">
+      <c:using value="(studio::upload-files cover)">
+        <meta name="twitter:image" lquery='(attr :content (studio::file-link (first *)))' />
+        <meta property="og:image" lquery='(attr :content (studio::file-link (first *)))' />
+      </c:using>
+    </c:when>
   </head>
   <body>
     <article class="studio" id="top">

@@ -45,9 +45,13 @@
 (define-page tag-gallery "studio/^gallery/([^/]+)/tag/(.+?)(?:/([0-9.]+)(?:[ +]([0-9]+))?)?$" (:uri-groups (user tag date offset) :clip "gallery.ctml")
   (let* ((date (parse-date date))
          (offset (maybe-parse-integer offset 0))
+         (gallery (ensure-gallery user))
          (uploads (uploads user :tag tag :date date :skip offset)))
     (multiple-value-bind (older newer) (page-marks uploads date offset (user:id user) tag)
       (r-clip:process T
+                      :description (dm:field gallery "description")
+                      :cover (when (dm:field gallery "cover")
+                               (ensure-upload (dm:field gallery "cover") NIL))
                       :author user
                       :tag tag
                       :uploads uploads
