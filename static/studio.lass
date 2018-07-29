@@ -1,3 +1,13 @@
+(:keyframes slide-object
+            (0%   :object-position 50% 50%)
+            (25%  :object-position 0% 0%)
+            (75%  :object-position 100% 100%)
+            (100% :object-position 50% 50%))
+
+(:keyframes spinner
+            (0%   :top 3em :left 3em :width 0 :height 0 :opacity 0.8)
+            (100% :top 0 :left 0 :width 6em :height 6em :opacity 0))
+
 (html
  :font-family "sans-serif"
  :font-size 14pt
@@ -457,11 +467,12 @@
   (a :color (hex 888888))
   ((:and a :hover) :color (hex EE8800))))
 
-(.prompt
+(.overlay
  :position fixed
  :top 0 :left 0 :bottom 0 :right 0
  :background (rgba 0 0 0 0.5)
- :z-index 100
+ :z-index 100)
+(.prompt
  (.container
   :padding 1em
   :background (hex 333333)
@@ -487,12 +498,26 @@
     :cursor pointer)
    ((:and button :hover)
     :background (hex 555555)))))
-
-(:keyframes slide-object
-            (0% :object-position 50% 50%)
-            (25% :object-position 0% 0%)
-            (75% :object-position 100% 100%)
-            (100% :object-position 50% 50%))
+(.spinner
+ :user-select none
+ (.container
+  :display inline-block
+  :position relative
+  :margin (calc (- 50vh 3em)) (calc (- 50vw 3em))
+  :width 6em
+  :height 6em
+  :text-align center
+  :line-height 6em
+  :color (hex FFFFFF)
+  :font-size 1.5em
+  :text-shadow 0 0 0.1em black
+  (div
+   :position absolute
+   :border 0.1em solid (hex FFFFFF)
+   :opacity 0.8
+   :border-radius 50%
+   :animation "spinner 1.5s cubic-bezier(0, 0.2, 0.8, 1) infinite")
+  ((:and div (:nth-child 2)) :animation-delay -0.5s)))
 
 (:media (:max-width 800px)
         (article.studio

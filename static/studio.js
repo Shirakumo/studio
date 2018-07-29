@@ -191,10 +191,35 @@ var Studio = function(){
         return (window.innerHeight + window.pageYOffset) >= document.body.offsetHeight - 2;
     };
 
+    self.spin = function(options){
+        options = options || {};
+        var spinner = document.querySelector(".spinner");
+        if(options.activate === undefined){
+            options.activate = (spinner)? false : true;
+        }
+        if(options.activate && !spinner){
+            spinner = self.constructElement("div", {
+                classes: ["overlay", "spinner", options.classes],
+                elements: {
+                    "div": {
+                        text: options.message || "Please Wait",
+                        classes: ["container"],
+                        elements: {"a": {tag:"div"},
+                                   "b": {tag:"div"}}
+                    }
+                }
+            });
+            document.querySelector("body").appendChild(spinner);
+        }else if(spinner){
+            spinner.parentElement.removeChild(spinner);
+        }
+        return spinner;
+    };
+
     self.prompt = function(options){
         options = options || {};
         var prompt = self.constructElement("div", {
-            classes: ["prompt", options.classes],
+            classes: ["overlay", "prompt", options.classes],
             elements: {
                 "div": {
                     classes: ["container"],
@@ -374,6 +399,7 @@ var Studio = function(){
                 request.responseType = 'json';
                 request.onload = function(ev){
                     self.log("Submission complete", request);
+                    self.spin({activate: false});
                     if(request.status == 200){
                         var url = request.response["data"]["url"];
                         window.location = url || document.querySelector("[rel=author]").getAttribute("href");
@@ -384,6 +410,7 @@ var Studio = function(){
 
                 var submit = function(){
                     self.log("Submitting", action, form);
+                    self.spin({activate: true});
                     request.open("POST", ev.target.getAttribute("formaction"));
                     request.send(form);
                 };
