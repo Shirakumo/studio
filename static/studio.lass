@@ -100,15 +100,10 @@
    (.image
     :text-align center
     :padding 1em
+    :display block
     (img
      :max-width (calc (- 90vw 2em))
-     :max-height (calc (- 90vh 4em))))
-   (.image.full
-    :width auto !important
-    :height auto !important
-    (img
-     :max-width none !important
-     :max-height none !important)))
+     :max-height (calc (- 90vh 4em)))))
   ((:or .images.top-to-bottom
         "#top-to-bottom:checked~.images")
    :flex-direction column

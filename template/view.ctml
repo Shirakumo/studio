@@ -39,9 +39,9 @@
         <input class="reading-option" type="checkbox" name="dark" id="dark"/>
         <label class="reading-option" for="dark" title="Dark background"><i class="fas fa-fw fa-moon"/></label>
         <section class="images" iterate="files">
-          <div class="image">
+          <a class="image" lquery="(attr :href (studio::file-link *))">
             <img src="#" lquery="(attr :src (studio::file-link *))" />
-          </div>
+          </a>
         </section>
         <section class="description">
           <div class="meta">
