@@ -498,12 +498,12 @@ var Studio = function(){
     var initView = function(root){
         self.log("Init view", root);
 
-        [].forEach.call(root.querySelectorAll(".image img"), function(img){
-            img.addEventListener("click", function(){
-                if(img.classList.contains("full")){
-                    img.classList.remove("full");
+        [].forEach.call(root.querySelectorAll(".image"), function(image){
+            image.addEventListener("click", function(){
+                if(image.classList.contains("full")){
+                    image.classList.remove("full");
                 }else{
-                    img.classList.add("full");
+                    image.classList.add("full");
                 }
             });
         });
