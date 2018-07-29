@@ -203,6 +203,16 @@
                                           "uploads" ,(princ-to-string (dm:id upload)))
                    :defaults config)))
 
+(defvar *volatile-files* ())
+
+(defmacro with-new-file-handling (&body body)
+  `(let ((*volatile-files* ()))
+     (unwind-protect
+          (multiple-value-prog1
+              (progn ,@body)
+            (setf *volatile-files* ()))
+       (%dispose-files *volatile-files*))))
+
 (defun %handle-new-files (upload files)
   (let ((id (dm:id upload)))
     (loop for i from 0
@@ -212,11 +222,14 @@
              (setf (dm:field hull "order") (or order i))
              (setf (dm:field hull "type") mime)
              (dm:insert hull)
-             (let ((file (file-pathname hull)))
+             (let ((file (file-pathname hull))
+                   (thumb (file-pathname hull :thumb T)))
                (uiop:copy-file path file)
-               (trivial-thumbnail:create file (file-pathname hull :thumb T)
+               (push file *volatile-files*)
+               (trivial-thumbnail:create file thumb
                                          :width (config :thumbnail-size)
-                                         :crop :cover)))))
+                                         :crop :cover)
+               (push thumb *volatile-files*)))))
 
 (defun %dispose-files (pathnames)
   (dolist (file pathnames)
@@ -260,72 +273,72 @@
       (dm:delete gallery))))
 
 (defun make-upload (title files &key description (author (auth:current)) (time (get-universal-time)) tags (visibility :public))
-  (db:with-transaction ()
-    (let ((upload (dm:hull 'uploads))
-          (uid (user:id author)))
-      (setf (dm:field upload "title") title)
-      (setf (dm:field upload "description") (or description ""))
-      (setf (dm:field upload "author") uid)
-      (setf (dm:field upload "time") time)
-      (setf (dm:field upload "visibility") (visibility->int visibility))
-      (dm:insert upload)
-      (let ((id (dm:field upload "_id")))
-        ;; FIXME: Clean up files in case of erroneous unwind.
-        (ensure-directories-exist (upload-pathname upload))
-        (%handle-new-files upload files)
-        (dolist (tag (remove-duplicates tags :test #'string-equal))
-          (db:insert 'tags `(("upload" . ,id)
-                             ("tag" . ,tag)
-                             ("author" . ,uid)
-                             ("time" . ,time)))))
-      (update-gallery (user:id author) :last-update (get-universal-time))
-      upload)))
-
-(defun update-upload (upload &key title description author time (files NIL files-p) (tags NIL tags-p) visibility)
-  (let ((to-delete ()))
+  (with-new-file-handling
     (db:with-transaction ()
-      (setf upload (ensure-upload upload))
-      (let ((id (dm:id upload)))
-        (when title
-          (setf (dm:field upload "title") title))
-        (when description
-          (setf (dm:field upload "description") description))
-        (when author
-          (setf (dm:field upload "author") (user:id author)))
-        (when time
-          (setf (dm:field upload "time") time))
-        (when visibility
-          (setf (dm:field upload "visibility") (visibility->int visibility)))
-        (dm:save upload)
-        (when tags-p
-          (db:remove 'tags (db:query (:= 'upload id)))
+      (let ((upload (dm:hull 'uploads))
+            (uid (user:id author)))
+        (setf (dm:field upload "title") title)
+        (setf (dm:field upload "description") (or description ""))
+        (setf (dm:field upload "author") uid)
+        (setf (dm:field upload "time") time)
+        (setf (dm:field upload "visibility") (visibility->int visibility))
+        (dm:insert upload)
+        (let ((id (dm:field upload "_id")))
+          (ensure-directories-exist (upload-pathname upload))
+          (%handle-new-files upload files)
           (dolist (tag (remove-duplicates tags :test #'string-equal))
             (db:insert 'tags `(("upload" . ,id)
                                ("tag" . ,tag)
-                               ("author" . ,(dm:field upload "author"))
-                               ("time" . ,(dm:field upload "time"))))))
-        (when files-p
-          (let ((to-upload ()) (to-keep ()))
-            ;; Determine order numbers and update existing files.
-            (loop for i from 0
-                  for file in files
-                  do (typecase file
-                       (list
-                        (push (append file (list i)) to-upload))
-                       (T
-                        (let ((file (ensure-file file)))
-                          (push (dm:id file) to-keep)
-                          (when (/= i (dm:field file "order"))
-                            (setf (dm:field file "order") i)
-                            (dm:save file))))))
-            ;; Delete missing files from DB and FS.
-            (loop for file in (upload-files upload)
-                  do (unless (find (dm:id file) to-keep)
-                       (push (file-pathname file) to-delete)
-                       (push (file-pathname file :thumb T) to-delete)
-                       (dm:delete file)))
-            ;; FIXME: Clean up files in case of failed commit.
-            (%handle-new-files upload to-upload)))))
+                               ("author" . ,uid)
+                               ("time" . ,time)))))
+        (update-gallery (user:id author) :last-update (get-universal-time))
+        upload))))
+
+(defun update-upload (upload &key title description author time (files NIL files-p) (tags NIL tags-p) visibility)
+  (let ((to-delete ()))
+    (with-new-file-handling
+      (db:with-transaction ()
+        (setf upload (ensure-upload upload))
+        (let ((id (dm:id upload)))
+          (when title
+            (setf (dm:field upload "title") title))
+          (when description
+            (setf (dm:field upload "description") description))
+          (when author
+            (setf (dm:field upload "author") (user:id author)))
+          (when time
+            (setf (dm:field upload "time") time))
+          (when visibility
+            (setf (dm:field upload "visibility") (visibility->int visibility)))
+          (dm:save upload)
+          (when tags-p
+            (db:remove 'tags (db:query (:= 'upload id)))
+            (dolist (tag (remove-duplicates tags :test #'string-equal))
+              (db:insert 'tags `(("upload" . ,id)
+                                 ("tag" . ,tag)
+                                 ("author" . ,(dm:field upload "author"))
+                                 ("time" . ,(dm:field upload "time"))))))
+          (when files-p
+            (let ((to-upload ()) (to-keep ()))
+              ;; Determine order numbers and update existing files.
+              (loop for i from 0
+                    for file in files
+                    do (typecase file
+                         (list
+                          (push (append file (list i)) to-upload))
+                         (T
+                          (let ((file (ensure-file file)))
+                            (push (dm:id file) to-keep)
+                            (when (/= i (dm:field file "order"))
+                              (setf (dm:field file "order") i)
+                              (dm:save file))))))
+              ;; Delete missing files from DB and FS.
+              (loop for file in (upload-files upload)
+                    do (unless (find (dm:id file) to-keep)
+                         (push (file-pathname file) to-delete)
+                         (push (file-pathname file :thumb T) to-delete)
+                         (dm:delete file)))
+              (%handle-new-files upload to-upload))))))
     ;; Do this late so we only delete files on successful TX commit.
     (%dispose-files (nreverse to-delete))
     upload))
