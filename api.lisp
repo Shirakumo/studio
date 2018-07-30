@@ -28,6 +28,8 @@
            :author (user:username (dm:field upload "author"))
            :tags (upload-tags upload)
            :time (dm:field upload "time")
+           :visibility (->visibility (dm:field upload "visibility"))
+           :description (dm:field upload "description")
            :files (mapcar #'dm:id (upload-files upload))))
 
 (define-api studio/gallery (author) ()

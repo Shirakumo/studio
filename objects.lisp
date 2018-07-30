@@ -129,7 +129,8 @@
   (dm:get 'galleries (db:query :all) :skip skip :amount amount :sort '((last-update :desc))))
 
 (defun page-marks (uploads date offset author &optional tag)
-  (let* ((oldest (if uploads (dm:field (car (last uploads)) "time") (first date)))
+  (let* ((author (user:id author))
+         (oldest (if uploads (dm:field (car (last uploads)) "time") (first date)))
          (latest (if uploads (dm:field (first uploads) "time") (second date)))
          (older (first (if tag
                            (db:select 'tags (db:query (:and (:< 'time oldest)
@@ -378,26 +379,29 @@
   (when user
     (< 0 (db:count 'galleries (db:query (:= 'author (user:id user)))))))
 
+(defparameter *admin-user-p* NIL)
+
 (defun permitted-p (perm &optional object (user (auth:current "anonymous")))
-  (when user
-    (ecase perm
-      (:import (user:check user (perm studio upload import)))
-      (:create (user:check user (perm studio upload create)))
-      (:view (or (= (user:id user) (dm:field object "author"))
-                 (/= (dm:field object "visibility") (visibility->int :private))))
-      (:edit   (or (and (= (user:id user) (dm:field object "author"))
-                        (user:check user (perm studio upload edit own)))
-                   (user:check user (perm studio upload edit))))
-      (:delete (or (and (= (user:id user) (dm:field object "author"))
-                        (user:check user (perm studio upload delete own)))
-                   (user:check user (perm studio upload delete))))
-      (:create-gallery (user:check user (perm studio gallery create)))
-      (:edit-gallery (or (and (if object (= (user:id user) (dm:field object "author")) T)
-                              (user:check user (perm studio gallery edit own)))
-                         (user:check user (perm studio gallery edit))))
-      (:delete-gallery (or (and (if object (= (user:id user) (dm:field object "author")) T)
-                                (user:check user (perm studio gallery delete own)))
-                           (user:check user (perm studio gallery delete)))))))
+  (or *admin-user-p*
+      (when user
+        (ecase perm
+          (:import (user:check user (perm studio upload import)))
+          (:create (user:check user (perm studio upload create)))
+          (:view (or (= (user:id user) (dm:field object "author"))
+                     (/= (dm:field object "visibility") (visibility->int :private))))
+          (:edit   (or (and (= (user:id user) (dm:field object "author"))
+                            (user:check user (perm studio upload edit own)))
+                       (user:check user (perm studio upload edit))))
+          (:delete (or (and (= (user:id user) (dm:field object "author"))
+                            (user:check user (perm studio upload delete own)))
+                       (user:check user (perm studio upload delete))))
+          (:create-gallery (user:check user (perm studio gallery create)))
+          (:edit-gallery (or (and (if object (= (user:id user) (dm:field object "author")) T)
+                                  (user:check user (perm studio gallery edit own)))
+                             (user:check user (perm studio gallery edit))))
+          (:delete-gallery (or (and (if object (= (user:id user) (dm:field object "author")) T)
+                                    (user:check user (perm studio gallery delete own)))
+                               (user:check user (perm studio gallery delete))))))))
 
 (defun check-permitted (perm &optional object (user (auth:current "anonymous")))
   (unless (permitted-p perm object user)

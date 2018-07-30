@@ -63,7 +63,9 @@ var Studio = function(){
 
     self.constructElement = function(tag, options){
         var el = document.createElement(options.tag || tag);
-        el.setAttribute("class", (options.classes||[]).join(" "));
+        (options.classes||[]).forEach(function(clas){
+            if(clas) el.classList.add(clas);
+        });
         if(options.text) el.innerText = options.text;
         if(options.html) el.innerHTML = options.html;
         for(var attr in (options.attributes||{})){
@@ -159,8 +161,11 @@ var Studio = function(){
     };
 
     self.showUpload = function(upload){
+        self.log(upload.visibility);
         var element = self.constructElement("article", {
-            classes: ["image", (1 < upload.files.length)? "multiple" : "NIL"],
+            classes: ["image",
+                      (1 < upload.files.length)? "multiple" : null,
+                     upload.visibility],
             elements: { "a": {
                 attributes: {"href": upload.url},
                 elements: {"img": {

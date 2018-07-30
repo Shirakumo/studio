@@ -55,7 +55,7 @@
             <c:then>
               <time lquery="(text (studio::format-date (clip (first uploads) :time)))">MM.YYYY</time>
               <c:splice iterate="uploads">
-                <article class="image" lquery='(add-class (when (rest (studio::upload-files *)) "multiple"))'>
+                <article class="image" lquery='(add-class (when (rest (studio::upload-files *)) "multiple") (studio::->visibility visibility))'>
                   <a href="#" lquery="(attr :href (studio::upload-link *))">
                     <c:using value="(studio::upload-files *)">
                       <img src="#" lquery='(attr :src (studio::file-link (first *) :thumb T))' />
