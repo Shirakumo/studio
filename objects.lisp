@@ -195,18 +195,16 @@
                    :skip skip :amount amount :sort '((time :desc)))))))
 
 (defun file-pathname (file &key thumb)
-  (merge-pathnames
+  (environment-module-pathname
+   #.*package* :data
    (make-pathname :name (format NIL "~a~:[~;-thumb~]" (dm:id file) thumb)
                   :type (mimes:mime-file-type (dm:field file "type"))
-                  :directory `(:relative "uploads" ,(princ-to-string (dm:field file "upload"))))
-   (mconfig-pathname #.*package*)))
+                  :directory `(:relative "uploads" ,(princ-to-string (dm:field file "upload"))))))
 
 (defun upload-pathname (upload)
-  (let ((config (mconfig-pathname #.*package*)))
-    (make-pathname :name NIL :type NIL
-                   :directory `(:absolute ,@(rest (pathname-directory config))
-                                          "uploads" ,(princ-to-string (dm:id upload)))
-                   :defaults config)))
+  (environment-module-pathname
+   #.*package* :data
+   (make-pathname :directory `(:relative "uploads" ,(princ-to-string (dm:id upload))))))
 
 (defun upload-atom-content (upload)
   (with-output-to-string (out)

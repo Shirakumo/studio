@@ -7,12 +7,11 @@
 (in-package #:org.shirakumo.radiance.studio)
 
 (defun cache-page (id)
-  (let ((config (mconfig-pathname #.*package*)))
-    (make-pathname :name (princ-to-string (car (last id)))
-                   :type "html"
-                   :directory `(:absolute ,@(rest (pathname-directory config))
-                                          "cache" ,@(mapcar #'princ-to-string (butlast id)))
-                   :defaults config)))
+  (environment-module-pathname
+   #.*package* :cache
+   (make-pathname :name (princ-to-string (car (last id)))
+                  :type "html"
+                  :directory `(:relative "cache" ,@(mapcar #'princ-to-string (butlast id))))))
 
 (defmacro with-cache ((author &rest id) &body body)
   `(generate-cache ,author (list ,@id)
