@@ -7,6 +7,12 @@
 (asdf:defsystem #:studio
   :defsystem-depends-on (:radiance)
   :class "radiance:virtual-module"
+  :author "Nicolas Hafner <shinmera@tymoon.eu>"
+  :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"
+  :license "Artistic"
+  :version "1.0.0"
+  :description "An image gallery hosting service"
+  :homepage "https://github.com/Shirakumo/studio"
   :components ((:file "module")
                (:file "toolkit")
                (:file "objects")
