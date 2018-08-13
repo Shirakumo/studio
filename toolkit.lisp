@@ -16,6 +16,21 @@
       (parse-integer thing)
       default))
 
+(defun ensure-date (date-ish)
+  (etypecase date-ish
+    (cons date-ish)
+    (string (parse-date date-ish))
+    (integer (timestamp-date date-ish))
+    ((eql T) (timestamp-date (get-universal-time)))))
+
+(defun timestamp-date (universal-time)
+  (multiple-value-bind (ss mm hh d m y)
+      (decode-universal-time universal-time 0)
+    (declare (ignore ss mm hh d))
+    (list (encode-universal-time 0 0 0 1 m y 0)
+          (multiple-value-bind (y+ m) (floor m 12)
+            (encode-universal-time 0 0 0 1 (1+ m) (+ y y+) 0))  )))
+
 (defun parse-date (date)
   (let (y m)
     (handler-case
@@ -33,9 +48,10 @@
             (encode-universal-time 0 0 0 1 (1+ m) (+ y y+) 0)))))
 
 (defun format-date (time)
-  (multiple-value-bind (ss mm hh d m y) (decode-universal-time time 0)
-    (declare (ignore ss mm hh d))
-    (format NIL "~d.~d" m y)))
+  (let ((time (if (consp time) (car time) time)))
+    (multiple-value-bind (ss mm hh d m y) (decode-universal-time time 0)
+      (declare (ignore ss mm hh d))
+      (format NIL "~d.~d" m y))))
 
 (defun adjust-date (time months)
   (multiple-value-bind (ss mm hh d m y) (decode-universal-time time 0)
