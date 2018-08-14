@@ -39,7 +39,7 @@
                       (type (:varchar 32)))
              :indices '(upload))
   (db:create 'tags '((upload :id)
-                     (tag (:varchar 32))
+                     (tag (:varchar 64))
                      (author :integer)
                      (time (:integer 5)))
              :indices '(upload tag)))
@@ -287,12 +287,17 @@
                     (delete-upload (make-instance 'dm:data-model :collection 'uploads :field-table row :inserted T))))
       (dm:delete gallery))))
 
+(defun ensure-length (string &optional (length 64))
+  (if (<= length (length string))
+      (subseq string 0 length)
+      string))
+
 (defun make-upload (title files &key description (author (auth:current)) (time (get-universal-time)) tags (visibility :public))
   (with-new-file-handling
     (db:with-transaction ()
       (let ((upload (dm:hull 'uploads))
             (uid (user:id author)))
-        (setf (dm:field upload "title") title)
+        (setf (dm:field upload "title") (ensure-length title))
         (setf (dm:field upload "description") (or description ""))
         (setf (dm:field upload "author") uid)
         (setf (dm:field upload "time") time)
@@ -303,7 +308,7 @@
           (%handle-new-files upload files)
           (dolist (tag (remove-duplicates tags :test #'string-equal))
             (db:insert 'tags `(("upload" . ,id)
-                               ("tag" . ,tag)
+                               ("tag" . ,(ensure-length tag))
                                ("author" . ,uid)
                                ("time" . ,time)))))
         (update-gallery (user:id author) :last-update (get-universal-time))
@@ -316,7 +321,7 @@
         (setf upload (ensure-upload upload))
         (let ((id (dm:id upload)))
           (when title
-            (setf (dm:field upload "title") title))
+            (setf (dm:field upload "title") (ensure-length title)))
           (when description
             (setf (dm:field upload "description") description))
           (when author
@@ -330,7 +335,7 @@
             (db:remove 'tags (db:query (:= 'upload id)))
             (dolist (tag (remove-duplicates tags :test #'string-equal))
               (db:insert 'tags `(("upload" . ,id)
-                                 ("tag" . ,tag)
+                                 ("tag" . ,(ensure-length tag))
                                  ("author" . ,(dm:field upload "author"))
                                  ("time" . ,(dm:field upload "time"))))))
           (when files-p
