@@ -483,7 +483,6 @@ var Studio = function(){
         if(next){
             next.parentElement.removeChild(next);
             next = self.extractPage(next.getAttribute("href"));
-            if(self.isScrolledToBottom()){ fetchNext(); }
             window.addEventListener("scroll", function(ev){
                 if(self.isScrolledToBottom()){ fetchNext(); }
                 var largest = null;
@@ -497,6 +496,17 @@ var Studio = function(){
                 });
                 self.changeToPage(self.imagesSectionPage(largest));
             });
+            // We need to run this check delayed because of the following buggy browser behaviour:
+            // The cover we have has a :hover group that expands it to a much larger height.
+            // Typically this height is inhibted by a transition and transition-delay. However,
+            // it appears that during DOMContentReady, the transition and delay are not considered
+            // and the page height is calculated as if the cover was already fully expanded. Thus,
+            // we need to delay the initial check until a time when the page is hopefully already
+            // fully displayed and the :hover property has either reverted or has actually properly
+            // transitioned.
+            setTimeout(function(){
+                if(self.isScrolledToBottom()){ fetchNext(); }
+            }, 1000);
         }
     };
 
