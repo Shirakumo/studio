@@ -22,6 +22,10 @@
                     :permissions :default)
   (apply #'user:add-default-permissions (config :permissions :default)))
 
+(define-version-migration studio (NIL 1.0.0)
+  (dolist (user (user:list))
+    (apply #'user:grant user (config :permissions :default))))
+
 (define-trigger db:connected ()
   (db:create 'galleries '((author :integer)
                           (last-update (:integer 5))
