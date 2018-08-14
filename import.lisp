@@ -26,12 +26,13 @@
 
 (defmethod run-import :around ((job import-job))
   (setf (status job) :running)
-  (restart-case
-      (prog1 (call-next-method)
-        (setf (status job) :completed))
-    (abort-job ()
-      :report "Abort the import job."
-      (setf (status job) :aborted))))
+  (handler-bind ((error (lambda (e) (maybe-invoke-debugger e 'abort-job))))
+    (restart-case
+        (prog1 (call-next-method)
+          (setf (status job) :completed))
+      (abort-job ()
+        :report "Abort the import job."
+        (setf (status job) :aborted)))))
 
 (defmethod start-import ((job import-job))
   (when (and (thread job) (bt:thread-alive-p (thread job)))
