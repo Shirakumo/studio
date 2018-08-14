@@ -47,8 +47,8 @@
                 </li>
               </ul>
               <nav>
-                <input type="submit" @formaction="/api/studio/import/tumblr" value="Import Selected" />
-                <input type="submit" class="everything" @formaction="/api/studio/import/tumblr/all" value="Import Everything" />
+                <input type="submit" @formaction="studio/api/studio/import/tumblr" value="Import Selected" />
+                <input type="submit" class="everything" @formaction="studio/api/studio/import/tumblr/all" value="Import Everything" />
               </nav>
             </c:then>
             <c:else>

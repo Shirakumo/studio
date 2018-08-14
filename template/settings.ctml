@@ -23,11 +23,11 @@
         <nav>
           <c:if test="exists">
             <c:then>
-              <input type="submit" @formaction="/api/studio/gallery/edit" value="Save" />
-              <input type="submit" @formaction="/api/studio/gallery/delete" value="Delete" />
+              <input type="submit" @formaction="studio/api/studio/gallery/edit" value="Save" />
+              <input type="submit" @formaction="studio/api/studio/gallery/delete" value="Delete" />
             </c:then>
             <c:else>
-              <input type="submit" @formaction="/api/studio/gallery/create" value="Register" />
+              <input type="submit" @formaction="studio/api/studio/gallery/create" value="Register" />
             </c:else>
           </c:if>
         </nav>
