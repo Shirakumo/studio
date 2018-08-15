@@ -28,7 +28,7 @@
            :author (user:username (dm:field upload "author"))
            :tags (upload-tags upload)
            :time (dm:field upload "time")
-           :visibility (->visibility (dm:field upload "visibility"))
+           :visibility (string-downcase (->visibility (dm:field upload "visibility")))
            :description (dm:field upload "description")
            :files (mapcar #'dm:id (upload-files upload))))
 
@@ -40,13 +40,11 @@
         (amount (if amount (parse-integer amount))))
     (api-output (mapcar #'upload->table (uploads :user user :tag tag :date date :skip skip :amount amount)))))
 
-(define-api studio/gallery/create (author &optional description cover) ()
+(define-api studio/gallery/create (&optional description) ()
   (check-permitted :create-gallery)
-  (let ((gallery (make-gallery author
-                               :description description
-                               :cover (when (and cover (string/= "" cover)) (db:ensure-id cover)))))
+  (let ((gallery (make-gallery (auth:current) :description description)))
     (if (string= (post/get "browser") "true")
-        (redirect (gallery-link author))
+        (redirect (gallery-link (auth:current)))
         (api-output (gallery->table gallery)))))
 
 (define-api studio/gallery/edit (author &optional description cover) ()
