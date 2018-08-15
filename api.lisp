@@ -17,6 +17,7 @@
 (defun gallery->table (gallery)
   (mktable :author (mktable :id (princ-to-string (dm:field gallery "author"))
                             :username (user:username (dm:field gallery "author")))
+           :url (gallery-link (dm:field gallery "author"))
            :description (dm:field gallery "description")
            :cover (when (dm:field gallery "cover")
                     (princ-to-string (dm:field gallery "cover")))))
