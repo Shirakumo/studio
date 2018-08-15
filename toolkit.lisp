@@ -6,6 +6,12 @@
 
 (in-package #:org.shirakumo.radiance.studio)
 
+(defun ensure-amount (amount default)
+  (let ((value (if amount (parse-integer amount))))
+    (if value
+        (min value default)
+        default)))
+
 (defun png->src (data)
   (with-output-to-string (out)
     (write-string "data:image/png;base64," out)

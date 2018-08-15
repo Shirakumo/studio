@@ -38,8 +38,8 @@
 
 (define-api studio/gallery/list (&optional skip amount) ()
   (let ((skip (if skip (parse-integer skip) 0))
-        (amount (if amount (parse-integer amount))))
-    (api-output (mapcar #'upload->table (uploads :user user :tag tag :date date :skip skip :amount amount)))))
+        (amount (ensure-amount amount (config :per-page :galleries))))
+    (api-output (mapcar #'gallery->table (galleries :skip skip :amount amount)))))
 
 (define-api studio/gallery/create (&optional description) ()
   (check-permitted :create-gallery)
@@ -102,7 +102,7 @@
 
 (define-api studio/upload/list (user &optional tag min-date max-date date skip amount) ()
   (let* ((skip (if skip (parse-integer skip) 0))
-         (amount (if amount (parse-integer amount)))
+         (amount (ensure-amount amount (config :per-page :uploads)))
          (date (cond (date
                       (parse-date date))
                      ((and min-date max-date)
