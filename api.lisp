@@ -42,6 +42,8 @@
 
 (define-api studio/gallery/create (&optional description) ()
   (check-permitted :create-gallery)
+  (when (ensure-gallery (auth:current) NIL)
+    (error 'api-error :message "This user already has a gallery."))
   (let ((gallery (make-gallery (auth:current) :description description)))
     (if (string= (post/get "browser") "true")
         (redirect (gallery-link (auth:current)))
