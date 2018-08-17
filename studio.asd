@@ -12,7 +12,9 @@
   :license "Artistic"
   :version "1.0.0"
   :description "An image gallery hosting service"
-  :homepage "https://github.com/Shirakumo/studio"
+  :homepage "https://Shirakumo.github.io/studio/"
+  :bug-tracker "https://github.com/Shirakumo/studio/issues"
+  :source-control (:git "https://github.com/Shirakumo/studio.git")
   :components ((:file "module")
                (:file "toolkit")
                (:file "objects")
