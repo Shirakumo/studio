@@ -39,6 +39,7 @@
                                (ensure-upload (dm:field gallery "cover") NIL))
                       :author user
                       :uploads uploads
+                      :date date
                       :next (when older (gallery-link user :date (first older) :offset (second older)))
                       :prev (when newer (gallery-link user :date (first newer) :offset (second newer)))))))
 
@@ -55,6 +56,7 @@
                       :author user
                       :tag tag
                       :uploads uploads
+                      :date date
                       :next (when older (gallery-link user :tag tag :date (first older) :offset (second older)))
                       :prev (when newer (gallery-link user :tag tag :date (first newer) :offset (second newer)))))))
 

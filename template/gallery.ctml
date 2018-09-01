@@ -51,9 +51,9 @@
           <a class="navlink prev" href="#" lquery="(attr :href prev)">Previous Page</a>
         </c:when>
         <section class="images">
+          <time lquery="(text (studio::format-date date))">MM.YYYY</time>
           <c:if test="uploads">
             <c:then>
-              <time lquery="(text (studio::format-date (clip (first uploads) :time)))">MM.YYYY</time>
               <c:splice iterate="uploads">
                 <article class="image" lquery='(add-class (when (rest (studio::upload-files *)) "multiple") (studio::->visibility visibility))'>
                   <a href="#" lquery="(attr :href (studio::upload-link *))">
@@ -63,14 +63,14 @@
                   </a>
                 </article>
               </c:splice>
-              <c:when test="next">
-                <a class="navlink next" href="#" lquery="(attr :href next)">Next Page</a>
-              </c:when>
             </c:then>
             <c:else>
-              <div class="alert">No further uploads.</div>
+              <div class="alert">No uploads this month.</div>
             </c:else>
           </c:if>
+          <c:when test="next">
+            <a class="navlink next" href="#" lquery="(attr :href next)">Next Page</a>
+          </c:when>
         </section>
       </main>
       <footer>
