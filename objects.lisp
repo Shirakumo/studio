@@ -171,17 +171,17 @@
         (skip (or skip 0))
         (amount (or amount (config :per-page :uploads))))
     (cond (tag
-           (db:iterate 'tags (cond (date
-                                    (db:query (:and (:= 'author (user:id user))
-                                                    (:<= min-date 'time)
-                                                    (:<  'time max-date)
-                                                    (:= 'tag tag))))
-                                   (T
-                                    (db:query (:and (:= 'author (user:id user))
-                                                    (:= 'tag tag)))))
-                       (lambda (data)
-                         (dm:get-one 'uploads (db:query (:= '_id (gethash "upload" data)))))
-                       :fields '(upload) :skip skip :amount amount :accumulate T :sort '((time :desc))))
+           (mapcar (lambda (id) (dm:get-one 'uploads (db:query (:= '_id id))))
+                   (db:iterate 'tags (cond (date
+                                            (db:query (:and (:= 'author (user:id user))
+                                                            (:<= min-date 'time)
+                                                            (:<  'time max-date)
+                                                            (:= 'tag tag))))
+                                           (T
+                                            (db:query (:and (:= 'author (user:id user))
+                                                            (:= 'tag tag)))))
+                               (lambda (data) (gethash "upload" data))
+                               :fields '(upload) :skip skip :amount amount :accumulate T :sort '((time :desc)))))
           (T
            (dm:get 'uploads (cond ((and date author-p)
                                    (db:query (:and (:= 'author (user:id user))
