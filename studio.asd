@@ -34,4 +34,5 @@
                :r-clip
                :i-json
                :cl-ppcre
-               :uiop))
+               :uiop
+               :3bmd))

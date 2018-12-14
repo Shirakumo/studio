@@ -71,7 +71,7 @@
             </nav>
             <time lquery="(text (format-human-date time)) (attr :title (format-fancy-date time))">2018.02.02</time>
           </div>
-          <p lquery="(text description)">This is some stupid ass avatar</p>
+          <p lquery="(html description)">This is some stupid ass avatar</p>
         </section>
       </main>
       <footer>

@@ -60,6 +60,11 @@
                       :next (when older (gallery-link user :tag tag :date (first older) :offset (second older)))
                       :prev (when newer (gallery-link user :tag tag :date (first newer) :offset (second newer)))))))
 
+(defun render-description (text)
+  (plump:parse
+   (with-output-to-string (string)
+     (3bmd:parse-string-and-print-to-stream text string))))
+
 (define-page view-image "studio/^view/(.+)" (:uri-groups (id) :clip "view.ctml")
   (let* ((upload (ensure-upload (db:ensure-id id)))
          (gallery (ensure-gallery (dm:field upload "author"))))
@@ -73,7 +78,7 @@
                     :files (upload-files upload)
                     :tags (upload-tags upload)
                     :time (dm:field upload "time")
-                    :description (dm:field upload "description")
+                    :description (render-description (dm:field upload "description"))
                     :cover-p (equal (dm:id upload) (dm:field gallery "cover")))))
 
 (define-page edit-image "studio/^edit/(.+)" (:uri-groups (id) :clip "upload.ctml")
