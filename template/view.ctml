@@ -10,11 +10,11 @@
 
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" lquery='(attr :content title)' />
-    <meta name="twitter:description" lquery='(attr :content description)' />
+    <meta name="twitter:description" lquery='(attr :content (plump:text description))' />
     <meta name="twitter:image:alt" content="Cover" />
     <meta property="og:type" content="website" />
     <meta property="og:title" lquery='(attr :content title)' />
-    <meta property="og:description" lquery='(attr :content description)' />
+    <meta property="og:description" lquery='(attr :content (plump:text description))' />
     <meta name="twitter:image" lquery='(attr :content (studio::file-link (first files)))' />
     <meta property="og:image" lquery='(attr :content (studio::file-link (first files)))' />
   </head>
