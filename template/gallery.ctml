@@ -4,7 +4,7 @@
     <meta charset="utf-8"/>
     <title><c:splice lquery='(text (format NIL "~@[~a | ~]" tag))'/><c:splice lquery='(text author)'/>'s Studio</title>
     <link rel="stylesheet" href="../static/studio.css" @href="/static/studio/studio.css" />
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css" integrity="sha256-BtbhCIbtfeVWGsqxk1vOHEYXS6qcvQvLMZqjtpWUEx8=" crossorigin="anonymous" />
     <link rel="api-base" @href="studio/api/studio/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     
@@ -45,6 +45,19 @@
             <c:then><h3 lquery="(text tag)">Tag</h3></c:then>
             <c:else><h3>Gallery</h3></c:else>
           </c:if>
+          <nav class="links">
+            <c:when test='(user:field "homepage" author)'>
+              <a lquery='(attr :href (user:field "homepage" author))' title="A link to the user's homepage">
+                <i class="fas fa-globe-europe"></i>
+              </a>
+            </c:when>
+            <a @href="studio/api/studio/gallery/atom?user={0}&tag={1} author tag" title="RSS/Atom feed of new posts">
+              <i class="fas fa-rss-square"></i>
+            </a>
+            <a @href="<profile page {0}> author" title="A link to the user's profile">
+              <i class="fas fa-user-circle"></i>
+            </a>
+          </nav>
         </section>
         <p class="description" lquery="(text description)"></p>
         <c:when test="prev">

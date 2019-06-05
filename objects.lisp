@@ -6,6 +6,11 @@
 
 (in-package #:org.shirakumo.radiance.studio)
 
+(define-version-migration studio (NIL 1.0.0)
+  (dolist (user (user:list))
+    (unless (user:= user (user:get "anonymous"))
+      (apply #'user:grant user (config :permissions :default)))))
+
 (define-trigger radiance:startup ()
   (defaulted-config '("image/png" "image/jpeg" "image/gif" "image/svg+xml") :allowed-content-types)
   (defaulted-config (* 4 10) :per-page :uploads)
@@ -19,13 +24,11 @@
                           (perm studio upload create)
                           (perm studio upload edit own)
                           (perm studio upload delete own))
-                    :permissions :default)
-  (apply #'user:add-default-permissions (config :permissions :default)))
+                    :permissions :default))
 
-(define-version-migration studio (NIL 1.0.0)
-  (dolist (user (user:list))
-    (unless (user:= user (user:get "anonymous"))
-      (apply #'user:grant user (config :permissions :default)))))
+(define-trigger user:ready ()
+  (apply #'user:add-default-permissions (config :permissions :default))
+  (profile:add-field "homepage" :type :url))
 
 (define-trigger db:connected ()
   (db:create 'galleries '((author :integer)

@@ -47,14 +47,18 @@
  
  ((:or >main >form)
   (.info
-  :display flex
-  :align-items center
-  :padding 10px
-  :height 64px
-  :margin 64px 0 0 0
-  :background (hex 333333)
-  :color (hex FFFFFF)
-  :padding 0 5em 0 5em
+   :display flex
+   :align-items center
+   :padding 10px
+   :height 64px
+   :margin 64px 0 0 0
+   :background (hex 333333)
+   :color (hex FFFFFF)
+   :padding 0 5em 0 5em
+   (a :color (hex EEEEEE))
+   ((:and a :hover) :color (hex EE8800))
+   (nav.links
+    :font-size 2em)
   (.avatar
    :z-index 10
    :background (hex 555555)
@@ -63,10 +67,8 @@
    :height 128px
    :border 3px solid (hex 333333)
    :border-radius 64px)
-  (h2
-   (a :color (hex EEEEEE))
-   ((:and a :hover) :color (hex EE8800)))
-  (h3
+   (h3
+   :flex-grow 1
    :overflow hidden
    :text-overflow ellipsis
    :white-space nowrap
