@@ -103,9 +103,23 @@
     :text-align center
     :padding 1em
     :display block
+    :position relative
     (img
      :max-width (calc (- 90vw 2em))
-     :max-height (calc (- 90vh 4em)))))
+     :max-height (calc (- 90vh 4em)))
+    (.link
+     :position absolute
+     :left (calc (- 50% 0.5em)) :top -1em
+     :width 1em :height 1em
+     :padding 0.5em
+     :border-radius 1em
+     :background (hex FFFFFF)
+     :color black
+     :opacity 0.2
+     :z-index 10)
+    ((:and .link :hover)
+     :opacity 1.0
+     :box-shadow 0 0 5px black)))
   ((:or .images.top-to-bottom
         "#top-to-bottom:checked~.images")
    :flex-direction column
@@ -115,19 +129,28 @@
         "#left-to-right:checked~.images")
    :flex-direction row
    (.image :padding 0 1em)
-   ((:and .image :first-child) :padding-left 25vw)
-   ((:and .image :last-child) :padding-right 25vw))
+   ((:and .image :first-child)
+    :padding-left 25vw
+    (.link :left (calc (+ 50% 12.5vw))))
+   ((:and .image :last-child)
+    :padding-right 25vw
+    (.link :left (calc (- 50% 12.5vw)))))
   ((:or .images.right-to-left
         "#right-to-left:checked~.images")
    :flex-direction row-reverse
    (.image :padding 0 1em)
-   ((:and .image :first-child) :padding-right 25vw)
-   ((:and .image :last-child) :padding-left 25vw))
+   ((:and .image :first-child)
+    :padding-right 25vw
+    (.link :left (calc (- 50% 12.5vw))))
+   ((:and .image :last-child)
+    :padding-left 25vw
+    (.link :left (calc (+ 50% 12.5vw)))))
   ((:or .images.tiled
         "#tiled:checked~.images")
    :flex-wrap wrap
    :justify-content left
    (.image :width 20vw :height 20vw)
+   (.link :font-size 0.5em :top 1em)
    (img :max-width 20vw
         :max-height 20vw))
   ((:or .images.contiguous

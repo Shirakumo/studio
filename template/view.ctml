@@ -40,8 +40,9 @@
         <input class="reading-option" type="checkbox" name="dark" id="dark"/>
         <label class="reading-option" for="dark" title="Dark background"><i class="fas fa-fw fa-moon"/></label>
         <section class="images" iterate="files">
-          <a class="image" lquery="(attr :href (studio::file-link *))">
+          <a class="image" lquery="(attr :href (studio::file-link *) :id _id)">
             <img src="#" lquery="(attr :src (studio::file-link *))" />
+            <a class="link" lquery="(attr :href (studio::upload-link (** :id) _id))"><i class="fas fa-link"></i></a>
           </a>
         </section>
         <section class="description">

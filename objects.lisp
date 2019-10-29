@@ -112,13 +112,14 @@
                 :query (list* (cons "id" (princ-to-string id))
                               (when thumb '(("thumb" . "true")))))))
 
-(defun upload-link (upload)
+(defun upload-link (upload &optional file)
   (let ((id (etypecase upload
               (integer upload)
               (T (dm:id (ensure-upload upload))))))
     (uri-to-url (radiance:make-uri :domains '("studio")
                                    :path (format NIL "view/~a" id))
-                :representation :external)))
+                :representation :external
+                :fragment (when file (princ-to-string file)))))
 
 (defun gallery-link (user &key tag date offset)
   (let ((offset (when (and offset (< 0 offset)) offset)))
