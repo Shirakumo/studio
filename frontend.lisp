@@ -100,4 +100,5 @@
 (define-page upload "studio/^upload" (:clip "upload.ctml")
   (check-permitted :create)
   (r-clip:process T
-                  :author (user:username (auth:current "anonymous"))))
+                  :author (user:username (auth:current "anonymous"))
+                  :arrangement :top-to-bottom))
