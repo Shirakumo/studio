@@ -11,6 +11,9 @@
     (unless (user:= user (user:get "anonymous"))
       (apply #'user:grant user (config :permissions :default)))))
 
+(define-version-migration studio (1.0.0 1.1.0)
+  (db:update 'uploads (db:query :all) '(("arrangement" . 0))))
+
 (define-trigger radiance:startup ()
   (defaulted-config '("image/png" "image/jpeg" "image/gif" "image/svg+xml") :allowed-content-types)
   (defaulted-config (* 4 10) :per-page :uploads)
@@ -40,6 +43,7 @@
                         (author :integer)
                         (title (:varchar 64))
                         (visibility (:integer 1))
+                        (arrangement (:integer 1))
                         (description :text))
              :indices '(author time))
   (db:create 'files '((upload :id)
@@ -301,7 +305,7 @@
       (subseq string 0 length)
       string))
 
-(defun make-upload (title files &key description (author (auth:current)) (time (get-universal-time)) tags (visibility :public))
+(defun make-upload (title files &key description (author (auth:current)) (time (get-universal-time)) tags (visibility :public) (arrangement :left-to-right))
   (with-new-file-handling
     (db:with-transaction ()
       (let ((upload (dm:hull 'uploads))
@@ -311,6 +315,7 @@
         (setf (dm:field upload "author") uid)
         (setf (dm:field upload "time") time)
         (setf (dm:field upload "visibility") (visibility->int visibility))
+        (setf (dm:field upload "arrangement") (arrangement->int arrangement))
         (dm:insert upload)
         (let ((id (dm:field upload "_id")))
           (ensure-directories-exist (upload-pathname upload))
@@ -323,7 +328,7 @@
         (update-gallery (user:id author) :last-update (get-universal-time))
         upload))))
 
-(defun update-upload (upload &key title description author time (files NIL files-p) (tags NIL tags-p) visibility)
+(defun update-upload (upload &key title description author time (files NIL files-p) (tags NIL tags-p) visibility arrangement)
   (let ((to-delete ()))
     (with-new-file-handling
       (db:with-transaction ()
@@ -339,6 +344,8 @@
             (setf (dm:field upload "time") time))
           (when visibility
             (setf (dm:field upload "visibility") (visibility->int visibility)))
+          (when arrangement
+            (setf (dm:field upload "arrangement") (arrangement->int arrangement)))
           (dm:save upload)
           (when tags-p
             (db:remove 'tags (db:query (:= 'upload id)))

@@ -95,6 +95,25 @@
     (:hidden "fa-eye-slash")
     (:private "fa-lock")))
 
+(defun arrangement->int (arrangement)
+  (ecase arrangement
+    (:top-to-bottom 0)
+    (:left-to-right 1)
+    (:right-to-left 2)
+    (:tiled 3)))
+
+(defun ->arrangement (arrangement)
+  (case arrangement
+    ((0 :top-to-bottom) :top-to-bottom)
+    ((1 :left-to-right) :left-to-right)
+    ((2 :right-to-left) :right-to-left)
+    ((3 :tiled) :tiled)
+    (T (cond ((string= arrangement "top-to-bottom") :top-to-bottom)
+             ((string= arrangement "left-to-right") :left-to-right)
+             ((string= arrangement "right-to-left") :right-to-left)
+             ((string= arrangement "tiled") :tiled)
+             (T (error "Invalid arrangement: ~s" arrangement))))))
+
 (defun collection->name (collection)
   (ecase collection
     (uploads "upload")

@@ -30,6 +30,7 @@
            :tags (upload-tags upload)
            :time (dm:field upload "time")
            :visibility (string-downcase (->visibility (dm:field upload "visibility")))
+           :arrangement (string-downcase (->arrangement (dm:field upload "arrangement")))
            :description (dm:field upload "description")
            :files (mapcar #'dm:id (upload-files upload))))
 
@@ -113,18 +114,19 @@
                            :older (when older (mktable :date (first older) :offset (second older)))
                            :newer (when newer (mktable :date (first newer) :offset (second newer))))))))
 
-(define-api studio/upload/create (title file[] &optional description tags visibility) ()
+(define-api studio/upload/create (title file[] &optional description tags visibility arrangement) ()
   (check-permitted :create)
   (unless (<= 1 (length title) 64)
     (error "Title must be between 1 and 64 characters long."))
   (let ((upload (make-upload title file[] :description description
                                           :tags (when tags (cl-ppcre:split "(\\s*,\\s*)+" tags))
-                                          :visibility (when visibility (->visibility visibility)))))
+                                          :visibility (when visibility (->visibility visibility))
+                                          :arrangement (when arrangement (->arrangement arrangement)))))
     (if (string= (post/get "browser") "true")
         (redirect (upload-link upload))
         (api-output (upload->table upload)))))
 
-(define-api studio/upload/edit (upload &optional title description file[] tags visibility) ()
+(define-api studio/upload/edit (upload &optional title description file[] tags visibility arrangement) ()
   (let ((upload (ensure-upload upload)))
     (check-permitted :edit upload)
     (setf upload (if tags
@@ -133,12 +135,14 @@
                                     :description description
                                     :files file[]
                                     :tags (cl-ppcre:split "(\\s*,\\s*)+" tags)
-                                    :visibility (when visibility (->visibility visibility)))
+                                    :visibility (when visibility (->visibility visibility))
+                                    :arrangement (when arrangement (->arrangement arrangement)))
                      (update-upload upload
                                     :title title
                                     :description description
                                     :files file[]
-                                    :visibility (when visibility (->visibility visibility)))))
+                                    :visibility (when visibility (->visibility visibility))
+                                    :arrangement (when arrangement (->arrangement arrangement)))))
     (if (string= (post/get "browser") "true")
         (redirect (upload-link upload))
         (api-output (upload->table upload)))))
