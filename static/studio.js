@@ -4,6 +4,7 @@ var Studio = function(){
     self.options = (new URL(window.location)).searchParams;
     self.apiBase = document.querySelector("link[rel=api-base]");
     if(self.apiBase) self.apiBase = self.apiBase.getAttribute("href");
+    self.nextPage = null;
     
     self.log = function(){
         if(console) console.log.apply(null, arguments);
@@ -129,9 +130,9 @@ var Studio = function(){
         return self.mergeInto(page, {date: date, offset: 0});
     };
 
-    var uploadRequest = null;
+    var currentRequest = null;
     self.fetchUploads = function(page, onComplete){
-        if(uploadRequest) return uploadRequest;
+        if(currentRequest) return currentRequest;
         self.log("Fetching uploads", page);
         var form = new FormData();
         form.append("data-format", "json");
@@ -139,15 +140,16 @@ var Studio = function(){
         form.append("date", page.date);
         form.append("skip", page.offset);
         if(page.tag) form.append("tag", page.tag);
-        uploadRequest = new XMLHttpRequest();
+        var uploadRequest = new XMLHttpRequest();
+        currentRequest = uploadRequest;
         uploadRequest.responseType = 'json';
         uploadRequest.onload = function(ev){
+            currentRequest = null;
             if(uploadRequest.status == 200){
                 onComplete(uploadRequest.response["data"]);
             }else{
-                self.log("Failed to fetch uploads", ev);
+                self.log("Failed to fetch uploads", ev, uploadRequest.response);
             }
-            uploadRequest = null;
         };
         uploadRequest.open("POST", self.apiBase+"upload/list");
         uploadRequest.send(form);
@@ -194,6 +196,29 @@ var Studio = function(){
 
     self.isScrolledToBottom = function(){
         return (window.innerHeight + window.pageYOffset) >= document.body.offsetHeight - 2;
+    };
+
+    self.fetchNextPage = function(page){
+        page = page || self.nextPage;
+        if(!page) return null;
+        self.nextPage = page;
+        return self.fetchUploads(page, function(data){
+            self.log("Fetched next page", data);
+            data.uploads.forEach(self.showUpload);
+            if(data.older){
+                self.log("Found next page",data.older);
+                self.mergeInto(self.nextPage, data.older);
+                // Try again in case we didn't fetch enough to advance the bottom
+                if(self.isScrolledToBottom()){
+                    self.log("Still not at bottom, fetching more...");
+                    self.fetchNextPage();
+                }else{
+                    self.log("No longer at bottom, stopping.");
+                }
+            }else{
+                self.nextPage = null;
+            }
+        });
     };
 
     self.spin = function(options){
@@ -465,27 +490,11 @@ var Studio = function(){
         self.log("Init gallery", root);
 
         var next = document.querySelector(".navlink.next");
-
-        var fetchNext;fetchNext = function(){
-            if(next){
-                self.fetchUploads(next, function(data){
-                    self.log("Fetch complete", data);
-                    data.uploads.forEach(self.showUpload);
-                    if(data.older){
-                        self.log(data.older);
-                        self.mergeInto(next, data.older);
-                        // Try again in case we didn't fetch enough to advance the bottom
-                        if(self.isScrolledToBottom()) fetchNext();
-                    }else next = null;
-                });
-            }
-        };
-        
         if(next){
             next.parentElement.removeChild(next);
-            next = self.extractPage(next.getAttribute("href"));
+            var nextPage = self.extractPage(next.getAttribute("href"));
             window.addEventListener("scroll", function(ev){
-                if(self.isScrolledToBottom()){ fetchNext(); }
+                if(self.isScrolledToBottom()){ self.fetchNextPage(); }
                 var largest = null;
                 [].forEach.call(root.querySelectorAll(".images"), function(images){
                     var offset = images.getBoundingClientRect().top;
@@ -506,8 +515,8 @@ var Studio = function(){
             // fully displayed and the :hover property has either reverted or has actually properly
             // transitioned.
             setTimeout(function(){
-                if(self.isScrolledToBottom()){ fetchNext(); }
-            }, 1000);
+                if(self.isScrolledToBottom()){ self.fetchNextPage(nextPage); }
+            }, 500);
         }
     };
 
