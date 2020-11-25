@@ -227,7 +227,7 @@
       (format out "~%  <img src=~s>" (file-link file)))
     (format out "~%</div>")
     (format out "~%<p class=\"description\">")
-    (plump:encode-entities (dm:field upload "description") out)
+    (plump:encode-entities (coerce (dm:field upload "description") 'simple-string) out)
     (format out "</p>")
     (format out "~%</div>")))
 
