@@ -141,6 +141,17 @@
 (defun galleries (&key (skip 0) (amount (config :per-page :galleries)))
   (dm:get 'galleries (db:query :all) :skip skip :amount amount :sort '((last-update :desc))))
 
+(defun tags (user &key (sort :name) direction)
+  (let ((tags (make-hash-table :test 'equal)))
+    (dolist (tag (dm:get 'tags (db:query (:= 'author (user:id user))) :sort '((tag :asc)) :unique T))
+      (incf (gethash (dm:field tag "tag") tags 0)))
+    (setf tags (loop for name being the hash-keys of tags
+                     for count being the hash-values of tags
+                     collect (cons name count)))
+    (ecase sort
+      (:name (sort tags (ecase direction ((:asc NIL) #'string<) (:dsc #'string>)) :key #'car))
+      (:count (sort tags (ecase direction (:asc #'<) ((:dsc NIL) #'>)) :key #'cdr)))))
+
 (defun page-marks (uploads date offset author &optional tag)
   (let* ((author (user:id author))
          (oldest (if uploads (dm:field (car (last uploads)) "time") (first date)))

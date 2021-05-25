@@ -43,6 +43,19 @@
                       :next (when older (gallery-link user :date (first older) :offset (second older)))
                       :prev (when newer (gallery-link user :date (first newer) :offset (second newer)))))))
 
+(define-page tag-list ("studio/^gallery/([^/]+)/tag/?$" 1) (:uri-groups (user) :clip "tags.ctml")
+  (let* ((gallery (ensure-gallery user))
+         (tags (tags user :sort (cond ((string-equal (post/get "sort") "count") :count)
+                                      (T :name))
+                          :direction (cond ((string-equal (post/get "direction") "asc") :asc)
+                                           ((string-equal (post/get "direction") "dsc") :dsc)))))
+    (r-clip:process T
+                    :description (dm:field gallery "description")
+                    :cover (when (dm:field gallery "cover")
+                             (ensure-upload (dm:field gallery "cover") NIL))
+                    :author user
+                    :tags tags)))
+
 (define-page tag-gallery "studio/^gallery/([^/]+)/tag/(.+?)(?:/([0-9.]+)(?:[ +]([0-9]+))?)?$" (:uri-groups (user tag date offset) :clip "gallery.ctml")
   (let* ((date (parse-date date))
          (offset (maybe-parse-integer offset 0))

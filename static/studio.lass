@@ -370,7 +370,32 @@
        :align-items center
        :justify-content center
        (img :max-width 100%
-            :max-height 100%)))))
+            :max-height 100%))))
+  (.tags
+   :margin 2em auto 0 auto
+   :max-width 600px
+   (.tag
+    :display flex
+    :justify-content space-between
+    :align-items baseline
+    (.name
+     :font-size 1.2em)
+    (.count
+     :text-align right
+     :min-width 3em))
+   (.tag.header
+    :border-bottom 1px solid black
+    (a :color (hex 333333)))
+   ((.tag.o10 .count) :background (rgba 255 0 0 0.1))
+   ((.tag.o50 .count) :background (rgba 255 0 0 0.2))
+   ((.tag.o100 .count) :background (rgba 255 0 0 0.3))
+   ((.tag.o500 .count) :background (rgba 255 0 0 0.4))
+   ((.tag.o1000 .count) :background (rgba 255 0 0 0.7))
+   (ul
+    :width 100%
+    :list-style none
+    :margin 0
+    :padding 0)))
  
  (.front
   :margin 2em 0 2em 0

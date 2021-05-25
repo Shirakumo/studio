@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8"/>
-    <title><c:splice lquery='(text (format NIL "~@[~a | ~]" tag))'/><c:splice lquery='(text author)'/>'s Studio</title>
+    <title>Tag overview | <c:splice lquery='(text author)'/>'s Studio</title>
     <link rel="stylesheet" href="../static/studio.css" @href="/static/studio/studio.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css" integrity="sha256-BtbhCIbtfeVWGsqxk1vOHEYXS6qcvQvLMZqjtpWUEx8=" crossorigin="anonymous" />
     <link rel="api-base" @href="studio/api/studio/" />
@@ -21,8 +21,8 @@
         <meta property="og:image" lquery='(attr :content (studio::file-link (first *)))' />
       </c:using>
     </c:when>
-    <link @href="studio/api/studio/gallery/atom?user={0}&tag={1} author tag" type="application/atom+xml" rel="alternate"
-          lquery='(attr :title (format NIL "~a~@[/~a~] Atom Feed" author tag))'/>
+    <link @href="studio/api/studio/gallery/atom?user={0} author" type="application/atom+xml" rel="alternate"
+          lquery='(attr :title (format NIL "~a Atom Feed" author))'/>
   </head>
   <body>
     <article class="studio" id="top">
@@ -41,10 +41,7 @@
         <section class="info">
           <img src="#" class="avatar" lquery="(attr :src (profile:avatar author 128))" />
           <h2><a href="#" rel="author" @href="studio/gallery/{0} author" lquery="(text author)">AUTHOR</a></h2>
-          <c:if test="tag">
-            <c:then><h3 lquery="(text tag)">Tag</h3></c:then>
-            <c:else><h3>Gallery</h3></c:else>
-          </c:if>
+          <h3>Tag overview</h3>
           <nav class="links">
             <a @href="studio/gallery/{0}/tag/ author" title="Tag overview">
               <i class="fas fa-tags"></i>
@@ -63,30 +60,17 @@
           </nav>
         </section>
         <p class="description" lquery="(text description)"></p>
-        <c:when test="prev">
-          <a class="navlink prev" href="#" lquery="(attr :href prev)">Previous Page</a>
-        </c:when>
-        <section class="images">
-          <time lquery="(text (studio::format-date date))">MM.YYYY</time>
-          <c:if test="uploads">
-            <c:then>
-              <c:splice iterate="uploads">
-                <article class="image" lquery='(add-class (when (rest (studio::upload-files *)) "multiple") (studio::->visibility visibility))'>
-                  <a href="#" lquery="(attr :href (studio::upload-link *))">
-                    <c:using value="(studio::upload-files *)">
-                      <img src="#" lquery='(attr :src (studio::file-link (first *) :thumb T))' />
-                    </c:using>
-                  </a>
-                </article>
-              </c:splice>
-            </c:then>
-            <c:else>
-              <div class="alert">No uploads this month.</div>
-            </c:else>
-          </c:if>
-          <c:when test="next">
-            <a class="navlink next" href="#" lquery="(attr :href next)">Next Page</a>
-          </c:when>
+        <section class="tags">
+          <nav class="tag header">
+            <a class="name" @href="studio/gallery/{0}/tag?sort=name author">Name</a>
+            <a class="name" @href="studio/gallery/{0}/tag?sort=count author">Count</a>
+          </nav>
+          <ul iterate="tags">
+            <li class="tag" lquery="(add-class (when (<= 10 (cdr *)) :o10) (when (<= 50 (cdr *)) :o50) (when (<= 100 (cdr *)) :o100) (when (<= 500 (cdr *)) :o500) (when (<= 1000 (cdr *)) :o1000))">
+              <a class="name" @href="studio/gallery/{0}/tag/{1} (** :author) (car *)" lquery="(text (car *))">Tag</a>
+              <span class="count" lquery="(text (cdr *))">0</span>
+            </li>
+          </ul>
         </section>
       </main>
       <footer>
