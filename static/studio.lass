@@ -389,7 +389,7 @@
    ((.tag.o10 .count) :background (rgba 255 0 0 0.1))
    ((.tag.o50 .count) :background (rgba 255 0 0 0.2))
    ((.tag.o100 .count) :background (rgba 255 0 0 0.3))
-   ((.tag.o500 .count) :background (rgba 255 0 0 0.4))
+   ((.tag.o500 .count) :background (rgba 255 0 0 0.5))
    ((.tag.o1000 .count) :background (rgba 255 0 0 0.7))
    (ul
     :width 100%
