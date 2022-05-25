@@ -27,20 +27,22 @@
           <h2><a href="#" rel="author" @href="studio/gallery/{0} author" lquery="(text author)">AUTHOR</a></h2>
           <h3 lquery="(text title)">TITLE</h3>
         </section>
-        <input class="reading-option" type="radio" name="arrangement" id="top-to-bottom"
-               lquery="(attr :checked (eql :top-to-bottom arrangement))"/>
-        <label class="reading-option" for="top-to-bottom" title="Read top to bottom"><i class="fas fa-fw fa-arrow-down"/></label>
-        <input class="reading-option" type="radio" name="arrangement" id="left-to-right"
-               lquery="(attr :checked (eql :left-to-right arrangement))"/>
-        <label class="reading-option" for="left-to-right" title="Read left to right"><i class="fas fa-fw fa-arrow-right"/></label>
-        <input class="reading-option" type="radio" name="arrangement" id="right-to-left"
-               lquery="(attr :checked (eql :right-to-left arrangement))"/>
-        <label class="reading-option" for="right-to-left" title="Read right to left"><i class="fas fa-fw fa-arrow-left"/></label>
-        <input class="reading-option" type="radio" name="arrangement" id="tiled"
-               lquery="(attr :checked (eql :tiled arrangement))"/>
-        <label class="reading-option" for="tiled" title="Tile images"><i class="fas fa-fw fa-th"/></label>
-        <input class="reading-option" type="checkbox" name="contiguous" id="contiguous"/>
-        <label class="reading-option" for="contiguous" title="No gaps between images"><i class="fas fa-fw fa-compress"/></label>
+        <c:when test="(rest files)">
+          <input class="reading-option" type="radio" name="arrangement" id="top-to-bottom"
+                 lquery="(attr :checked (eql :top-to-bottom arrangement))"/>
+          <label class="reading-option" for="top-to-bottom" title="Read top to bottom"><i class="fas fa-fw fa-arrow-down"/></label>
+          <input class="reading-option" type="radio" name="arrangement" id="left-to-right"
+                 lquery="(attr :checked (eql :left-to-right arrangement))"/>
+          <label class="reading-option" for="left-to-right" title="Read left to right"><i class="fas fa-fw fa-arrow-right"/></label>
+          <input class="reading-option" type="radio" name="arrangement" id="right-to-left"
+                 lquery="(attr :checked (eql :right-to-left arrangement))"/>
+          <label class="reading-option" for="right-to-left" title="Read right to left"><i class="fas fa-fw fa-arrow-left"/></label>
+          <input class="reading-option" type="radio" name="arrangement" id="tiled"
+                 lquery="(attr :checked (eql :tiled arrangement))"/>
+          <label class="reading-option" for="tiled" title="Tile images"><i class="fas fa-fw fa-th"/></label>
+          <input class="reading-option" type="checkbox" name="contiguous" id="contiguous"/>
+          <label class="reading-option" for="contiguous" title="No gaps between images"><i class="fas fa-fw fa-compress"/></label>
+        </c:when>
         <input class="reading-option" type="checkbox" name="dark" id="dark"/>
         <label class="reading-option" for="dark" title="Dark background"><i class="fas fa-fw fa-moon"/></label>
         <section class="images" iterate="files">
