@@ -77,6 +77,14 @@
             <time lquery="(text (format-human-date time)) (attr :title (format-fancy-date time))">2018.02.02</time>
           </div>
           <p lquery="(html description)">This is some stupid ass avatar</p>
+          <c:when test="license">
+            <div class="license">
+              License:
+              <a @href="studio/license/{0}/{1} (clip license :_id) (clip license :name)" lquery="(text (clip license :name))">
+                License
+              </a>
+            </div>
+          </c:when>
         </section>
       </main>
       <footer>

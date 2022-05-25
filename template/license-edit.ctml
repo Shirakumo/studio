@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8"/>
+    <title>Edit License - Shinmera's Studio</title>
+    <link rel="stylesheet" href="../static/studio.css" @href="/static/studio/studio.css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+    <link rel="api-base" @href="studio/api/studio/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <article class="studio" id="top">
+      <c:splice lquery='(html (template-file "header.ctml" :studio))'/>
+      <form class="license" method="post" enctype="multipart/form-data">
+        <section class="info">
+          <input name="name" placeholder="Name" minlength="1" maxlength="64" required autofocus lquery="(val name)" />
+        </section>
+        <textarea class="body" name="body" placeholder="License Body" lquery="(text body)"
+                  oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'></textarea>
+        <section class="description">
+          <textarea name="description" placeholder="Description" lquery="(text description)"></textarea>
+          <input type="hidden" name="browser" value="true" />
+          <nav>
+            <c:if test="id">
+              <c:then>
+                <input type="hidden" name="license" lquery="(val id)" />
+                <input type="submit" @formaction="studio/api/studio/license/edit" value="Save" />
+                <input type="submit" @formaction="studio/api/studio/license/delete" value="Delete" />
+              </c:then>
+              <c:else>
+                <input type="submit" @formaction="studio/api/studio/license/create" value="Submit" />
+              </c:else>
+            </c:if>
+          </nav>
+        </section>
+      </form>
+      <footer>
+        Running on <a href="https://github.com/Shirakumo/studio">Studio</a>
+      </footer>
+    </article>
+    <script type="text/javascript" src="../static/studio.js" @src="/static/studio/studio.js"></script>
+  </body>
+</html>

@@ -25,6 +25,8 @@
     (r-clip:process T
                     :author (user:username (auth:current))
                     :description (when gallery (dm:field gallery "description"))
+                    :licenses (list-licenses)
+                    :license (dm:field gallery "license")
                     :exists gallery)))
 
 (define-page gallery "studio/^gallery/([^/]+)(?:/([0-9.]+)(?:[+ ]([0-9]+))?)?" (:uri-groups (user date offset) :clip "gallery.ctml")
@@ -80,7 +82,8 @@
 
 (define-page view-image "studio/^view/(.+)" (:uri-groups (id) :clip "view.ctml")
   (let* ((upload (ensure-upload (db:ensure-id id)))
-         (gallery (ensure-gallery (dm:field upload "author"))))
+         (gallery (ensure-gallery (dm:field upload "author")))
+         (license (when (dm:field upload "license") (ensure-license (dm:field upload "license")))))
     (check-permitted :view upload)
     (r-clip:process T
                     :upload upload
@@ -93,7 +96,8 @@
                     :tags (upload-tags upload)
                     :time (dm:field upload "time")
                     :description (render-description (dm:field upload "description"))
-                    :cover-p (equal (dm:id upload) (dm:field gallery "cover")))))
+                    :cover-p (equal (dm:id upload) (dm:field gallery "cover"))
+                    :license license)))
 
 (define-page edit-image "studio/^edit/(.+)" (:uri-groups (id) :clip "upload.ctml")
   (let ((upload (ensure-upload (db:ensure-id id))))
@@ -108,10 +112,37 @@
                     :files (upload-files upload)
                     :tags (upload-tags upload)
                     :time (dm:field upload "time")
-                    :description (dm:field upload "description"))))
+                    :description (dm:field upload "description")
+                    :licenses (list-licenses)
+                    :license (dm:field upload "license"))))
 
 (define-page upload "studio/^upload" (:clip "upload.ctml")
-  (check-permitted :create)
-  (r-clip:process T
-                  :author (user:username (auth:current "anonymous"))
-                  :arrangement :top-to-bottom))
+  (let ((gallery (ensure-gallery (auth:current "anonymous"))))
+    (check-permitted :create)
+    (r-clip:process T
+                    :author (user:username (auth:current "anonymous"))
+                    :licenses (list-licenses)
+                    :license (dm:field gallery "license")
+                    :arrangement :top-to-bottom)))
+
+(define-page view-license ("studio/^license/([^/]+)/" -1) (:uri-groups (id) :clip "license-view.ctml")
+  (let ((license (ensure-license id)))
+    (check-permitted :license)
+    (r-clip:process T
+                    :id (dm:id license)
+                    :name (dm:field license "name")
+                    :description (dm:field license "description")
+                    :body (dm:field license "body"))))
+
+(define-page new-license "studio/^license/new$" (:clip "license-edit.ctml")
+  (check-permitted :license)
+  (r-clip:process T))
+
+(define-page edit-license "studio/^license/([^/]+)/edit" (:uri-groups (id) :clip "license-edit.ctml")
+  (let ((license (ensure-license id)))
+    (check-permitted :license)
+    (r-clip:process T
+                    :id (dm:id license)
+                    :name (dm:field license "name")
+                    :description (dm:field license "description")
+                    :body (dm:field license "body"))))

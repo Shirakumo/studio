@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8"/>
+    <title>Edit License - Shinmera's Studio</title>
+    <link rel="stylesheet" href="../static/studio.css" @href="/static/studio/studio.css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+    <link rel="api-base" @href="studio/api/studio/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <article class="studio" id="top">
+      <c:splice lquery='(html (template-file "header.ctml" :studio))'/>
+      <form class="license" method="post" enctype="multipart/form-data">
+        <section class="info">
+          <h3 class="title" lquery="(text name)"></h3>
+        </section>
+        <p class="body" lquery="(text body)"></p>
+        <section class="description">
+          <p lquery="(text description)"></p>
+        </section>
+      </form>
+      <footer>
+        Running on <a href="https://github.com/Shirakumo/studio">Studio</a>
+      </footer>
+    </article>
+    <script type="text/javascript" src="../static/studio.js" @src="/static/studio/studio.js"></script>
+  </body>
+</html>

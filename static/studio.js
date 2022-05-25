@@ -418,6 +418,7 @@ var Studio = function(){
                 form.append("description", root.querySelector("[name=description]").value);
                 form.append("tags", root.querySelector("[name=tags]").value);
                 form.append("visibility", root.querySelector("[name=visibility]").value);
+                form.append("license", root.querySelector("[name=license]").value);
                 form.append("arrangement", root.querySelector("[name=arrangement]:checked").id);
                 if(root.querySelector("[name=upload]")){
                     form.append("upload", root.querySelector("[name=upload]").value);

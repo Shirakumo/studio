@@ -18,6 +18,12 @@
           <a class="button" title="Import from another platform." @href="studio/import"><i class="fas fa-file-import"></i> Import</a>
         </section>
         <input class="description" name="description" placeholder="A short description of your gallery" lquery="(text description)"/>
+        <div class="license">
+          Default License:
+          <select name="license" iterate="licenses" lquery="(select license)">
+            <option lquery="(val _id) (text name)"></option>
+          </select>
+        </div>
         <input type="hidden" name="author" lquery="(val author)" />
         <input type="hidden" name="browser" value="true" />
         <nav>

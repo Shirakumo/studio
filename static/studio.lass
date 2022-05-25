@@ -75,7 +75,7 @@
    :margin 0 0 0 0.5em
    :font-size 1.8em)))
  
- ((:or .view .upload)
+ ((:or .view .upload .license)
   :position relative
   ((:or input[type=radio].reading-option
         input[type=checkbox].reading-option) :display none)
@@ -169,7 +169,7 @@
    :color (hex FFFFFF)
    :padding 1em 5em 5em 5em))
 
- ((:or .upload .settings .import)
+ ((:or .upload .settings .import .license)
   ((:or input textarea select)
    :display block
    :box-sizing border-box
@@ -250,7 +250,10 @@
     :width (calc (- 100% 2em))
     :margin 1em
     :min-height 10em)
+   (.license
+    (select :display inline-block))
    (nav
+    :width 100%
     :flex-grow 1
     :display flex)))
  
@@ -283,7 +286,10 @@
     (time))
    (p
     :margin 1em
-    :overflow-x auto)))
+    :overflow-x auto)
+   (.license
+    (a :color (hex FFFFFF)
+       :text-decoration underline))))
 
  ((:or .gallery .front)
   (.navlink
@@ -509,6 +515,25 @@
     :display flex
     (.everything
      :width 9em))))
+
+ (.license
+  ((:or input textarea select)
+   :background (hex 222222))
+  (.info
+   (input
+    :font-size 1.8em
+    :margin 0 0 0 0.5em
+    :width 100%))
+  (.body
+   :margin 0 auto
+   :width 800px
+   :background white
+   :padding 0.2em 1em
+   :min-height 30em
+   :white-space pre-wrap)
+  (.description
+   (textarea
+    :width 100%)))
  
  (footer
   :text-align center

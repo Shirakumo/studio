@@ -55,6 +55,12 @@
             <option value="private">Private</option>
           </select>
           <textarea name="description" placeholder="Description" lquery="(text description)"></textarea>
+          <div class="license">
+            License:
+            <select name="license" iterate="licenses" lquery="(select license)">
+              <option lquery="(val _id) (text name)"></option>
+            </select>
+          </div>
           <input type="hidden" name="browser" value="true" />
           <nav>
             <c:if test="id">
