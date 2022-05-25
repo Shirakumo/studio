@@ -93,18 +93,10 @@
 
 (defun gallery-uploads (gallery-ish)
   (let* ((gallery (ensure-gallery gallery-ish))
-         (cover (when (dm:field gallery "cover")
-                  (dm:get-one 'uploads (db:query (:= '_id (dm:field gallery "cover"))))))
-         (query (if cover
-                    (db:query (:and (:= 'author (dm:field gallery "author"))
-                                    (:!= '_id (dm:field gallery "cover"))
-                                    (:= 'visibility (visibility->int :public))))
-                    (db:query (:and (:= 'author (dm:field gallery "author"))
-                                    (:= 'visibility (visibility->int :public))))))
+         (query (db:query (:and (:= 'author (dm:field gallery "author"))
+                                (:= 'visibility (visibility->int :public)))))
          (count (config :frontpage-uploads)))
-    (if cover
-        (list* cover (dm:get 'uploads query :amount (1- count) :sort '((time :desc))))
-        (dm:get 'uploads query :amount count :sort '((time :desc))))))
+    (dm:get 'uploads query :amount count :sort '((time :desc)))))
 
 (defun upload-tags (upload-ish)
   (let ((id (dm:id (ensure-upload upload-ish)))
