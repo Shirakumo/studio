@@ -19,6 +19,7 @@
                             :username (user:username (dm:field gallery "author")))
            :url (gallery-link (dm:field gallery "author"))
            :description (dm:field gallery "description")
+           :upload (dm:field gallery "license")
            :cover (when (dm:field gallery "cover")
                     (princ-to-string (dm:field gallery "cover")))))
 
@@ -32,6 +33,7 @@
            :visibility (string-downcase (->visibility (dm:field upload "visibility")))
            :arrangement (string-downcase (->arrangement (dm:field upload "arrangement")))
            :description (dm:field upload "description")
+           :license (dm:field upload "license")
            :files (mapcar #'dm:id (upload-files upload))))
 
 (define-api studio/gallery (author) ()
@@ -42,24 +44,26 @@
         (amount (ensure-amount amount (config :per-page :galleries))))
     (api-output (mapcar #'gallery->table (galleries :skip skip :amount amount)))))
 
-(define-api studio/gallery/create (&optional description) ()
+(define-api studio/gallery/create (&optional description license) ()
   (check-permitted :create-gallery)
   (when (ensure-gallery (auth:current) NIL)
     (error 'api-error :message "This user already has a gallery."))
-  (let ((gallery (make-gallery (auth:current) :description description)))
+  (let ((gallery (make-gallery (auth:current) :description description :license license)))
     (if (string= (post/get "browser") "true")
         (redirect (gallery-link (auth:current)))
         (api-output (gallery->table gallery)))))
 
-(define-api studio/gallery/edit (author &optional description cover) ()
+(define-api studio/gallery/edit (author &optional description license cover) ()
   (let ((gallery (ensure-gallery author)))
     (check-permitted :edit-gallery gallery)
     (setf gallery (if cover
                       (update-gallery author
                                       :description description
+                                      :license license
                                       :cover (when (string/= "" cover) (db:ensure-id cover)))
                       (update-gallery author
-                                      :description description)))
+                                      :description description
+                                      :license license)))
     (if (string= (post/get "browser") "true")
         (redirect (gallery-link author))
         (api-output (gallery->table gallery)))))
@@ -114,19 +118,20 @@
                            :older (when older (mktable :date (first older) :offset (second older)))
                            :newer (when newer (mktable :date (first newer) :offset (second newer))))))))
 
-(define-api studio/upload/create (title file[] &optional description tags visibility arrangement) ()
+(define-api studio/upload/create (title file[] &optional description tags visibility arrangement license) ()
   (check-permitted :create)
   (unless (<= 1 (length title) 64)
     (error "Title must be between 1 and 64 characters long."))
   (let ((upload (make-upload title file[] :description description
                                           :tags (when tags (cl-ppcre:split "(\\s*,\\s*)+" tags))
                                           :visibility (when visibility (->visibility visibility))
-                                          :arrangement (when arrangement (->arrangement arrangement)))))
+                                          :arrangement (when arrangement (->arrangement arrangement))
+                                          :license license)))
     (if (string= (post/get "browser") "true")
         (redirect (upload-link upload))
         (api-output (upload->table upload)))))
 
-(define-api studio/upload/edit (upload &optional title description file[] tags visibility arrangement) ()
+(define-api studio/upload/edit (upload &optional title description file[] tags visibility arrangement license) ()
   (let ((upload (ensure-upload upload)))
     (check-permitted :edit upload)
     (setf upload (if tags
@@ -136,13 +141,15 @@
                                     :files file[]
                                     :tags (cl-ppcre:split "(\\s*,\\s*)+" tags)
                                     :visibility (when visibility (->visibility visibility))
-                                    :arrangement (when arrangement (->arrangement arrangement)))
+                                    :arrangement (when arrangement (->arrangement arrangement))
+                                    :license license)
                      (update-upload upload
                                     :title title
                                     :description description
                                     :files file[]
                                     :visibility (when visibility (->visibility visibility))
-                                    :arrangement (when arrangement (->arrangement arrangement)))))
+                                    :arrangement (when arrangement (->arrangement arrangement))
+                                    :license license)))
     (if (string= (post/get "browser") "true")
         (redirect (upload-link upload))
         (api-output (upload->table upload)))))
@@ -154,3 +161,26 @@
     (if (string= (post/get "browser") "true")
         (redirect (gallery-link (dm:field upload "author")))
         (api-output "OK"))))
+
+(define-api studio/license (id) ()
+  (let ((license (ensure-license id)))
+    (api-output (dm::field-table license))))
+
+(define-api studio/license/list () ()
+  (let ((licenses (list-licenses)))
+    (api-output (mapcar #'dm::field-table licenses))))
+
+(define-api studio/license/create (name description body) ()
+  (check-permitted :license)
+  (let ((license (make-license name description body)))
+    (if (string= (post/get "browser") "true")
+        (redirect (gallery-link (auth:current)))
+        (api-output (dm::field-table license)))))
+
+(define-api studio/license/edit (license &optional name description body) ()
+  (check-permitted :license)
+  (let ((license (ensure-license license)))
+    (setf license (update-license license :name name :description description :body body))
+    (if (string= (post/get "browser") "true")
+        (redirect (gallery-link (auth:current)))
+        (api-output (dm::field-table license)))))

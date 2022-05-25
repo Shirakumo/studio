@@ -37,6 +37,7 @@
   (db:create 'galleries '((author :integer)
                           (last-update (:integer 5))
                           (cover :id)
+                          (license :id)
                           (description :text))
              :indices '(author))
   (db:create 'uploads '((time (:integer 5))
@@ -44,6 +45,7 @@
                         (title (:varchar 64))
                         (visibility (:integer 1))
                         (arrangement (:integer 1))
+                        (license :id)
                         (description :text))
              :indices '(author time))
   (db:create 'files '((upload :id)
@@ -54,7 +56,18 @@
                      (tag (:varchar 64))
                      (author :integer)
                      (time (:integer 5)))
-             :indices '(upload tag)))
+             :indices '(upload tag))
+  (db:create 'pins '((upload :id)
+                     (author :integer))
+             :indices '(upload author))
+  (db:create 'licenses '((name (:varchar 64))
+                         (description :text)
+                         (body :text))))
+
+(defun ensure-id (id-ish)
+  (typecase id-ish
+    (dm:data-model (dm:id id-ish))
+    (T (db:ensure-id id-ish))))
 
 (defun ensure-gallery (gallery-ish &optional (errorp T))
   (etypecase gallery-ish
@@ -279,16 +292,18 @@
         (l:debug :radiance.studio e)
         (l:warn :radiance.studio "Failed to delete file ~a" file)))))
 
-(defun make-gallery (author &key description cover)
+(defun make-gallery (author &key description cover license)
   (db:with-transaction ()
     (let ((gallery (dm:hull 'galleries)))
       (setf (dm:field gallery "author") (user:id author))
       (setf (dm:field gallery "description") (or description ""))
       (setf (dm:field gallery "last-update") 0)
       (setf (dm:field gallery "cover") cover)
+      (when license
+        (setf (dm:field gallery "license") (ensure-id license)))
       (dm:insert gallery))))
 
-(defun update-gallery (gallery &key author description (cover NIL cover-p) last-update)
+(defun update-gallery (gallery &key author description (cover NIL cover-p) (license NIL license-p) last-update)
   (db:with-transaction ()
     (let ((gallery (ensure-gallery gallery)))
       (when author
@@ -299,6 +314,8 @@
         (setf (dm:field gallery "cover") cover))
       (when last-update
         (setf (dm:field gallery "last-update") (user:id last-update)))
+      (when license-p
+        (setf (dm:field gallery "license") (ensure-id license)))
       (dm:save gallery))))
 
 (defun delete-gallery (gallery)
@@ -316,7 +333,7 @@
       (subseq string 0 length)
       string))
 
-(defun make-upload (title files &key description (author (auth:current)) (time (get-universal-time)) tags (visibility :public) (arrangement :left-to-right))
+(defun make-upload (title files &key description (author (auth:current)) (time (get-universal-time)) license tags (visibility :public) (arrangement :left-to-right))
   (with-new-file-handling
     (db:with-transaction ()
       (let ((upload (dm:hull 'uploads))
@@ -325,6 +342,7 @@
         (setf (dm:field upload "description") (or description ""))
         (setf (dm:field upload "author") uid)
         (setf (dm:field upload "time") time)
+        (setf (dm:field upload "license") (when license (ensure-id license)))
         (setf (dm:field upload "visibility") (visibility->int visibility))
         (setf (dm:field upload "arrangement") (arrangement->int arrangement))
         (dm:insert upload)
@@ -339,7 +357,7 @@
         (update-gallery (user:id author) :last-update (get-universal-time))
         upload))))
 
-(defun update-upload (upload &key title description author time (files NIL files-p) (tags NIL tags-p) visibility arrangement)
+(defun update-upload (upload &key title description author time license (files NIL files-p) (tags NIL tags-p) visibility arrangement (pinned NIL pinned-p))
   (let ((to-delete ()))
     (with-new-file-handling
       (db:with-transaction ()
@@ -357,6 +375,8 @@
             (setf (dm:field upload "visibility") (visibility->int visibility)))
           (when arrangement
             (setf (dm:field upload "arrangement") (arrangement->int arrangement)))
+          (when license
+            (setf (dm:field upload "license") (ensure-id license)))
           (dm:save upload)
           (when tags-p
             (db:remove 'tags (db:query (:= 'upload id)))
@@ -365,6 +385,11 @@
                                  ("tag" . ,(ensure-length tag))
                                  ("author" . ,(dm:field upload "author"))
                                  ("time" . ,(dm:field upload "time"))))))
+          (when pinned-p
+            (if pinned
+                (when (= 0 (db:count 'pins (db:query (:= 'upload id))))
+                  (db:insert 'pins `(("upload" . ,id) ("author" . ,(dm:field upload "author")))))
+                (db:remove 'pins (db:query (:= 'upload id)))))
           (when files-p
             (let ((to-upload ()) (to-keep ()))
               ;; Determine order numbers and update existing files.
@@ -401,6 +426,7 @@
         (push (upload-pathname upload) to-delete)
         (db:remove 'files (db:query (:= 'upload id)))
         (db:remove 'tags (db:query (:= 'upload id)))
+        (db:remove 'pins (db:query (:= 'upload id)))
         (dm:delete upload)))
     ;; Do this late so we only delete files on successful TX commit.
     (%dispose-files (nreverse to-delete))))
@@ -431,9 +457,36 @@
                              (user:check user (perm studio gallery edit))))
           (:delete-gallery (or (and (if object (= (user:id user) (dm:field object "author")) T)
                                     (user:check user (perm studio gallery delete own)))
-                               (user:check user (perm studio gallery delete))))))))
+                               (user:check user (perm studio gallery delete))))
+          (:license (user:check user (perm studio license create)))))))
 
 (defun check-permitted (perm &optional object (user (auth:current "anonymous")))
   (unless (permitted-p perm object user)
     (error 'request-denied :message (format NIL "You are not allowed to ~(~a~)~@[ this ~a~]"
                                             perm (when object (collection->name (dm:collection object)))))))
+
+(defun ensure-license (license-ish &optional (errorp T))
+  (etypecase license-ish
+    (dm:data-model license-ish)
+    ((or string integer)
+     (or (dm:get-one 'licenses (db:query (:= '_id (db:ensure-id license-ish))))
+         (when errorp (error "No license with id ~s" license-ish))))))
+
+(defun make-license (name description body)
+  (db:with-transaction ()
+    (let ((license (dm:hull 'licenses)))
+      (setf (dm:field license "name") name)
+      (setf (dm:field license "description") description)
+      (setf (dm:field license "body") body)
+      (dm:insert license))))
+
+(defun update-license (license &key name description body)
+  (db:with-transaction ()
+    (let ((license (ensure-license license)))
+      (when name
+        (setf (dm:field license "name") name))
+      (when description
+        (setf (dm:field license "description") description))
+      (when body
+        (setf (dm:field license "body") body))
+      (dm:save license))))
