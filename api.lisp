@@ -162,6 +162,22 @@
         (redirect (gallery-link (dm:field upload "author")))
         (api-output "OK"))))
 
+(define-api studio/upload/pin (upload) ()
+  (let ((upload (ensure-upload upload)))
+    (check-permitted :edit upload)
+    (update-upload upload :pinned T)
+    (if (string= (post/get "browser") "true")
+        (redirect (upload-link upload))
+        (api-output (upload->table upload)))))
+
+(define-api studio/upload/unpin (upload) ()
+  (let ((upload (ensure-upload upload)))
+    (check-permitted :edit upload)
+    (update-upload upload :pinned NIL)
+    (if (string= (post/get "browser") "true")
+        (redirect (upload-link upload))
+        (api-output (upload->table upload)))))
+
 (define-api studio/license (id) ()
   (let ((license (ensure-license id)))
     (api-output (dm::field-table license))))

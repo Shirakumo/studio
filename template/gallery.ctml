@@ -67,6 +67,18 @@
           <a class="navlink prev" href="#" lquery="(attr :href prev)">Previous Page</a>
         </c:when>
         <section class="images">
+          <c:when test="pins">
+            <time><i class="fas fa-thumbtack"></i> Pinned</time>
+            <c:splice iterate="pins">
+                <article class="image" lquery='(add-class (when (rest (studio::upload-files *)) "multiple") (studio::->visibility visibility))'>
+                  <a href="#" lquery="(attr :href (studio::upload-link *))">
+                    <c:using value="(studio::upload-files *)">
+                      <img src="#" lquery='(attr :src (studio::file-link (first *) :thumb T))' />
+                    </c:using>
+                  </a>
+                </article>
+            </c:splice>
+          </c:when>
           <time lquery="(text (studio::format-date date))">MM.YYYY</time>
           <c:if test="uploads">
             <c:then>

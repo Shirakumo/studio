@@ -41,6 +41,7 @@
                                (ensure-upload (dm:field gallery "cover") NIL))
                       :author user
                       :uploads uploads
+                      :pins (when (= 0 offset) (pins user))
                       :date date
                       :next (when older (gallery-link user :date (first older) :offset (second older)))
                       :prev (when newer (gallery-link user :date (first newer) :offset (second newer)))))))
@@ -97,6 +98,7 @@
                     :time (dm:field upload "time")
                     :description (render-description (dm:field upload "description"))
                     :cover-p (equal (dm:id upload) (dm:field gallery "cover"))
+                    :pinned-p (= 1 (db:count 'pins (db:query (:= 'upload (dm:id upload)))))
                     :license license)))
 
 (define-page edit-image "studio/^edit/(.+)" (:uri-groups (id) :clip "upload.ctml")

@@ -57,9 +57,8 @@
                      (author :integer)
                      (time (:integer 5)))
              :indices '(upload tag))
-  (db:create 'pins '((upload (:id uploads))
-                     (author :integer))
-             :indices '(upload author))
+  (db:create 'pins '((upload (:id uploads)))
+             :indices '(upload))
   (db:create 'licenses '((name (:varchar 64))
                          (description :text)
                          (body :text))))
@@ -223,6 +222,10 @@
                                                    (:= 'visibility (visibility->int :public))))))
                    :skip skip :amount amount :sort '((time :desc)))))))
 
+(defun pins (user)
+  (dm:get (rdb:join (pins upload) (uploads _id)) (db:query (:= 'author (user:id user)))
+          :sort '((time :desc))))
+
 (defun file-pathname (file &key thumb)
   (environment-module-pathname
    #.*package* :data
@@ -380,7 +383,7 @@
           (when pinned-p
             (if pinned
                 (when (= 0 (db:count 'pins (db:query (:= 'upload id))))
-                  (db:insert 'pins `(("upload" . ,id) ("author" . ,(dm:field upload "author")))))
+                  (db:insert 'pins `(("upload" . ,id))))
                 (db:remove 'pins (db:query (:= 'upload id)))))
           (when files-p
             (let ((to-upload ()) (to-keep ()))

@@ -22,7 +22,7 @@
                (:file "api")
                (:file "import")
                (:file "import-tumblr"))
-  :depends-on ((:interface :database)
+  :depends-on ((:interface :relational-database)
                (:interface :user)
                (:interface :auth)
                (:interface :profile)

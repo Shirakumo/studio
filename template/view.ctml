@@ -66,10 +66,18 @@
                 <c:when test="(eql :public visibility)">
                   <c:if test="cover-p">
                     <c:then>
-                      <a href="#" class="editbutton" @href="studio/api/studio/gallery/set-cover?upload=_"><i class="far fa-star"></i> Remove Cover</a>
+                      <a href="#" class="editbutton" @href="studio/api/studio/gallery/set-cover?upload=_&browser=true"><i class="far fa-star"></i> Remove Cover</a>
                     </c:then>
                     <c:else>
-                      <a href="#" class="editbutton" @href="studio/api/studio/gallery/set-cover?upload={0} id"><i class="fas fa-star"></i> Set Cover</a>
+                      <a href="#" class="editbutton" @href="studio/api/studio/gallery/set-cover?upload={0}&browser=true id"><i class="fas fa-star"></i> Set Cover</a>
+                    </c:else>
+                  </c:if>
+                  <c:if test="pinned-p">
+                    <c:then>
+                      <a href="#" class="editbutton" @href="studio/api/studio/upload/unpin?upload={0}&browser=true id"><i class="fas fa-thumbtack"></i> Unpin</a>
+                    </c:then>
+                    <c:else>
+                      <a href="#" class="editbutton" @href="studio/api/studio/upload/pin?upload={0}&browser=true id"><i class="fas fa-thumbtack"></i> Pin</a>
                     </c:else>
                   </c:if>
                 </c:when>
