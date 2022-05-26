@@ -15,14 +15,19 @@
         <section class="info">
           <img src="#" class="avatar" lquery="(attr :src (profile:avatar author 128))" />
           <h2><a href="#" rel="author" @href="studio/gallery/{0} author" lquery="(text author)">AUTHOR</a></h2>
-          <a class="button" title="Import from another platform." @href="studio/import"><i class="fas fa-file-import"></i> Import</a>
         </section>
-        <input class="description" name="description" placeholder="A short description of your gallery" lquery="(text description)"/>
-        <div class="license">
-          Default License:
-          <select name="license" iterate="licenses" lquery="(select license)">
-            <option lquery="(val _id) (text name)"></option>
-          </select>
+        <div class="form">
+          <a class="button" title="Import from another platform." @href="studio/import"><i class="fas fa-file-import"></i> Import</a>
+          <div class="row">
+            <label>Description: </label>
+            <input class="description" name="description" placeholder="A short description of your gallery" lquery="(val description)"/>
+          </div>
+          <div class="row">
+            <label>Default License:</label>
+            <select class="license" name="license" iterate="licenses" lquery="(select license)">
+              <option lquery="(val _id) (text name)"></option>
+            </select>
+          </div>
         </div>
         <input type="hidden" name="author" lquery="(val author)" />
         <input type="hidden" name="browser" value="true" />

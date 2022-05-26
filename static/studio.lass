@@ -307,16 +307,6 @@
    :font-size 2em
    :padding 1em
    :text-align center))
-
- ((:or .gallery .settings)
-  (.description
-   :margin 0
-   :width 100%
-   :max-width none
-   :padding 0.2em 0
-   :background (rgba 0 0 0 0.5)
-   :color (hex FFFFFF)
-   :text-align center))
  
  (.gallery
   :margin 0 0 250px 0
@@ -348,6 +338,14 @@
   (.navlink.prev
    :max-width 1100px
    :margin 0.2em auto 0.2em auto)
+  (.description
+   :margin 0
+   :width 100%
+   :max-width none
+   :padding 0.2em 0
+   :background (rgba 0 0 0 0.5)
+   :color (hex FFFFFF)
+   :text-align center)
   (.images
    :margin 0 auto 0 auto
    :max-width 1100px
@@ -446,16 +444,25 @@
 
  (.settings
   ((:or input textarea select)
-   :display block
+   :display inline-block
    :box-sizing border-box
    :border none
    :color inherit
    :font-size inherit
    :font-family inherit)
   (nav
-   :max-width 1100px
-   :margin 5em auto
-   :display flex))
+   :max-width 800px
+   :margin 1em auto
+   :display flex)
+  (.form
+   :max-width 800px
+   :margin 3em auto 0 auto
+   (.row
+    :display flex
+    :margin 0.5em 0
+    (label
+     :min-width 10em)
+    ((:or input select) :flex-grow 1))))
 
  (.import
   (.job

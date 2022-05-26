@@ -26,7 +26,7 @@
                     :author (user:username (auth:current))
                     :description (when gallery (dm:field gallery "description"))
                     :licenses (list-licenses)
-                    :license (dm:field gallery "license")
+                    :license (when gallery (dm:field gallery "license"))
                     :exists gallery)))
 
 (define-page gallery "studio/^gallery/([^/]+)(?:/([0-9.]+)(?:[+ ]([0-9]+))?)?" (:uri-groups (user date offset) :clip "gallery.ctml")
