@@ -27,9 +27,9 @@
           <h2><a href="#" rel="author" @href="studio/gallery/{0} author" lquery="(text author)">AUTHOR</a></h2>
           <h3 lquery="(text title)">TITLE</h3>
         </section>
+        <input class="reading-option" type="radio" name="arrangement" id="top-to-bottom"
+               lquery="(attr :checked (eql :top-to-bottom arrangement))"/>
         <c:when test="(rest files)">
-          <input class="reading-option" type="radio" name="arrangement" id="top-to-bottom"
-                 lquery="(attr :checked (eql :top-to-bottom arrangement))"/>
           <label class="reading-option" for="top-to-bottom" title="Read top to bottom"><i class="fas fa-fw fa-arrow-down"/></label>
           <input class="reading-option" type="radio" name="arrangement" id="left-to-right"
                  lquery="(attr :checked (eql :left-to-right arrangement))"/>
