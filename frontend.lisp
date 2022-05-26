@@ -30,7 +30,8 @@
                     :exists gallery)))
 
 (define-page gallery "studio/^gallery/([^/]+)(?:/([0-9.]+)(?:[+ ]([0-9]+))?)?" (:uri-groups (user date offset) :clip "gallery.ctml")
-  (let* ((date (parse-date date))
+  (let* ((no-date-p (null date))
+         (date (parse-date date))
          (offset (maybe-parse-integer offset 0))
          (gallery (ensure-gallery user))
          (uploads (uploads user :date date :skip offset)))
@@ -41,7 +42,7 @@
                                (ensure-upload (dm:field gallery "cover") NIL))
                       :author user
                       :uploads uploads
-                      :pins (when (= 0 offset) (pins user))
+                      :pins (when no-date-p (pins user))
                       :date date
                       :next (when older (gallery-link user :date (first older) :offset (second older)))
                       :prev (when newer (gallery-link user :date (first newer) :offset (second newer)))))))
