@@ -99,6 +99,8 @@
                     :description (render-description (dm:field upload "description"))
                     :cover-p (equal (dm:id upload) (dm:field gallery "cover"))
                     :pinned-p (= 1 (db:count 'pins (db:query (:= 'upload (dm:id upload)))))
+                    :prior (prior-upload upload)
+                    :later (later-upload upload)
                     :license license)))
 
 (define-page edit-image "studio/^edit/(.+)" (:uri-groups (id) :clip "upload.ctml")

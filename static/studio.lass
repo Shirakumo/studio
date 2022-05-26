@@ -258,6 +258,39 @@
     :display flex)))
  
  (.view
+  (.navigation
+   :font-size 2em
+   :color gray
+   (div
+    :position relative
+    :display flex
+    :justify-content center
+    :align-items center
+    :margin 0 auto
+    :width fit-content
+    :background (hex 333333)
+    (a :padding 0 1em)
+    (a[href] :color white)
+    ((:and a[href] :hover)
+     :color (hex EE8800)))
+   ((:and div :before)
+    :content ""
+    :position absolute
+    :width 0
+    :height 0
+    :left -0.5em :bottom 0
+    :border-top 1.2em solid transparent
+    :border-bottom 0 solid transparent
+    :border-right 0.5em solid (hex 333333))
+   ((:and div :after)
+    :content ""
+    :position absolute
+    :width 0
+    :height 0
+    :right -0.5em :bottom 0
+    :border-top 1.2em solid transparent
+    :border-bottom 0 solid transparent
+    :border-left 0.5em solid (hex 333333)))
   (.description
    (.meta
     :display flex

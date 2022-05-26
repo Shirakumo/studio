@@ -226,6 +226,18 @@
   (dm:get (rdb:join (pins upload) (uploads _id)) (db:query (:= 'author (user:id user)))
           :sort '((time :desc))))
 
+(defun prior-upload (upload)
+  (dm:get-one 'uploads (db:query (:and (:= 'author (dm:field upload "author"))
+                                       (:< 'time (dm:field upload "time"))
+                                       (:= 'visibility (visibility->int :public))))
+              :sort '((time :desc))))
+
+(defun later-upload (upload)
+  (dm:get-one 'uploads (db:query (:and (:= 'author (dm:field upload "author"))
+                                       (:> 'time (dm:field upload "time"))
+                                       (:= 'visibility (visibility->int :public))))
+              :sort '((time :asc))))
+
 (defun file-pathname (file &key thumb)
   (environment-module-pathname
    #.*package* :data
