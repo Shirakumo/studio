@@ -383,7 +383,8 @@
           (when arrangement
             (setf (dm:field upload "arrangement") (arrangement->int arrangement)))
           (when license
-            (setf (dm:field upload "license") (ensure-id license)))
+            (let ((id (ignore-errors (ensure-id license))))
+              (when id (setf (dm:field upload "license") id))))
           (dm:save upload)
           (when tags-p
             (db:remove 'tags (db:query (:= 'upload id)))
