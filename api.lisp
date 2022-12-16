@@ -10,6 +10,7 @@
   (handler-case
       (let ((file (ensure-file (db:ensure-id (post/get "id")))))
         (setf (header "Cache-Control") "public, max-age=31536000")
+        (setf (header "Access-Control-Allow-Origin") "*")
         (serve-file (file-pathname file :thumb (or* (post/get "thumb"))) (dm:field file "type")))
     (error (e)
       (error 'request-not-found :message (princ-to-string e)))))
