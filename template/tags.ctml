@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css" integrity="sha256-BtbhCIbtfeVWGsqxk1vOHEYXS6qcvQvLMZqjtpWUEx8=" crossorigin="anonymous" />
     <link rel="api-base" @href="studio/api/studio/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    
+    <meta name="robots" content="noai, noimageai">
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" lquery='(attr :content (format NIL "~a&apos;s studio" author))' />
     <meta name="twitter:description" lquery='(attr :content description)' />
