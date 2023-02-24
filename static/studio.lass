@@ -355,7 +355,8 @@
     :overflow hidden
     (img :width 100%
          :object-fit cover
-         :max-width 2000px)
+         :max-width 2000px
+         :margin 0 auto)
     (.title
      :margin-top -1.8em
      :background (rgba 0 0 0 0.75)
