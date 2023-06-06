@@ -4,7 +4,7 @@
     <meta charset="utf-8"/>
     <title>Studio</title>
     <link rel="stylesheet" href="../static/studio.css" @href="/static/studio/studio.css" />
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css" integrity="sha512-q3eWabyZPc1XTCmF+8/LuE1ozpg5xxn7iO89yfSOd5/oKvyqLngoNGsx8jq92Y8eXJ/IRxQbEC+FGSYxtk2oiw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="api-base" @href="studio/api/studio/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noai, noimageai">
@@ -26,26 +26,13 @@
                     <h2><a href="#" @href="studio/gallery/{0} (user:username author)" lquery="(text (user:username author))">AUTHOR</a></h2>
                   </section>
                   <section class="images" iterate="(studio::gallery-uploads *)">
-                    <c:if test='(studio::upload-has-tag * "nsfw" "gore" "blood" "porn" "explicit")'>
-                      <c:then>
-                        <article class="image explicit">
-                          <c:using value="(studio::upload-files *)">
-                            <a href="#" @href="studio/view/{0} (dm:id **)">
-                              <img src="#" lquery="(attr :data-src (studio::file-link (first *) :thumb T))" />
-                            </a>
-                          </c:using>
-                        </article>
-                      </c:then>
-                      <c:else>
-                        <article class="image safe">
-                          <c:using value="(studio::upload-files *)">
-                            <a href="#" @href="studio/view/{0} (dm:id **)">
-                              <img src="#" lquery="(attr :src (studio::file-link (first *) :thumb T))" />
-                            </a>
-                          </c:using>
-                        </article>
-                      </c:else>
-                    </c:if>
+                    <article class="image" lquery='(add-class (if (studio::upload-has-tag * "nsfw" "gore" "blood" "porn" "explicit") "explicit" "safe"))'>
+                      <c:using value="(studio::upload-files *)">
+                        <a href="#" @href="studio/view/{0} (dm:id **)">
+                          <img src="#" lquery="(attr :src (studio::file-link (first *) :thumb T))" />
+                        </a>
+                      </c:using>
+                    </article>
                   </section>
                 </header>
               </article>

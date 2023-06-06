@@ -411,18 +411,23 @@
         :max-width 100%
         :max-height 100%)))
    (.image.explicit
-    (img
-     :width 100%
-     :height 100%
-     :background (rgb 112 42 42)
-     :background "radial-gradient(circle, rgba(112,42,42,1) 18%, rgba(19,0,0,1) 100%)"))
+    :background (rgb 112 42 42)
+    :background "radial-gradient(circle, rgba(112,42,42,1) 18%, rgba(19,0,0,1) 100%)"
+    (a (img :opacity 0
+            :filter "blur(20px)"
+            :transition "2s filter linear, 2s opacity linear")))
    ((:and .image.explicit :after)
     :content "\\f071"
     :font-family "'Font Awesome 5 Free'"
     :font-weight 900
     :font-size 5em
     :color white
-    :position absolute))
+    :position absolute)
+   ((:and .image.explicit :hover)
+    (a (img :opacity 1
+            :filter "blur(0px)")))
+   ((:and .image.explicit :hover :after)
+    :display none))
   (.tags
    :margin 2em auto 0 auto
    :max-width 600px
