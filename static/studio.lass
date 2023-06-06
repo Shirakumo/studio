@@ -407,8 +407,22 @@
        :display flex
        :align-items center
        :justify-content center
-       (img :max-width 100%
-            :max-height 100%))))
+       (img
+        :max-width 100%
+        :max-height 100%)))
+   (.image.explicit
+    (img
+     :width 100%
+     :height 100%
+     :background (rgb 112 42 42)
+     :background "radial-gradient(circle, rgba(112,42,42,1) 18%, rgba(19,0,0,1) 100%)"))
+   ((:and .image.explicit :after)
+    :content "\\f071"
+    :font-family "'Font Awesome 5 Free'"
+    :font-weight 900
+    :font-size 5em
+    :color white
+    :position absolute))
   (.tags
    :margin 2em auto 0 auto
    :max-width 600px

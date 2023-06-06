@@ -105,6 +105,9 @@
                 :fields '(tag))
     (nreverse tags)))
 
+(defun upload-has-tag (upload-ish &rest tags)
+  (< 0 (db:count 'tags (db:query (:and (:= 'upload (dm:id (ensure-upload upload-ish))) (:any 'tag tags))))))
+
 (defun upload-files (upload-ish)
   (let ((id (dm:id (ensure-upload upload-ish))))
     (dm:get 'files (db:query (:= 'upload id))

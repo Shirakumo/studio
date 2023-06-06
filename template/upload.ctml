@@ -48,7 +48,8 @@
           </div>
         </section>
         <section class="description">
-          <input class="tags" name="tags" placeholder="Some, Tags" lquery='(val (format NIL "~{~a~^, ~}" tags))' />
+          <input class="tags" name="tags" placeholder="Some, Tags" lquery='(val (format NIL "~{~a~^, ~}" tags))'
+                 title="The tags nsfw, blood, gore, porn, and explicit will cause the image to be blurred on the front page." />
           <select class="visibility" name="visibility">
             <option value="public">Public</option>
             <option value="hidden">Hidden</option>
