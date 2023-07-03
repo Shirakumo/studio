@@ -1,9 +1,3 @@
-#|
- This file is a part of Studio
- (c) 2018 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
- Author: Nicolas Hafner <shinmera@tymoon.eu>
-|#
-
 (in-package #:org.shirakumo.radiance.studio)
 
 (defmacro with-tumblr-oauth ((&key client token secret callback) &body body)

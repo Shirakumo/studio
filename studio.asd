@@ -1,14 +1,8 @@
-#|
- This file is a part of Studio
- (c) 2018 Shirakumo http://tymoon.eu (shinmera@tymoon.eu)
- Author: Nicolas Hafner <shinmera@tymoon.eu>
-|#
-
 (asdf:defsystem #:studio
   :defsystem-depends-on (:radiance)
   :class "radiance:virtual-module"
-  :author "Nicolas Hafner <shinmera@tymoon.eu>"
-  :maintainer "Nicolas Hafner <shinmera@tymoon.eu>"
+  :author "Yukari Hafner <shinmera@tymoon.eu>"
+  :maintainer "Yukari Hafner <shinmera@tymoon.eu>"
   :license "zlib"
   :version "1.1.0"
   :description "An image gallery hosting service"
