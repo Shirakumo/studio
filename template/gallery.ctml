@@ -8,17 +8,19 @@
     <link rel="api-base" @href="studio/api/studio/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noai, noimageai">
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" lquery='(attr :content (format NIL "~a&apos;s studio" author))' />
-    <meta name="twitter:description" lquery='(attr :content description)' />
-    <meta name="twitter:image:alt" content="Cover" />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content="studio:gallery" />
+    <mate property="og:username" lquery='(attr :content author)' />
     <meta property="og:title" lquery='(attr :content (format NIL "~a&apos;s studio" author))' />
-    <meta property="og:description" lquery='(attr :content description)' />
+    <meta property="og:description" lquery='(attr :content (or* description (format NIL "~as gallery" author)))' />
+    <meta property="og:content" lquery='(attr :content (or* description (format NIL "~as gallery" author)))' />
     <c:when test="cover">
-      <c:using value="(studio::upload-files cover)">
-        <meta name="twitter:image" lquery='(attr :content (studio::file-link (first *)))' />
-        <meta property="og:image" lquery='(attr :content (studio::file-link (first *)))' />
+      <c:using value="(first (studio::upload-files cover))">
+        <meta property="og:image" lquery='(attr :content (studio::file-link *))' />
+        <meta property="og:image:alt" lquery='(attr :content _id)' />
+        <meta property="og:image:type" lquery='(attr :content type)' />
+        <meta property="og:image:width" lquery='(attr :content width)'/>
+        <meta property="og:image:height" lquery='(attr :content height)'/>
+        <meta name="twitter:card" content="summary_large_image">
       </c:using>
     </c:when>
     <link @href="studio/api/studio/gallery/atom?user={0}&tag={1} author tag" type="application/atom+xml" rel="alternate"

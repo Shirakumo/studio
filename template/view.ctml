@@ -8,15 +8,19 @@
     <link rel="api-base" @href="studio/api/studio/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noai, noimageai">
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" lquery='(attr :content title)' />
-    <meta name="twitter:description" lquery='(attr :content (plump:text description))' />
-    <meta name="twitter:image:alt" content="Cover" />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content="studio:image" />
+    <meta property="og:site_name" content="Studio"/>
     <meta property="og:title" lquery='(attr :content title)' />
-    <meta property="og:description" lquery='(attr :content (plump:text description))' />
-    <meta name="twitter:image" lquery='(attr :content (studio::file-link (first files)))' />
-    <meta property="og:image" lquery='(attr :content (studio::file-link (first files)))' />
+    <meta property="og:description" lquery='(attr :content (or* (plump:text description) "..."))' />
+    <meta property="og:content" lquery='(attr :content (or* (plump:text description) "..."))' />
+    <c:splice iterate="files">
+      <meta property="og:image" lquery='(attr :content (studio::file-link *))' />
+      <meta property="og:image:alt" lquery='(attr :content _id)' />
+      <meta property="og:image:type" lquery='(attr :content type)' />
+      <meta property="og:image:width" lquery='(attr :content width)'/>
+      <meta property="og:image:height" lquery='(attr :content height)'/>
+    </c:splice>
+    <meta name="twitter:card" content="summary_large_image">
   </head>
   <body>
     <article class="studio" id="top">

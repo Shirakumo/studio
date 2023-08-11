@@ -8,8 +8,17 @@
 (define-version-migration studio (1.0.0 1.1.0)
   (db:update 'uploads (db:query :all) '(("arrangement" . 0))))
 
+(define-version-migration studio (1.1.0 1.2.0)
+  (l:info :studio "Filling database with image dimensions. This will take a while.")
+  (dolist (file (dm:get 'files (db:query :all)))
+    (unless (dm:field file "width")
+      (destructuring-bind (width . height) (ignore-errors (image-dimensions (file-pathname file)))
+        (setf (dm:field file "width") (or width 1280))
+        (setf (dm:field file "height") (or height 720))
+        (dm:save file)))))
+
 (define-trigger radiance:startup ()
-  (defaulted-config '("image/png" "image/jpeg" "image/gif" "image/svg+xml") :allowed-content-types)
+  (defaulted-config '("image/png" "image/jpeg" "image/gif" "image/svg+xml" "image/webp" "image/jxl") :allowed-content-types)
   (defaulted-config (* 4 10) :per-page :uploads)
   (defaulted-config 10 :per-page :galleries)
   (defaulted-config 4 :frontpage-uploads)
@@ -44,7 +53,9 @@
              :indices '(author time))
   (db:create 'files '((upload (:id uploads))
                       (order (:integer 1))
-                      (type (:varchar 32)))
+                      (type (:varchar 32))
+                      (width :integer)
+                      (height :integer))
              :indices '(upload))
   (db:create 'tags '((upload (:id uploads))
                      (tag (:varchar 64))
@@ -242,6 +253,12 @@
                   :type (mimes:mime-file-type (dm:field file "type"))
                   :directory `(:relative "uploads" ,(princ-to-string (dm:field file "upload"))))))
 
+(defun image-dimensions (path)
+  (let ((string (uiop:run-program (list "identify" "-format" "%w %h" (uiop:native-namestring path))
+                                  :output :string)))
+    (multiple-value-bind (width start) (parse-integer string :junk-allowed T)
+      (cons width (parse-integer string :start start :junk-allowed T)))))
+
 (defun upload-pathname (upload)
   (environment-module-pathname
    #.*package* :data
@@ -277,6 +294,9 @@
           do (setf (dm:field hull "upload") id)
              (setf (dm:field hull "order") (or order i))
              (setf (dm:field hull "type") mime)
+             (destructuring-bind (width . height) (image-dimensions path)
+               (setf (dm:field hull "width") width)
+               (setf (dm:field hull "height") height))
              (dm:insert hull)
              (let ((file (file-pathname hull))
                    (thumb (file-pathname hull :thumb T)))

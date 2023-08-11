@@ -4,7 +4,7 @@
   :author "Yukari Hafner <shinmera@tymoon.eu>"
   :maintainer "Yukari Hafner <shinmera@tymoon.eu>"
   :license "zlib"
-  :version "1.1.0"
+  :version "1.2.0"
   :description "An image gallery hosting service"
   :homepage "https://Shirakumo.github.io/studio/"
   :bug-tracker "https://github.com/Shirakumo/studio/issues"
