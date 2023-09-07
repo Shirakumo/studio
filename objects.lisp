@@ -339,7 +339,7 @@
       (when last-update
         (setf (dm:field gallery "last-update") (user:id last-update)))
       (when license-p
-        (setf (dm:field gallery "license") (ensure-id license)))
+        (setf (dm:field gallery "license") (when license (ensure-id license))))
       (dm:save gallery))))
 
 (defun delete-gallery (gallery)
