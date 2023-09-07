@@ -43,7 +43,7 @@
   (check-permitted :create-gallery)
   (when (ensure-gallery (auth:current) NIL)
     (error 'api-error :message "This user already has a gallery."))
-  (let ((gallery (make-gallery (auth:current) :description description :license license)))
+  (let ((gallery (make-gallery (auth:current) :description description :license (unless (string-equal "none" license) license))))
     (if (string= (post/get "browser") "true")
         (redirect (gallery-link (auth:current)))
         (api-output (gallery->table gallery)))))
@@ -54,11 +54,11 @@
     (setf gallery (if cover
                       (update-gallery author
                                       :description description
-                                      :license license
+                                      :license (unless (string-equal "none" license) license)
                                       :cover (when (string/= "" cover) (db:ensure-id cover)))
                       (update-gallery author
                                       :description description
-                                      :license license)))
+                                      :license (unless (string-equal "none" license) license))))
     (if (string= (post/get "browser") "true")
         (redirect (gallery-link author))
         (api-output (gallery->table gallery)))))
@@ -121,7 +121,7 @@
                                           :tags (when tags (cl-ppcre:split "(\\s*,\\s*)+" tags))
                                           :visibility (when visibility (->visibility visibility))
                                           :arrangement (when arrangement (->arrangement arrangement))
-                                          :license license)))
+                                          :license (unless (string-equal "none" license) license))))
     (if (string= (post/get "browser") "true")
         (redirect (upload-link upload))
         (api-output (upload->table upload)))))
@@ -137,14 +137,14 @@
                                     :tags (cl-ppcre:split "(\\s*,\\s*)+" tags)
                                     :visibility (when visibility (->visibility visibility))
                                     :arrangement (when arrangement (->arrangement arrangement))
-                                    :license license)
+                                    :license (unless (string-equal "none" license) license))
                      (update-upload upload
                                     :title title
                                     :description description
                                     :files file[]
                                     :visibility (when visibility (->visibility visibility))
                                     :arrangement (when arrangement (->arrangement arrangement))
-                                    :license license)))
+                                    :license (unless (string-equal "none" license) license))))
     (if (string= (post/get "browser") "true")
         (redirect (upload-link upload))
         (api-output (upload->table upload)))))
