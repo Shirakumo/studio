@@ -23,6 +23,7 @@
                :north-drakma
                :dexador
                :humbler
+               :trivial-mimes
                :trivial-thumbnail
                :r-data-model
                :r-clip
