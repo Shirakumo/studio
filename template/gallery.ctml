@@ -75,6 +75,7 @@
                 <article class="image" lquery='(add-class (when (rest (studio::upload-files *)) "multiple") (studio::->visibility visibility))'>
                   <a href="#" lquery="(attr :href (studio::upload-link *))">
                     <c:using value="(studio::upload-files *)">
+                      <span class="count" lquery="(text (length *))"></span>
                       <img src="#" lquery='(attr :src (studio::file-link (first *) :thumb T))' />
                     </c:using>
                   </a>
@@ -88,6 +89,7 @@
                 <article class="image" lquery='(add-class (when (rest (studio::upload-files *)) "multiple") (studio::->visibility visibility))'>
                   <a href="#" lquery="(attr :href (studio::upload-link *))">
                     <c:using value="(studio::upload-files *)">
+                      <span class="count" lquery="(text (length *))"></span>
                       <img src="#" lquery='(attr :src (studio::file-link (first *) :thumb T))' />
                     </c:using>
                   </a>

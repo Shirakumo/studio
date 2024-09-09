@@ -170,9 +170,10 @@ var Studio = function(){
                      upload.visibility],
             elements: { "a": {
                 attributes: {"href": upload.url},
-                elements: {"img": {
-                    attributes: {"src": self.apiBase+"file?thumb=true&id="+upload.files[0]}
-                }}
+                elements: {
+                    "span": {classes: ["count"], text: upload.files.length+""},
+                    "img": {attributes: {"src": self.apiBase+"file?thumb=true&id="+upload.files[0]}}
+                }
             }}
         });
         var date = self.uploadDate(upload);
