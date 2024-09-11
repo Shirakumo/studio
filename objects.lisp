@@ -36,6 +36,9 @@
   (apply #'user:add-default-permissions (config :permissions :default))
   (profile:add-field "homepage" :type :url))
 
+(define-trigger user:remove (user)
+  (delete-gallery user))
+
 (define-trigger db:connected ()
   (db:create 'licenses '((name (:varchar 64))
                          (description :text)
