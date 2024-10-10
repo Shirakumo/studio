@@ -68,7 +68,7 @@
         <section class="description">
           <div class="meta">
             <ul class="tags" iterate="tags">
-              <li><a href="#" @href="studio/gallery/{0}/tag/{1} (** :author) *" lquery="(text *)">TAG</a></li>
+              <li><a rel="tag" href="#" @href="studio/gallery/{0}/tag/{1} (** :author) *" lquery="(text *)">TAG</a></li>
             </ul>
             <div class="visibility">
               <i class="fas" lquery='(add-class (studio::visibility->icon visibility))'></i>
@@ -104,7 +104,7 @@
           <c:when test="license">
             <div class="license">
               License:
-              <a @href="studio/license/{0}/{1} (clip license :_id) (clip license :name)" lquery="(text (clip license :name))">
+              <a rel="license" @href="studio/license/{0}/{1} (clip license :_id) (clip license :name)" lquery="(text (clip license :name))">
                 License
               </a>
             </div>
