@@ -445,6 +445,21 @@
     (%dispose-files (nreverse to-delete))
     upload))
 
+(defun file-filename (file)
+  (let* ((file (ensure-file file))
+         (upload (ensure-upload (dm:field file "upload"))))
+    (with-output-to-string (out)
+      (flet ((safe-output (string)
+               (loop for char across string
+                     do (unless (find char "\"/\\%<>:|?*&")
+                          (write-char char out)))))
+        (safe-output (dm:field upload "title"))
+        (format out " by ")
+        (safe-output (user:username (dm:field upload "author")))
+        (format out " ~(~36,3,'0r~)-~3,'0d.~a"
+                (dm:id upload) (1+ (dm:field file "order"))
+                (trivial-mimes:mime-file-type (dm:field file "type")))))))
+
 (defun delete-upload (upload)
   (let ((to-delete ()))
     (db:with-transaction ()

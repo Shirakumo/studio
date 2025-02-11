@@ -4,9 +4,7 @@
   (handler-case
       (let ((file (ensure-file (db:ensure-id (post/get "id")))))
         (setf (header "Cache-Control") "public, max-age=31536000")
-        (setf (header "Content-Disposition") (format NIL "inline; filename=\"file-~a.~a\""
-                                                     (dm:id file)
-                                                     (trivial-mimes:mime-file-type (dm:field file "type"))))
+        (setf (header "Content-Disposition") (format NIL "inline; filename=~s" (file-filename file)))
         (setf (header "Access-Control-Allow-Origin") "*")
         (serve-file (file-pathname file :thumb (or* (post/get "thumb"))) (dm:field file "type")))
     (error (e)
