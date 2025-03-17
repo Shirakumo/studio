@@ -55,16 +55,16 @@
             <a class="link" lquery="(attr :href (studio::upload-link (** :id) _id))"><i class="fas fa-link"></i></a>
           </a>
         </section>
-        <nav class="navigation">
-          <div>
-            <a lquery="(attr :href (when later (studio::upload-link later)))" title="More recent upload">
-              <i class="fas fa-angle-left"></i>
-            </a>
-            <a lquery="(attr :href (when prior (studio::upload-link prior)))" title="Older upload">
-              <i class="fas fa-angle-right"></i>
-            </a>
-          </div>
-        </nav>
+        <!-- <nav class="navigation">
+             <div>
+             <a lquery="(attr :href (when later (studio::upload-link later)))" title="More recent upload">
+             <i class="fas fa-angle-left"></i>
+             </a>
+             <a lquery="(attr :href (when prior (studio::upload-link prior)))" title="Older upload">
+             <i class="fas fa-angle-right"></i>
+             </a>
+             </div>
+             </nav> -->
         <section class="description">
           <div class="meta">
             <ul class="tags" iterate="tags">
