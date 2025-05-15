@@ -115,6 +115,16 @@
                     :licenses (list-licenses)
                     :license (dm:field upload "license"))))
 
+(define-page view-file "studio/^file/([^/]+)" (:uri-groups (id))
+  (handler-case
+      (let ((file (ensure-file (db:ensure-id id))))
+        (setf (header "Cache-Control") "public, max-age=31536000")
+        (setf (header "Content-Disposition") (format NIL "inline; filename=~s" (file-filename file)))
+        (setf (header "Access-Control-Allow-Origin") "*")
+        (serve-file (file-pathname file :thumb (or* (post/get "thumb"))) (dm:field file "type")))
+    (error (e)
+      (error 'request-not-found :message (princ-to-string e)))))
+
 (define-page upload "studio/^upload" (:clip "upload.ctml")
   (let ((gallery (ensure-gallery (auth:current "anonymous"))))
     (check-permitted :create)

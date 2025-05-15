@@ -122,14 +122,11 @@
             :sort '(("order" :asc)))))
 
 (defun file-link (file &key thumb)
-  (let ((id (etypecase file
-              (integer file)
-              (T (dm:id (ensure-file file))))))
+  (let ((file (ensure-file file)))
     (uri-to-url (radiance:make-uri :domains '("studio")
-                                   :path (format NIL "api/studio/file"))
+                                   :path (format NIL "file/~a/~a" (dm:id file) (file-filename file)))
                 :representation :external
-                :query (list* (cons "id" (princ-to-string id))
-                              (when thumb '(("thumb" . "true")))))))
+                :query (when thumb '(("thumb" . "true"))))))
 
 (defun upload-link (upload &optional file)
   (let ((id (etypecase upload
