@@ -286,6 +286,13 @@
             (setf *volatile-files* ()))
        (%dispose-files *volatile-files*))))
 
+(defun normalize-file-type (mime path)
+  (when (search "application/octet-stream" mime :test #'char-equal)
+    (setf mime (trivial-mimes:mime-probe path))
+    (when (search "application/octet-stream" mime :test #'char-equal)
+      (error "The file does not have a valid file type.")))
+  mime)
+
 (defun %handle-new-files (upload files)
   (let ((id (dm:id upload)))
     (loop for i from 0
@@ -293,9 +300,7 @@
           for hull = (dm:hull 'files)
           do (setf (dm:field hull "upload") id)
              (setf (dm:field hull "order") (or order i))
-             (setf (dm:field hull "type") (if (search "application/octet-stream" mime)
-                                              (trivial-mimes:mime-probe path)
-                                              mime))
+             (setf (dm:field hull "type") (normalize-file-type mime path))
              (destructuring-bind (width . height) (image-dimensions path)
                (setf (dm:field hull "width") width)
                (setf (dm:field hull "height") height))
