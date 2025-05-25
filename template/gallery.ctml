@@ -15,7 +15,7 @@
     <meta property="og:content" lquery='(attr :content (or* description (format NIL "~as gallery" author)))' />
     <c:when test="cover">
       <c:using value="(first (studio::upload-files cover))">
-        <meta property="og:image" lquery='(attr :content (studio::file-link *))' />
+        <meta property="og:image" lquery='(attr :content (studio::file-link * :direct T))' />
         <meta property="og:image:alt" lquery='(attr :content _id)' />
         <meta property="og:image:type" lquery='(attr :content type)' />
         <meta property="og:image:width" lquery='(attr :content width)'/>

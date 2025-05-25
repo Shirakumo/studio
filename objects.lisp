@@ -121,12 +121,18 @@
     (dm:get 'files (db:query (:= 'upload id))
             :sort '(("order" :asc)))))
 
-(defun file-link (file &key thumb)
+(defun file-link (file &key thumb direct)
   (let ((file (ensure-file file)))
-    (uri-to-url (radiance:make-uri :domains '("studio")
-                                   :path (format NIL "file/~a/~a" (dm:id file) (file-filename file)))
-                :representation :external
-                :query (when thumb '(("thumb" . "true"))))))
+    (if direct
+        (uri-to-url (radiance:make-uri :domains '("studio")
+                                       :path (format NIL "api/studio/file"))
+                    :representation :external
+                    :query (list* (cons "id" (princ-to-string (dm:id file)))
+                                  (when thumb '(("thumb" . "true")))))
+        (uri-to-url (radiance:make-uri :domains '("studio")
+                                       :path (format NIL "file/~a/~a" (dm:id file) (file-filename file)))
+                    :representation :external
+                    :query (when thumb '(("thumb" . "true")))))))
 
 (defun upload-link (upload &optional file)
   (let ((id (etypecase upload

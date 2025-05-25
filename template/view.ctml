@@ -14,7 +14,7 @@
     <meta property="og:description" lquery='(attr :content (or* (plump:text description) "..."))' />
     <meta property="og:content" lquery='(attr :content (or* (plump:text description) "..."))' />
     <c:splice iterate="files">
-      <meta property="og:image" lquery='(attr :content (studio::file-link *))' />
+      <meta property="og:image" lquery='(attr :content (studio::file-link * :direct T))' />
       <meta property="og:image:alt" lquery='(attr :content _id)' />
       <meta property="og:image:type" lquery='(attr :content type)' />
       <meta property="og:image:width" lquery='(attr :content width)'/>
@@ -51,7 +51,7 @@
         <label class="reading-option" for="dark" title="Dark background"><i class="fas fa-fw fa-moon"/></label>
         <section class="images" iterate="files">
           <a class="image" lquery="(attr :href (studio::file-link *) :id _id)">
-            <img src="#" lquery="(attr :src (studio::file-link *))" />
+            <img src="#" lquery="(attr :src (studio::file-link * :direct T))" />
             <a class="link" lquery="(attr :href (studio::upload-link (** :id) _id))"><i class="fas fa-link"></i></a>
           </a>
         </section>
