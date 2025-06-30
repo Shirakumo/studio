@@ -156,6 +156,15 @@
                                                  offset))
                 :representation :external)))
 
+(defun gallery-search-link (user &key search offset)
+  (let ((offset (when (and offset (< 0 offset)) offset)))
+    (uri-to-url (radiance:make-uri :domains '("studio")
+                                   :path (format NIL "gallery/~a/search/~@[~a~]~@[/~d~]"
+                                                 (user:username user)
+                                                 search
+                                                 offset))
+                :representation :external)))
+
 (defun galleries (&key (skip 0) (amount (config :per-page :galleries)))
   (dm:get 'galleries (db:query :all) :skip skip :amount amount :sort '((last-update :desc))))
 
@@ -239,6 +248,24 @@
 (defun pins (user)
   (dm:get (rdb:join (pins upload) (uploads _id)) (db:query (:= 'author (user:id user)))
           :sort '((time :desc))))
+
+(defun search-uploads (user query &key skip amount (author-p (user:= user (auth:current "anonymous"))))
+  (let ((query (regex-escape query))
+        (skip (or skip 0))
+        (amount (or amount (config :per-page :uploads))))
+    (dm:get (rdb:join (uploads _id) (tags upload))
+            (if author-p
+                (db:query (:and (:= (:field a author) (user:id user))
+                                (:or (:matches* 'title query)
+                                     (:matches* 'description query)
+                                     (:matches* 'tag query))))
+                (db:query (:and (:= (:field a author) (user:id user))
+                                (:= 'visibility (visibility->int :public))
+                                (:or (:matches* 'title query)
+                                     (:matches* 'description query)
+                                     (:matches* 'tag query)))))
+            :fields '((a _id) (a time) (a author) (a title) (a visibility) (a arrangement) (a license) (a description))
+            :skip skip :amount amount :sort '((a _id :asc) (a time :desc)) :unique '((a _id)))))
 
 (defun prior-upload (upload)
   (dm:get-one 'uploads (db:query (:and (:= 'author (dm:field upload "author"))

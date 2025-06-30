@@ -71,6 +71,24 @@
                       :next (when older (gallery-link user :tag tag :date (first older) :offset (second older)))
                       :prev (when newer (gallery-link user :tag tag :date (first newer) :offset (second newer)))))))
 
+(define-page search-gallery ("studio/^gallery/([^/]+)/search/(.+?)(?:/([0-9]+)?)?$" 1) (:uri-groups (user query offset) :clip "gallery.ctml")
+  (let* ((offset (maybe-parse-integer offset 0))
+         (gallery (ensure-gallery user))
+         (amount (config :per-page :uploads))
+         (uploads (search-uploads user query :skip offset :amount amount)))
+    (r-clip:process T
+                    :description (dm:field gallery "description")
+                    :cover (when (dm:field gallery "cover")
+                             (ensure-upload (dm:field gallery "cover") NIL))
+                    :author user
+                    :search query
+                    :uploads uploads
+                    :date (if uploads
+                              (dm:field (first uploads) "time")
+                              (get-universal-time))
+                    :next (when (<= amount (length uploads)) (gallery-search-link user :search query :offset (+ offset amount)))
+                    :prev (when (< 0 offset) (gallery-search-link user :search query :offset (- offset amount))))))
+
 (defun render-description (text)
   (plump:parse
    (with-output-to-string (string)

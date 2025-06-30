@@ -128,3 +128,6 @@
     (:running "fa-spin fa-hourglass-half")
     (:completed "fa-check")
     (:aborted "fa-ban")))
+
+(defun regex-escape (str)
+  (cl-ppcre:regex-replace-all "([{}()\\[\\].+*?^$\\\\|])" str "\\\\\\1"))
