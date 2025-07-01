@@ -169,7 +169,7 @@ var Studio = function(){
                       (1 < upload.files.length)? "multiple" : null,
                      upload.visibility],
             elements: { "a": {
-                attributes: {"href": upload.url},
+                attributes: {"href": upload.url, "title": upload.title},
                 elements: {
                     "span": {classes: ["count"], text: upload.files.length+""},
                     "img": {attributes: {"src": self.apiBase+"file?thumb=true&id="+upload.files[0]}}

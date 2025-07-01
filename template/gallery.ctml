@@ -83,7 +83,7 @@
             <time><i class="fas fa-thumbtack"></i> Pinned</time>
             <c:splice iterate="pins">
                 <article class="image" lquery='(add-class (when (rest (studio::upload-files *)) "multiple") (studio::->visibility visibility))'>
-                  <a href="#" lquery="(attr :href (studio::upload-link *))">
+                  <a href="#" lquery="(attr :href (studio::upload-link *) :title title)">
                     <c:using value="(studio::upload-files *)">
                       <span class="count" lquery="(text (length *))"></span>
                       <img src="#" lquery='(attr :src (studio::file-link (first *) :thumb T))' />
@@ -97,7 +97,7 @@
             <c:then>
               <c:splice iterate="uploads">
                 <article class="image" lquery='(add-class (when (rest (studio::upload-files *)) "multiple") (studio::->visibility visibility))'>
-                  <a href="#" lquery="(attr :href (studio::upload-link *))">
+                  <a href="#" lquery="(attr :href (studio::upload-link *) :title title)">
                     <c:using value="(studio::upload-files *)">
                       <span class="count" lquery="(text (length *))"></span>
                       <img src="#" lquery='(attr :src (studio::file-link (first *) :thumb T))' />
