@@ -43,28 +43,38 @@
         <section class="info">
           <img src="#" class="avatar" lquery="(attr :src (profile:avatar author 128))" />
           <h2><a href="#" rel="author" @href="studio/gallery/{0} author" lquery="(text author)">AUTHOR</a></h2>
-          <c:if test="tag">
-            <c:then><h3 lquery="(text tag)">Tag</h3></c:then>
+          <c:cond>
+            <c:if test="tag"><h3 lquery="(text tag)">Tag</h3></c:if>
+            <c:if test="search"><h3>Search</h3></c:if>
             <c:else><h3>Gallery</h3></c:else>
-          </c:if>
+          </c:cond>
           <nav class="links">
+            <a @href="studio/gallery/{0}/search/ author" title="Search">
+              <i class="fas fa-fw fa-search"></i>
+            </a>
             <a @href="studio/gallery/{0}/tag/ author" title="Tag overview">
-              <i class="fas fa-tags"></i>
+              <i class="fas fa-fw fa-tags"></i>
             </a>
             <c:when test='(user:field "homepage" author)'>
               <a lquery='(attr :href (user:field "homepage" author))' title="A link to the user's homepage">
-                <i class="fas fa-globe-europe"></i>
+                <i class="fas fa-fw fa-globe-europe"></i>
               </a>
             </c:when>
             <a @href="studio/api/studio/gallery/atom?user={0}&tag={1} author tag" title="RSS/Atom feed of new posts">
-              <i class="fas fa-rss-square"></i>
+              <i class="fas fa-fw fa-rss-square"></i>
             </a>
             <a @href="<profile page {0}> author" title="A link to the user's profile">
-              <i class="fas fa-user-circle"></i>
+              <i class="fas fa-fw fa-user-circle"></i>
             </a>
           </nav>
         </section>
         <p class="description" lquery="(text description)"></p>
+        <c:when test="search">
+          <form class="searchbar">
+            <input type="search" name="query" lquery="(val search)" autofocus placeholder="Search..." />
+            <button><i class="fas fa-fw fa-search"></i> Go</button>
+          </form>
+        </c:when>
         <c:when test="prev">
           <a class="navlink prev" href="#" lquery="(attr :href prev)">Previous Page</a>
         </c:when>

@@ -71,10 +71,11 @@
                       :next (when older (gallery-link user :tag tag :date (first older) :offset (second older)))
                       :prev (when newer (gallery-link user :tag tag :date (first newer) :offset (second newer)))))))
 
-(define-page search-gallery ("studio/^gallery/([^/]+)/search/(.+?)(?:/([0-9]+)?)?$" 1) (:uri-groups (user query offset) :clip "gallery.ctml")
+(define-page search-gallery ("studio/^gallery/([^/]+)/search/(.*?)(?:/([0-9]+)?)?$" 1) (:uri-groups (user query offset) :clip "gallery.ctml")
   (let* ((offset (maybe-parse-integer offset 0))
          (gallery (ensure-gallery user))
          (amount (config :per-page :uploads))
+         (query (or (or* (post/get "query") query) ""))
          (uploads (search-uploads user query :skip offset :amount amount)))
     (r-clip:process T
                     :description (dm:field gallery "description")

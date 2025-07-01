@@ -380,6 +380,27 @@
    :background (rgba 0 0 0 0.5)
    :color (hex FFFFFF)
    :text-align center)
+  (.searchbar
+   :background (rgba 0 0 0 0.5)
+   :color (hex FFFFFF)
+   :text-align center
+   :display flex
+   :align-items center
+   :justify-content center
+   :padding-bottom 0.4em
+   (>*
+    :font-family inherit
+    :font-size inherit
+    :border none)
+   (input
+    :width 20em
+    :padding 0 0.2em)
+   (button
+    :cursor pointer
+    :background (rgba 0 0 0 0.5)
+    :color (hex FFFFFF))
+   ((:and button :hover)
+    :background (hex EE8800)))
   (.images
    :margin 0 auto 0 auto
    :max-width 1100px
