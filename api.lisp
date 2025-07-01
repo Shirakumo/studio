@@ -101,14 +101,16 @@
     (check-permitted :view upload)
     (api-output (upload->table upload))))
 
-(define-api studio/upload/list (user &optional tag min-date max-date date skip amount) ()
+(define-api studio/upload/list (user &optional search tag min-date max-date date skip amount) ()
   (let* ((skip (if skip (parse-integer skip) 0))
          (amount (ensure-amount amount (config :per-page :uploads)))
          (date (cond (date
                       (parse-date date))
                      ((and min-date max-date)
                       (list (parse-integer min-date) (parse-integer max-date)))))
-         (uploads (uploads user :tag tag :date date :skip skip :amount amount)))
+         (uploads (if search
+                      (search-uploads user search :skip skip :amount amount)
+                      (uploads user :tag tag :date date :skip skip :amount amount))))
     (multiple-value-bind (older newer) (page-marks uploads date skip (user:id user))
       (api-output (mktable :uploads (map 'vector #'upload->table uploads)
                            :older (when older (mktable :date (first older) :offset (second older)))

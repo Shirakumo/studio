@@ -140,6 +140,7 @@ var Studio = function(){
         form.append("date", page.date);
         form.append("skip", page.offset);
         if(page.tag) form.append("tag", page.tag);
+        if(page.search) form.append("search", page.search);
         var uploadRequest = new XMLHttpRequest();
         currentRequest = uploadRequest;
         uploadRequest.responseType = 'json';
