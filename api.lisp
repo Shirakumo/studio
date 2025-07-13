@@ -46,7 +46,7 @@
     (error 'api-error :message "This user already has a gallery."))
   (let ((gallery (make-gallery (auth:current) :description description :license (unless (string-equal "none" license) license))))
     (if (string= (post/get "browser") "true")
-        (redirect (gallery-link (auth:current)))
+        (api-redirect (gallery-link (auth:current)))
         (api-output (gallery->table gallery)))))
 
 (define-api studio/gallery/edit (author &optional description license cover) ()
@@ -61,21 +61,21 @@
                                       :description description
                                       :license (unless (string-equal "none" license) license))))
     (if (string= (post/get "browser") "true")
-        (redirect (gallery-link author))
+        (api-redirect (gallery-link author))
         (api-output (gallery->table gallery)))))
 
 (define-api studio/gallery/set-cover (upload &optional author) ()
   (let ((gallery (ensure-gallery (or author (auth:current)))))
     (check-permitted :edit-gallery gallery)
     (update-gallery gallery :cover (when (string/= "_" upload) (db:ensure-id upload)))
-    (redirect (referer))))
+    (api-redirect (referer))))
 
 (define-api studio/gallery/delete (author) ()
   (let ((gallery (ensure-gallery author)))
     (check-permitted :delete-gallery gallery)
     (delete-gallery author)
     (if (string= (post/get "browser") "true")
-        (redirect #@"studio/")
+        (api-redirect #@"studio/")
         (api-output T :message "Gallery deleted."))))
 
 (define-api studio/gallery/atom (user &optional tag) ()
@@ -126,7 +126,7 @@
                                           :arrangement (when arrangement (->arrangement arrangement))
                                           :license (unless (string-equal "none" license) license))))
     (if (string= (post/get "browser") "true")
-        (redirect (upload-link upload))
+        (api-redirect (upload-link upload))
         (api-output (upload->table upload)))))
 
 (define-api studio/upload/edit (upload &optional title description file[] tags visibility arrangement license) ()
@@ -149,7 +149,7 @@
                                     :arrangement (when arrangement (->arrangement arrangement))
                                     :license (unless (string-equal "none" license) license))))
     (if (string= (post/get "browser") "true")
-        (redirect (upload-link upload))
+        (api-redirect (upload-link upload))
         (api-output (upload->table upload)))))
 
 (define-api studio/upload/delete (upload) ()
@@ -157,7 +157,7 @@
     (check-permitted :delete upload)
     (delete-upload upload)
     (if (string= (post/get "browser") "true")
-        (redirect (gallery-link (dm:field upload "author")))
+        (api-redirect (gallery-link (dm:field upload "author")))
         (api-output "OK"))))
 
 (define-api studio/upload/pin (upload) ()
@@ -165,7 +165,7 @@
     (check-permitted :edit upload)
     (update-upload upload :pinned T)
     (if (string= (post/get "browser") "true")
-        (redirect (upload-link upload))
+        (api-redirect (upload-link upload))
         (api-output (upload->table upload)))))
 
 (define-api studio/upload/unpin (upload) ()
@@ -173,7 +173,7 @@
     (check-permitted :edit upload)
     (update-upload upload :pinned NIL)
     (if (string= (post/get "browser") "true")
-        (redirect (upload-link upload))
+        (api-redirect (upload-link upload))
         (api-output (upload->table upload)))))
 
 (define-api studio/license (id) ()
@@ -188,7 +188,7 @@
   (check-permitted :license)
   (let ((license (make-license name description body)))
     (if (string= (post/get "browser") "true")
-        (redirect (gallery-link (auth:current)))
+        (api-redirect (gallery-link (auth:current)))
         (api-output (dm::field-table license)))))
 
 (define-api studio/license/edit (license &optional name description body) ()
@@ -196,5 +196,5 @@
   (let ((license (ensure-license license)))
     (setf license (update-license license :name name :description description :body body))
     (if (string= (post/get "browser") "true")
-        (redirect (gallery-link (auth:current)))
+        (api-redirect (gallery-link (auth:current)))
         (api-output (dm::field-table license)))))
