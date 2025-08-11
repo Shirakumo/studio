@@ -48,7 +48,7 @@
         </c:if>
       </main>
       <footer>
-        Running on <a href="https://github.com/Shirakumo/studio">Studio</a>
+        Running on <a href="https://shirakumo.org/project/studio">Studio</a>
       </footer>
     </article>
     <script type="text/javascript" src="../static/studio.js" @src="/static/studio/studio.js"></script>

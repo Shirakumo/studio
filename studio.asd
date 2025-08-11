@@ -6,9 +6,9 @@
   :license "zlib"
   :version "1.2.0"
   :description "An image gallery hosting service"
-  :homepage "https://Shirakumo.github.io/studio/"
-  :bug-tracker "https://github.com/Shirakumo/studio/issues"
-  :source-control (:git "https://github.com/Shirakumo/studio.git")
+  :homepage "https://shirakumo.org/docs/studio/"
+  :bug-tracker "https://shirakumo.org/project/studio/issues"
+  :source-control (:git "https://shirakumo.org/project/studio.git")
   :components ((:file "module")
                (:file "toolkit")
                (:file "objects")
